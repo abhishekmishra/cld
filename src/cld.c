@@ -25,6 +25,8 @@
 #include <editline/readline.h>
 #elif defined(__OpenBSD__)
 #include <readline/readline.h>
+#elif defined(_WIN32)
+#include <readline/readline.h>
 #endif
 
 #include <histedit.h>

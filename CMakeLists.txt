@@ -67,3 +67,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
 
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
+
+# To find and use libarchive, as the vcpkg build does not have cmake config
+find_path(READLINE_INCLUDE_DIR readline/readline.h)
+find_library(READLINE_LIBRARY readline-win32)
+include_directories(${READLINE_INCLUDE_DIR})
+link_libraries(${READLINE_LIBRARY})
