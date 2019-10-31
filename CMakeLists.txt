@@ -30,6 +30,7 @@ set( CLDCLIENT_SOURCES
   src/cld_table.c
   src/cld_vol.c
   src/cld.c
+  src/tokenizer.c
 
   src/cld_command.h
   src/cld_common.h
@@ -41,6 +42,7 @@ set( CLDCLIENT_SOURCES
   src/cld_sys.h
   src/cld_table.h
   src/cld_vol.h
+  src/histedit.h
 )
 
 add_library ( ${PROJECT_NAME} ${CLDCLIENT_SOURCES} )
@@ -68,8 +70,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
 
-# To find and use libarchive, as the vcpkg build does not have cmake config
-find_path(READLINE_INCLUDE_DIR readline/readline.h)
-find_library(READLINE_LIBRARY readline-win32)
-include_directories(${READLINE_INCLUDE_DIR})
-link_libraries(${READLINE_LIBRARY})
+# To find and use linenoise, as the vcpkg build does not have cmake config
+find_path(LINENOISE_INCLUDE_DIR linenoise.h)
+find_library(LINENOISE_LIBRARY linenoise)
+include_directories(${LINENOISE_INCLUDE_DIR})
+link_libraries(${LINENOISE_LIBRARY})
