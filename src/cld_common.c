@@ -29,5 +29,5 @@ void handle_docker_error(docker_result* res,
 			success_handler(CLD_COMMAND_IS_RUNNING, CLD_RESULT_STRING, res->message);
 		}
 	}
-	free_docker_result(&res);
+	//free_docker_result(&res);
 }

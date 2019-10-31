@@ -19,16 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//based on example at http://www.cs.utah.edu/~bigler/code/libedit.html
-//see https://stackoverflow.com/questions/36953960/is-editline-tab-completion-supposed-to-work
-// #if defined(__linux__) // can also use Linux here
-// #include <editline/readline.h>
-// #elif defined(__OpenBSD__)
-// #include <readline/readline.h>
-// #elif defined(_WIN32)
-// #include <readline/readline.h>
-// #include <readline/history.h>
-// #endif
+ //based on example at http://www.cs.utah.edu/~bigler/code/libedit.html
+ //see https://stackoverflow.com/questions/36953960/is-editline-tab-completion-supposed-to-work
+ // #if defined(__linux__) // can also use Linux here
+ // #include <editline/readline.h>
+ // #elif defined(__OpenBSD__)
+ // #include <readline/readline.h>
+ // #elif defined(_WIN32)
+ // #include <readline/readline.h>
+ // #include <readline/history.h>
+ // #endif
 
 #include <linenoise.h>
 #include <histedit.h>
@@ -48,14 +48,12 @@
 #include "cld_dict.h"
 #include "cld_progress.h"
 
-#define DOCKER_DEFINE_DEFAULT_UNIX_SOCKET "blah"
-
 #define CMD_NOT_FOUND -1
 
-arraylist *create_commands()
+arraylist* create_commands()
 {
-	arraylist *commands;
-	arraylist_new(&commands, (void (*)(void *)) & free_command);
+	arraylist* commands;
+	arraylist_new(&commands, (void (*)(void*)) & free_command);
 	arraylist_add(commands, sys_commands());
 	arraylist_add(commands, ctr_commands());
 	arraylist_add(commands, img_commands());
@@ -69,15 +67,15 @@ arraylist *create_commands()
 // 	return "CLD> ";
 // }
 
-void print_table_result(void *result)
+void print_table_result(void* result)
 {
-	cld_table *result_tbl = (cld_table *)result;
-	int *col_widths;
-	col_widths = (int *)calloc(result_tbl->num_cols, sizeof(int));
-	char **col_fmtspec;
-	col_fmtspec = (char **)calloc(result_tbl->num_cols, sizeof(char *));
-	char *header;
-	char *value;
+	cld_table* result_tbl = (cld_table*)result;
+	int* col_widths;
+	col_widths = (int*)calloc(result_tbl->num_cols, sizeof(int));
+	char** col_fmtspec;
+	col_fmtspec = (char**)calloc(result_tbl->num_cols, sizeof(char*));
+	char* header;
+	char* value;
 	int min_width = 4, max_width = 25;
 
 	//calculate column widths, and create format specifiers
@@ -104,7 +102,7 @@ void print_table_result(void *result)
 		{
 			col_width = max_width;
 		}
-		char *fmtspec = (char *)calloc(16, sizeof(char));
+		char* fmtspec = (char*)calloc(16, sizeof(char));
 		sprintf(fmtspec, "%%-%d.%ds", (col_width + 1), col_width);
 		col_widths[i] = col_width;
 		col_fmtspec[i] = fmtspec;
@@ -152,11 +150,11 @@ void print_table_result(void *result)
 }
 
 cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
-						  void *result)
+	void* result)
 {
 	if (res_type == CLD_RESULT_STRING)
 	{
-		char *result_str = (char *)result;
+		char* result_str = (char*)result;
 		printf("%s", result_str);
 	}
 	else if (res_type == CLD_RESULT_TABLE)
@@ -165,7 +163,7 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	}
 	else if (res_type == CLD_RESULT_DICT)
 	{
-		cld_dict *result_dict = (cld_dict *)result;
+		cld_dict* result_dict = (cld_dict*)result;
 		cld_dict_foreach(result_dict, k, v)
 		{
 			printf("%-26.25s: %s\n", k, v);
@@ -174,7 +172,7 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	}
 	else if (res_type == CLD_RESULT_PROGRESS)
 	{
-		cld_multi_progress *result_progress = (cld_multi_progress *)result;
+		cld_multi_progress* result_progress = (cld_multi_progress*)result;
 		if (result_progress->old_count > 0)
 		{
 			printf("\033[%dA", result_progress->old_count);
@@ -184,10 +182,10 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 		//		printf("To remove %d, to write %d\n", result_progress->old_count, new_len);
 		for (int i = 0; i < new_len; i++)
 		{
-			cld_progress *p = (cld_progress *)arraylist_get(
+			cld_progress* p = (cld_progress*)arraylist_get(
 				result_progress->progress_ls, i);
 			printf("\033[K%s: %s", p->name, p->message);
-			char *progress = p->extra;
+			char* progress = p->extra;
 			if (progress != NULL)
 			{
 				printf(" %s", progress);
@@ -202,20 +200,20 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	return CLD_COMMAND_SUCCESS;
 }
 
-int parse_line_run_command(Tokenizer *tokenizer, const char *line,
-						   int *cmd_argc, char ***cmd_argv, docker_context *ctx)
+int parse_line_run_command(Tokenizer* tokenizer, const char* line,
+	int* cmd_argc, char*** cmd_argv, docker_context* ctx)
 {
 	if (strcmp(line, "\n") == 0)
 	{
 		return 0;
 	}
 	int tok_err = tok_str(tokenizer, line, &*cmd_argc,
-						  (const char ***)&*cmd_argv);
+		(const char***) & *cmd_argv);
 	if (tok_err == 0)
 	{
 		cld_cmd_err err = exec_command(create_commands(), ctx, *cmd_argc,
-									   *cmd_argv, (cld_command_output_handler)&print_handler,
-									   (cld_command_output_handler)&print_handler);
+			*cmd_argv, (cld_command_output_handler)&print_handler,
+			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
 		{
 			printf("Error: invalid command.\n");
@@ -232,16 +230,16 @@ int parse_line_run_command(Tokenizer *tokenizer, const char *line,
 	return tok_err;
 }
 
-int parse_line_help_command(Tokenizer *tokenizer, const char *line,
-							int *cmd_argc, char ***cmd_argv, docker_context *ctx)
+int parse_line_help_command(Tokenizer* tokenizer, const char* line,
+	int* cmd_argc, char*** cmd_argv, docker_context* ctx)
 {
 	int tok_err = tok_str(tokenizer, line, &*cmd_argc,
-						  (const char ***)&*cmd_argv);
+		(const char***) & *cmd_argv);
 	if (tok_err == 0)
 	{
 		cld_cmd_err err = help_cmd_handler(create_commands(), ctx, *cmd_argc,
-										   *cmd_argv, (cld_command_output_handler)&print_handler,
-										   (cld_command_output_handler)&print_handler);
+			*cmd_argv, (cld_command_output_handler)&print_handler,
+			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
 		{
 			printf("Error: invalid command.\n");
@@ -258,27 +256,27 @@ int parse_line_help_command(Tokenizer *tokenizer, const char *line,
 	return tok_err;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-	static docker_context *ctx;
+	static docker_context* ctx;
 
 	// EditLine *el;
 	// History *myhistory;
-	Tokenizer *tokenizer;
+	Tokenizer* tokenizer;
 	int interactive = 1;
 	int command = 0;
-	char *command_str;
-	char *url;
+	char* command_str;
+	char* url;
 	int connected = 0;
 	int show_help = 0;
 
 	/* Temp variables */
 	int count;
-	const char *line;
+	const char* line;
 	int keepreading = 1;
 	HistEvent ev;
 	int cmd_argc;
-	char **cmd_argv;
+	char** cmd_argv;
 
 	/* Initialize the tokenizer */
 	tokenizer = tok_init(NULL);
@@ -298,26 +296,26 @@ int main(int argc, char *argv[])
 		/* These options don’t set a flag.
 		 We distinguish them by their indices. */
 		static struct option long_options[] =
-			{
-				{"config", required_argument, 0, 0},
-				{"debug", no_argument, 0, 'D'},
-				{"help", no_argument, 0, 'h'},
-				{"log-level", required_argument, 0, 'l'},
-				{"tls",
-				 no_argument, 0, 0},
-				{"tlscacert", required_argument, 0, 0},
-				{"tlscert", required_argument, 0, 0},
-				{"tlskey",
-				 required_argument, 0, 0},
-				{"tlsverify", no_argument, 0, 0},
-				{"command", required_argument, 0, 'c'},
-				{"interactive",
-				 no_argument, 0, 'i'},
-				{"host",
-				 required_argument, 0, 'H'},
-				{"version",
-				 no_argument, 0, 'v'},
-				{0, 0, 0, 0}};
+		{
+			{"config", required_argument, 0, 0},
+			{"debug", no_argument, 0, 'D'},
+			{"help", no_argument, 0, 'h'},
+			{"log-level", required_argument, 0, 'l'},
+			{"tls",
+			 no_argument, 0, 0},
+			{"tlscacert", required_argument, 0, 0},
+			{"tlscert", required_argument, 0, 0},
+			{"tlskey",
+			 required_argument, 0, 0},
+			{"tlsverify", no_argument, 0, 0},
+			{"command", required_argument, 0, 'c'},
+			{"interactive",
+			 no_argument, 0, 'i'},
+			{"host",
+			 required_argument, 0, 'H'},
+			{"version",
+			 no_argument, 0, 'v'},
+			{0, 0, 0, 0} };
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
@@ -382,7 +380,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Print any remaining command line arguments (not options). */
-	docker_result *res;
+	docker_result* res;
 	if (optind < argc)
 	{
 		//		printf("There are extra arguments: ");
@@ -393,8 +391,8 @@ int main(int argc, char *argv[])
 			total_len += strlen(argv[i]);
 			total_len += 1; // for space
 		}
-		command_str = (char *)calloc(total_len, sizeof(char));
-		command_str[0] = '\0';
+		command_str = (char*)calloc(total_len, sizeof(char));
+		memset(command_str, 0, total_len);
 		for (int i = optind; i < argc; i++)
 		{
 			//printf("%s ", argv[optind++]);
@@ -404,12 +402,12 @@ int main(int argc, char *argv[])
 				strcat(command_str, " ");
 			}
 		}
-		printf("Command is <%s>\n", command_str);
+		//printf("Command is <%s>\n", command_str);
 	}
 
 	if (!connected)
 	{
-		url = DOCKER_DEFINE_DEFAULT_UNIX_SOCKET;
+		url = DOCKER_DEFAULT_UNIX_SOCKET;
 		if (make_docker_context_socket(&ctx, url) == E_SUCCESS)
 		{
 			connected = 1;
@@ -428,26 +426,29 @@ int main(int argc, char *argv[])
 			docker_log_info("%s is alive.", url);
 		}
 	}
+	else {
+		exit(-1);
+	}
 
 	if (command)
 	{
 		if (show_help == 1)
 		{
 			int tok_err = parse_line_help_command(tokenizer, command_str,
-												  &cmd_argc, &cmd_argv, ctx);
+				&cmd_argc, &cmd_argv, ctx);
 		}
 		else
 		{
 			int tok_err = parse_line_run_command(tokenizer, command_str,
-												 &cmd_argc, &cmd_argv, ctx);
+				&cmd_argc, &cmd_argv, ctx);
 		}
 	}
 
 	if (interactive > command)
 	{
-		const char *file = "~/.cldhistory";
+		const char* file = "~/.cldhistory";
 		linenoiseHistoryLoad(file);
-		char const *prompt = "\x1b[1;32mCLD\x1b[0m> ";
+		char const* prompt = "\x1b[1;32mCLD\x1b[0m> ";
 
 		printf("=========================================\n");
 		printf("== CLD (clibdocker) Docker CLI.        ==\n");
@@ -456,29 +457,9 @@ int main(int argc, char *argv[])
 		printf("== For help type help <command>        ==\n");
 		printf("=========================================\n");
 
-		/* Initialize the EditLine state to use our prompt function and
-		 emacs style editing. */
-		// el = el_init(argv[0], stdin, stdout, stderr);
-		// el_set(el, EL_PROMPT, &prompt);
-		// el_set(el, EL_EDITOR, "emacs");
-
-		/* Initialize the history */
-		// myhistory = history_init();
-		// if (myhistory == 0)
-		// {
-		// 	fprintf(stderr, "history could not be initialized\n");
-		// 	return 1;
-		// }
-
-		// /* Set the size of the history */
-		// history(myhistory, &ev, H_SETSIZE, 800);
-
-		// /* This sets up the call back functions for history functionality */
-		// el_set(el, EL_HIST, history, myhistory);
-
 		while (1)
 		{
-			char *result = linenoise(prompt);
+			char* result = linenoise(prompt);
 
 			if (result == NULL)
 			{
@@ -489,20 +470,26 @@ int main(int argc, char *argv[])
 				/* Display the current history. */
 				for (int index = 0;; ++index)
 				{
-					char *hist = linenoiseHistoryLine(index);
+					char* hist = linenoiseHistoryLine(index);
 					if (hist == NULL)
 						break;
 					printf("%4d: %s\n", index, hist);
 					free(hist);
 				}
 			}
+			else {
+				int tok_err = parse_line_run_command(tokenizer, result, &cmd_argc,
+					&cmd_argv, ctx);
+			}
+
 			if (*result == '\0')
 			{
 				free(result);
 				break;
 			}
 
-			printf("thanks for the input.\n");
+			//printf("thanks for the input. %s\n", result);
+
 			linenoiseHistoryAdd(result);
 			free(result);
 		}
@@ -510,37 +497,7 @@ int main(int argc, char *argv[])
 		linenoiseHistorySave(file);
 		linenoiseHistoryFree();
 	}
-	// 	while (keepreading)
-	// 	{
-	// 		/* count is the number of characters read.
-	// 		 line is a const char* of our command line with the tailing \n */
-	// 		line = el_gets(el, &count);
-	// 		if (line != NULL)
-	// 		{
-	// 			if (strcmp("quit\n", line) == 0 || strcmp("q\n", line) == 0)
-	// 			{
-	// 				printf("Ending session.\n");
-	// 				el_beep(el);
-	// 				goto CLEANUP_AND_EXIT;
-	// 			}
-	// 			int tok_err = parse_line_run_command(tokenizer, line, &cmd_argc,
-	// 												 &cmd_argv, ctx);
-	// 		}
 
-	// 		/* In order to use our history we have to explicitly add commands
-	// 		 to the history */
-	// 		if (count > 0)
-	// 		{
-	// 			history(myhistory, &ev, H_ENTER, line);
-	// 			//			printf("You typed \"%s\"\n", line);
-	// 		}
-	// 	}
-	// CLEANUP_AND_EXIT:
-	// 	/* Clean up our memory */
-	// 	history_end(myhistory);
-	// 	el_end(el);
-	// }
-
-	// tok_end(tokenizer);
-	// return 0;
+	tok_end(tokenizer);
+	return 0;
 }
