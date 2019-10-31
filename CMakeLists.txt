@@ -1,5 +1,7 @@
 cmake_minimum_required ( VERSION 3.9 )
 
+include(CheckIncludeFile)
+
 project ( cldclient C )
 
 # Set the project source dir (just convention)
@@ -76,8 +78,12 @@ target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
 #include_directories(${LINENOISE_INCLUDE_DIR})
 #target_link_libraries(${PROJECT_NAME} PUBLIC ${LINENOISE_LIBRARY})
 
-# To find and use linenoise, as the vcpkg build does not have cmake config
-find_path(GETOPT_INCLUDE_DIR getopt.h)
-find_library(GETOPT_LIBRARY getopt)
-include_directories(${GETOPT_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})
+check_include_file("getopt.h" HAVE_GETOPT)
+
+if(NOT HAVE_GETOPT)
+	# To find and use linenoise, as the vcpkg build does not have cmake config
+	find_path(GETOPT_INCLUDE_DIR getopt.h)
+	find_library(GETOPT_LIBRARY getopt)
+	include_directories(${GETOPT_INCLUDE_DIR})
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})
+endif (NOT HAVE_GETOPT)
