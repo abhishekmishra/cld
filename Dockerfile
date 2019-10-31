@@ -45,6 +45,9 @@ RUN ./coll_test
 
 WORKDIR /root
 
+RUN gcc --version
+RUN ./vcpkg/vcpkg list
+
 RUN \
     git clone https://github.com/abhishekmishra/clibdocker.git && \
     cd clibdocker && \
