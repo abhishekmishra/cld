@@ -35,7 +35,7 @@
 
 #include <string.h>
 #include <getopt.h>
-#include <json-c/arraylist.h>
+#include <arraylist.h>
 
 #include "docker_all.h"
 #include "cld_command.h"
@@ -52,22 +52,22 @@
 
 #define CMD_NOT_FOUND -1
 
-struct array_list *create_commands()
+arraylist *create_commands()
 {
-	struct array_list *commands = array_list_new(
-		(void (*)(void *)) & free_command);
-	array_list_add(commands, sys_commands());
-	array_list_add(commands, ctr_commands());
-	array_list_add(commands, img_commands());
-	array_list_add(commands, vol_commands());
-	array_list_add(commands, net_commands());
+	arraylist *commands;
+	arraylist_new(&commands, (void (*)(void *)) & free_command);
+	arraylist_add(commands, sys_commands());
+	arraylist_add(commands, ctr_commands());
+	arraylist_add(commands, img_commands());
+	arraylist_add(commands, vol_commands());
+	arraylist_add(commands, net_commands());
 	return commands;
 }
 
-char* prompt(EditLine *e)
-{
-	return "CLD> ";
-}
+// char *prompt(EditLine *e)
+// {
+// 	return "CLD> ";
+// }
 
 void print_table_result(void *result)
 {
@@ -180,11 +180,11 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 			printf("\033[%dA", result_progress->old_count);
 			fflush(stdout);
 		}
-		int new_len = array_list_length(result_progress->progress_ls);
+		int new_len = arraylist_length(result_progress->progress_ls);
 		//		printf("To remove %d, to write %d\n", result_progress->old_count, new_len);
 		for (int i = 0; i < new_len; i++)
 		{
-			cld_progress *p = (cld_progress *)array_list_get_idx(
+			cld_progress *p = (cld_progress *)arraylist_get(
 				result_progress->progress_ls, i);
 			printf("\033[K%s: %s", p->name, p->message);
 			char *progress = p->extra;
@@ -262,8 +262,8 @@ int main(int argc, char *argv[])
 {
 	static docker_context *ctx;
 
-	EditLine *el;
-	History *myhistory;
+	// EditLine *el;
+	// History *myhistory;
 	Tokenizer *tokenizer;
 	int interactive = 1;
 	int command = 0;
@@ -287,8 +287,9 @@ int main(int argc, char *argv[])
 	docker_log_set_quiet(1);
 
 	/** Initialize docker context **/
-	//make_docker_context_socket(&ctx, DOCKER_DEFINE_DEFAULT_UNIX_SOCKET);
-	make_docker_context_url(&ctx, DOCKER_DEFINE_DEFAULT_UNIX_SOCKET);
+	make_docker_context_url(&ctx, DOCKER_DEFAULT_UNIX_SOCKET);
+
+	linenoiseInstallWindowChangeHandler();
 
 	int c;
 
@@ -444,6 +445,10 @@ int main(int argc, char *argv[])
 
 	if (interactive > command)
 	{
+		const char *file = "~/.cldhistory";
+		linenoiseHistoryLoad(file);
+		char const *prompt = "\x1b[1;32mCLD\x1b[0m> ";
+
 		printf("=========================================\n");
 		printf("== CLD (clibdocker) Docker CLI.        ==\n");
 		printf("== Version: 0.1a                       ==\n");
@@ -453,55 +458,89 @@ int main(int argc, char *argv[])
 
 		/* Initialize the EditLine state to use our prompt function and
 		 emacs style editing. */
-		el = el_init(argv[0], stdin, stdout, stderr);
-		el_set(el, EL_PROMPT, &prompt);
-		el_set(el, EL_EDITOR, "emacs");
+		// el = el_init(argv[0], stdin, stdout, stderr);
+		// el_set(el, EL_PROMPT, &prompt);
+		// el_set(el, EL_EDITOR, "emacs");
 
 		/* Initialize the history */
-		myhistory = history_init();
-		if (myhistory == 0)
+		// myhistory = history_init();
+		// if (myhistory == 0)
+		// {
+		// 	fprintf(stderr, "history could not be initialized\n");
+		// 	return 1;
+		// }
+
+		// /* Set the size of the history */
+		// history(myhistory, &ev, H_SETSIZE, 800);
+
+		// /* This sets up the call back functions for history functionality */
+		// el_set(el, EL_HIST, history, myhistory);
+
+		while (1)
 		{
-			fprintf(stderr, "history could not be initialized\n");
-			return 1;
-		}
+			char *result = linenoise(prompt);
 
-		/* Set the size of the history */
-		history(myhistory, &ev, H_SETSIZE, 800);
-
-		/* This sets up the call back functions for history functionality */
-		el_set(el, EL_HIST, history, myhistory);
-
-		while (keepreading)
-		{
-			/* count is the number of characters read.
-			 line is a const char* of our command line with the tailing \n */
-			line = el_gets(el, &count);
-			if (line != NULL)
+			if (result == NULL)
 			{
-				if (strcmp("quit\n", line) == 0 || strcmp("q\n", line) == 0)
+				break;
+			}
+			else if (!strncmp(result, "/history", 8))
+			{
+				/* Display the current history. */
+				for (int index = 0;; ++index)
 				{
-					printf("Ending session.\n");
-					el_beep(el);
-					goto CLEANUP_AND_EXIT;
+					char *hist = linenoiseHistoryLine(index);
+					if (hist == NULL)
+						break;
+					printf("%4d: %s\n", index, hist);
+					free(hist);
 				}
-				int tok_err = parse_line_run_command(tokenizer, line, &cmd_argc,
-													 &cmd_argv, ctx);
 			}
-
-			/* In order to use our history we have to explicitly add commands
-			 to the history */
-			if (count > 0)
+			if (*result == '\0')
 			{
-				history(myhistory, &ev, H_ENTER, line);
-				//			printf("You typed \"%s\"\n", line);
+				free(result);
+				break;
 			}
-		}
-	CLEANUP_AND_EXIT:
-		/* Clean up our memory */
-		history_end(myhistory);
-		el_end(el);
-	}
 
-	tok_end(tokenizer);
-	return 0;
+			printf("thanks for the input.\n");
+			linenoiseHistoryAdd(result);
+			free(result);
+		}
+
+		linenoiseHistorySave(file);
+		linenoiseHistoryFree();
+	}
+	// 	while (keepreading)
+	// 	{
+	// 		/* count is the number of characters read.
+	// 		 line is a const char* of our command line with the tailing \n */
+	// 		line = el_gets(el, &count);
+	// 		if (line != NULL)
+	// 		{
+	// 			if (strcmp("quit\n", line) == 0 || strcmp("q\n", line) == 0)
+	// 			{
+	// 				printf("Ending session.\n");
+	// 				el_beep(el);
+	// 				goto CLEANUP_AND_EXIT;
+	// 			}
+	// 			int tok_err = parse_line_run_command(tokenizer, line, &cmd_argc,
+	// 												 &cmd_argv, ctx);
+	// 		}
+
+	// 		/* In order to use our history we have to explicitly add commands
+	// 		 to the history */
+	// 		if (count > 0)
+	// 		{
+	// 			history(myhistory, &ev, H_ENTER, line);
+	// 			//			printf("You typed \"%s\"\n", line);
+	// 		}
+	// 	}
+	// CLEANUP_AND_EXIT:
+	// 	/* Clean up our memory */
+	// 	history_end(myhistory);
+	// 	el_end(el);
+	// }
+
+	// tok_end(tokenizer);
+	// return 0;
 }

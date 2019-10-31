@@ -241,9 +241,9 @@ cld_cmd_err make_command(cld_command** command, char* name, char* short_name,
 	(*command)->short_name = short_name;
 	(*command)->description = description;
 	(*command)->handler = handler;
-	(*command)->options = array_list_new((void (*)(void *)) &free_option);
-	(*command)->sub_commands = array_list_new((void (*)(void *)) &free_command);
-	(*command)->args = array_list_new((void (*)(void *)) &free_argument);
+	arraylist_new(&((*command)->options), (void (*)(void *)) &free_option);
+	arraylist_new(&((*command)->sub_commands), (void (*)(void *)) &free_command);
+	arraylist_new(&((*command)->args), (void (*)(void *)) &free_argument);
 	return CLD_COMMAND_SUCCESS;
 }
 
@@ -261,9 +261,9 @@ void free_command(cld_command* command)
 		free(command->description);
 	}
 	free(command->name);
-	array_list_free(command->options);
-	array_list_free(command->sub_commands);
-	array_list_free(command->args);
+	arraylist_free(command->options);
+	arraylist_free(command->sub_commands);
+	arraylist_free(command->args);
 	free(command);
 }
 

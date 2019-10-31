@@ -56,7 +56,7 @@ int create_cld_multi_progress(cld_multi_progress** multi_progress) {
 		return -1;
 	}
 	(*multi_progress)->old_count = 0;
-	(*multi_progress)->progress_ls = array_list_new((void (*)(void *))&free_cld_progress);
+	arraylist_new(&((*multi_progress)->progress_ls), (void (*)(void *))&free_cld_progress);
 	return 0;
 }
 

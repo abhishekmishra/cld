@@ -74,4 +74,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
 find_path(LINENOISE_INCLUDE_DIR linenoise.h)
 find_library(LINENOISE_LIBRARY linenoise)
 include_directories(${LINENOISE_INCLUDE_DIR})
-link_libraries(${LINENOISE_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LINENOISE_LIBRARY})
+
+# To find and use linenoise, as the vcpkg build does not have cmake config
+find_path(GETOPT_INCLUDE_DIR getopt.h)
+find_library(GETOPT_LIBRARY getopt)
+include_directories(${GETOPT_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})

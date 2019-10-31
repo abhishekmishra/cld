@@ -19,13 +19,13 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 	{
 		if (status->id)
 		{
-			int len = array_list_length(upd_args->multi_progress->progress_ls);
+			int len = arraylist_length(upd_args->multi_progress->progress_ls);
 			int new_len = len;
 			int found = 0;
 			int loc = -1;
 			for (int i = 0; i < len; i++)
 			{
-				cld_progress* p = (cld_progress*) array_list_get_idx(
+				cld_progress* p = (cld_progress*) arraylist_get(
 						upd_args->multi_progress->progress_ls, i);
 				if (strcmp(status->id, p->name) == 0)
 				{
@@ -38,8 +38,8 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 				cld_progress* p;
 				if (create_cld_progress(&p, status->id, 0, 0) == 0)
 				{
-					array_list_add(upd_args->multi_progress->progress_ls, p);
-					upd_args->multi_progress->old_count = array_list_length(
+					arraylist_add(upd_args->multi_progress->progress_ls, p);
+					upd_args->multi_progress->old_count = arraylist_length(
 							upd_args->multi_progress->progress_ls) - 1;
 					new_len += 1;
 					p->message = status->status;
@@ -57,9 +57,9 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 			}
 			else
 			{
-				cld_progress* p = (cld_progress*) array_list_get_idx(
+				cld_progress* p = (cld_progress*) arraylist_get(
 						upd_args->multi_progress->progress_ls, loc);
-				upd_args->multi_progress->old_count = array_list_length(
+				upd_args->multi_progress->old_count = arraylist_length(
 						upd_args->multi_progress->progress_ls);
 				p->message = status->status;
 				if (status->progress != NULL)
@@ -84,8 +84,8 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 	}
 }
 
-cld_cmd_err img_pl_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err img_pl_cmd_handler(void *handler_args, struct arraylist *options,
+		struct arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler)
 {
 	int quiet = 0;
@@ -97,7 +97,7 @@ cld_cmd_err img_pl_cmd_handler(void *handler_args, struct array_list *options,
 	upd_args->success_handler = success_handler;
 	create_cld_multi_progress(&(upd_args->multi_progress));
 
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1)
 	{
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
@@ -106,7 +106,7 @@ cld_cmd_err img_pl_cmd_handler(void *handler_args, struct array_list *options,
 	}
 	else
 	{
-		cld_argument* image_name_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* image_name_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* image_name = image_name_arg->val->str_value;
 		d_err_t docker_error = docker_image_create_from_image_cb(ctx, &res,
@@ -128,16 +128,16 @@ cld_cmd_err img_pl_cmd_handler(void *handler_args, struct array_list *options,
 	free_cld_multi_progress(upd_args->multi_progress);
 }
 
-char* concat_tags(array_list* tags_ls)
+char* concat_tags(arraylist* tags_ls)
 {
 	char* tags = NULL;
 	if (tags_ls)
 	{
-		int len_tags = array_list_length(tags_ls);
+		int len_tags = arraylist_length(tags_ls);
 		int tag_strlen = 0;
 		for (int i = 0; i < len_tags; i++)
 		{
-			tag_strlen += strlen((char*) array_list_get_idx(tags_ls, i));
+			tag_strlen += strlen((char*) arraylist_get(tags_ls, i));
 			tag_strlen += 1; //for newline
 		}
 		tag_strlen += 1; //for null terminator
@@ -147,7 +147,7 @@ char* concat_tags(array_list* tags_ls)
 			tags[0] = '\0';
 			for (int i = 0; i < len_tags; i++)
 			{
-				strcat(tags, (char*) array_list_get_idx(tags_ls, i));
+				strcat(tags, (char*) arraylist_get(tags_ls, i));
 				if (i != (len_tags - 1))
 				{
 					strcat(tags, "\n");
@@ -160,19 +160,19 @@ char* concat_tags(array_list* tags_ls)
 
 char* get_image_tags_concat(docker_image* img)
 {
-	array_list* tags_ls = img->repo_tags;
+	arraylist* tags_ls = img->repo_tags;
 	char* tags = concat_tags(tags_ls);
 	return tags;
 }
 
-cld_cmd_err img_ls_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
+		struct arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler)
 {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	array_list* images;
+	arraylist* images;
 
 	d_err_t docker_error = docker_images_list(ctx, &res, &images, 1, 1, NULL, 0,
 	NULL, NULL, NULL);
@@ -185,7 +185,7 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct array_list *options,
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 		int col_num = 0;
-		int len_images = array_list_length(images);
+		int len_images = arraylist_length(images);
 		cld_table* img_tbl;
 		if (create_cld_table(&img_tbl, len_images, 6) == 0)
 		{
@@ -197,7 +197,7 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct array_list *options,
 			cld_table_set_header(img_tbl, 5, "SIZE");
 			for (int i = 0; i < len_images; i++)
 			{
-				docker_image* img = (docker_image*) array_list_get_idx(images,
+				docker_image* img = (docker_image*) arraylist_get(images,
 						i);
 				col_num = 0;
 				char cstr[1024];
@@ -237,7 +237,7 @@ void log_build_message(docker_build_status* status, void* client_cbargs) {
 }
 
 cld_cmd_err img_build_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		struct arraylist *options, struct arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler)
 {
@@ -250,7 +250,7 @@ cld_cmd_err img_build_cmd_handler(void *handler_args,
 	upd_args->success_handler = success_handler;
 	create_cld_multi_progress(&(upd_args->multi_progress));
 
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1)
 	{
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
@@ -259,7 +259,7 @@ cld_cmd_err img_build_cmd_handler(void *handler_args,
 	}
 	else
 	{
-		cld_argument* folder_url_dash_arg = (cld_argument*) array_list_get_idx(
+		cld_argument* folder_url_dash_arg = (cld_argument*) arraylist_get(
 				args, 0);
 		char* folder_url_dash = folder_url_dash_arg->val->str_value;
 		d_err_t docker_error = docker_image_build_cb(ctx, &res, folder_url_dash,
@@ -294,14 +294,14 @@ cld_command *img_commands()
 			cld_argument* image_name_arg;
 			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
 					"Name of Docker Image to be pulled.");
-			array_list_add(imgpl_command->args, image_name_arg);
+			arraylist_add(imgpl_command->args, image_name_arg);
 
-			array_list_add(image_command->sub_commands, imgpl_command);
+			arraylist_add(image_command->sub_commands, imgpl_command);
 		}
 		if (make_command(&imgls_command, "list", "ls", "Docker Image List",
 				&img_ls_cmd_handler) == CLD_COMMAND_SUCCESS)
 		{
-			array_list_add(image_command->sub_commands, imgls_command);
+			arraylist_add(image_command->sub_commands, imgls_command);
 		}
 		if (make_command(&imgbuild_command, "build", "make",
 				"Docker Image Build", &img_build_cmd_handler)
@@ -311,9 +311,9 @@ cld_command *img_commands()
 			make_argument(&folder_or_url_or_dash, "Folder | URL | -",
 					CLD_TYPE_STRING,
 					"Docker resources to build (folder/url/stdin)");
-			array_list_add(imgbuild_command->args, folder_or_url_or_dash);
+			arraylist_add(imgbuild_command->args, folder_or_url_or_dash);
 
-			array_list_add(image_command->sub_commands, imgbuild_command);
+			arraylist_add(image_command->sub_commands, imgbuild_command);
 		}
 	}
 	return image_command;

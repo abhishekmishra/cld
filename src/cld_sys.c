@@ -11,7 +11,7 @@
 #include "cld_dict.h"
 
 cld_cmd_err sys_version_cmd_handler(void* handler_args,
-		struct array_list* options, struct array_list* args,
+		arraylist* options, arraylist* args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	docker_result* res;
@@ -43,7 +43,7 @@ cld_cmd_err sys_version_cmd_handler(void* handler_args,
 }
 
 cld_cmd_err sys_connection_cmd_handler(void* handler_args,
-		struct array_list* options, struct array_list* args,
+		arraylist* options, arraylist* args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	docker_context* ctx = get_docker_context(handler_args);
@@ -81,13 +81,13 @@ void docker_events_cb(docker_event* event, void* cbargs) {
 }
 
 cld_cmd_err sys_events_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 
-	array_list* events;
+	arraylist* events;
 	time_t now = time(NULL);
 	docker_system_events_cb(ctx, &res, &docker_events_cb, success_handler, &events,  now - (3600 * 24), 0);
 		int done = is_ok(res);
@@ -105,17 +105,17 @@ cld_command* sys_commands() {
 		if (make_command(&sysver_command, "version", "ver",
 				"Docker System Version", &sys_version_cmd_handler)
 				== CLD_COMMAND_SUCCESS) {
-			array_list_add(system_command->sub_commands, sysver_command);
+			arraylist_add(system_command->sub_commands, sysver_command);
 		}
 		if (make_command(&syscon_command, "connection", "con",
 				"Docker System Connection", &sys_connection_cmd_handler)
 				== CLD_COMMAND_SUCCESS) {
-			array_list_add(system_command->sub_commands, syscon_command);
+			arraylist_add(system_command->sub_commands, syscon_command);
 		}
 		if (make_command(&sysevt_command, "events", "evt",
 				"Docker System Connection", &sys_events_cmd_handler)
 				== CLD_COMMAND_SUCCESS) {
-			array_list_add(system_command->sub_commands, sysevt_command);
+			arraylist_add(system_command->sub_commands, sysevt_command);
 		}
 	}
 	return system_command;

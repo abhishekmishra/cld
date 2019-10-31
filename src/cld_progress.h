@@ -8,7 +8,7 @@
 #ifndef SRC_CLD_PROGRESS_H_
 #define SRC_CLD_PROGRESS_H_
 
-#include <json-c/arraylist.h>
+#include <arraylist.h>
 
 #define CLD_PROGRESS_DEFAULT_BAR "#"
 #define CLD_PROGRESS_DEFAULT_BEFORE "["
@@ -35,7 +35,7 @@ void show_progress(cld_progress* progress);
 
 typedef struct cld_multi_progress_t {
 	int old_count;
-	array_list* progress_ls;
+	arraylist* progress_ls;
 } cld_multi_progress;
 
 int create_cld_multi_progress(cld_multi_progress** multi_progress);

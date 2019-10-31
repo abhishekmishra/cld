@@ -14,20 +14,20 @@ int create_cld_dict(cld_dict** dict) {
 	if(!(*dict)) {
 		return -1;
 	}
-	(*dict)->keys = array_list_new(&free);
-	(*dict)->vals = array_list_new(&free);
+	arraylist_new(&((*dict)->keys), &free);
+	arraylist_new(&((*dict)->vals), &free);
 	return 0;
 }
 
 void free_cld_dict(cld_dict* dict) {
-	array_list_free(dict->keys);
-	array_list_free(dict->vals);
+	arraylist_free(dict->keys);
+	arraylist_free(dict->vals);
 	free(dict);
 }
 
 int cld_dict_put(cld_dict* dict, char* key, char* value) {
-	array_list_add(dict->keys, str_clone(key));
-	array_list_add(dict->vals, str_clone(value));
+	arraylist_add(dict->keys, str_clone(key));
+	arraylist_add(dict->vals, str_clone(value));
 	return 0;
 }
 
