@@ -291,29 +291,30 @@ int gobble(int argc, char** argv, int at_pos)
 }
 
 
-cld_command* get_command_to_exec(struct array_list* commands, int* argc,
+cld_command* get_command_to_exec(arraylist* commands, int* argc,
 		char** argv)
 {
 	//First read all commands
-	struct array_list* cmd_names = array_list_new(&free);
+	arraylist* cmd_names;
+	arraylist_new(&cmd_names, &free);
 	cld_command* cmd_to_exec = NULL;
-	struct array_list* cmd_list = commands;
+	arraylist* cmd_list = commands;
 	for (int i = 0; i < *argc; i++)
 	{
 		char* cmd_name = argv[i];
 		int found = 0;
 		if (cmd_list != NULL)
 		{
-			for (int j = 0; j < array_list_length(cmd_list); j++)
+			for (int j = 0; j < arraylist_length(cmd_list); j++)
 			{
-				cld_command* cmd = (cld_command*) array_list_get_idx(cmd_list,
+				cld_command* cmd = (cld_command*) arraylist_get(cmd_list,
 						j);
 				if (strcmp(cmd_name, cmd->name) == 0
 						|| strcmp(cmd_name, cmd->short_name) == 0)
 				{
 					found = 1;
 					cmd_list = cmd->sub_commands;
-					array_list_add(cmd_names, cmd->name);
+					arraylist_add(cmd_names, cmd->name);
 					cmd_to_exec = cmd;
 					break;
 				}
@@ -325,7 +326,7 @@ cld_command* get_command_to_exec(struct array_list* commands, int* argc,
 			break;
 		}
 	}
-	for (int i = 0; i < array_list_length(cmd_names); i++)
+	for (int i = 0; i < arraylist_length(cmd_names); i++)
 	{
 		*argc = gobble(*argc, argv, 0);
 	}
@@ -342,7 +343,7 @@ cld_command* get_command_to_exec(struct array_list* commands, int* argc,
  * \param success_handler handle success results
  * \param error_handler handler error results
  */
-cld_cmd_err help_cmd_handler(struct array_list* commands, void* handler_args,
+cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
 		int argc, char** argv, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler)
 {
@@ -367,19 +368,19 @@ cld_cmd_err help_cmd_handler(struct array_list* commands, void* handler_args,
  * \param arg_commands is a list of string
  * \return error code
  */
-cld_cmd_err get_help_for(char** help_str, struct array_list* commands,
-		struct array_list* arg_commands)
+cld_cmd_err get_help_for(char** help_str, arraylist* commands,
+		arraylist* arg_commands)
 {
-	struct array_list* cmd_list = commands;
-	for (int i = 0; i < array_list_length(arg_commands); i++)
+	arraylist* cmd_list = commands;
+	for (int i = 0; i < arraylist_length(arg_commands); i++)
 	{
 		if (cmd_list != NULL)
 		{
-			char* cmd_name = array_list_get_idx(arg_commands, i);
+			char* cmd_name = arraylist_get(arg_commands, i);
 			int found_cmd = 0;
-			for (int j = 0; j < array_list_length(cmd_list); j++)
+			for (int j = 0; j < arraylist_length(cmd_list); j++)
 			{
-				cld_command* cmd = array_list_get_idx(cmd_list, j);
+				cld_command* cmd = arraylist_get(cmd_list, j);
 				if (strcmp(cmd_name, cmd->name) == 0)
 				{
 					found_cmd = 1;
@@ -401,7 +402,7 @@ cld_cmd_err get_help_for(char** help_str, struct array_list* commands,
 	return CLD_COMMAND_ERR_UNKNOWN;
 }
 
-cld_cmd_err parse_options(struct array_list* options, int* argc, char*** argv)
+cld_cmd_err parse_options(arraylist* options, int* argc, char*** argv)
 {
 	int ac = (*argc);
 	char** av = (*argv);
@@ -424,11 +425,11 @@ cld_cmd_err parse_options(struct array_list* options, int* argc, char*** argv)
 				//short option
 				short_option_name = option + 1;
 			}
-			int options_len = array_list_length(options);
+			int options_len = arraylist_length(options);
 			cld_option* found = NULL;
 			for (int j = 0; j < options_len; j++)
 			{
-				cld_option* opt = array_list_get_idx(options, j);
+				cld_option* opt = arraylist_get(options, j);
 				if (long_option_name)
 				{
 					if (strcmp(long_option_name, opt->name) == 0)
@@ -484,17 +485,17 @@ cld_cmd_err parse_options(struct array_list* options, int* argc, char*** argv)
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err parse_args(struct array_list* args, int* argc, char*** argv)
+cld_cmd_err parse_args(arraylist* args, int* argc, char*** argv)
 {
 	int ac = (*argc);
 	char** av = (*argv);
-	int args_len = array_list_length(args);
+	int args_len = arraylist_length(args);
 //	printf("args len %d\n", args_len);
 	if (args_len == ac)
 	{
 		for (int i = 0; i < args_len; i++)
 		{
-			cld_argument* arg = array_list_get_idx(args, i);
+			cld_argument* arg = arraylist_get(args, i);
 			char* argval = av[i];
 			//check if we have
 			parse_cld_val(arg->val, argval);
@@ -524,7 +525,7 @@ cld_cmd_err parse_args(struct array_list* args, int* argc, char*** argv)
  * \param success_handler handle success results
  * \param error_handler handler error results
  */
-cld_cmd_err exec_command(struct array_list* commands, void* handler_args,
+cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		int argc, char** argv, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler)
 {

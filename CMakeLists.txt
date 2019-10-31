@@ -45,7 +45,7 @@ set( CLDCLIENT_SOURCES
   src/histedit.h
 )
 
-add_library ( ${PROJECT_NAME} ${CLDCLIENT_SOURCES} )
+add_executable( ${PROJECT_NAME} ${CLDCLIENT_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)

@@ -5,8 +5,8 @@
 #include "docker_all.h"
 #include "cld_table.h"
 
-cld_cmd_err ctr_ls_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_ls_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
@@ -41,9 +41,9 @@ cld_cmd_err ctr_ls_cmd_handler(void *handler_args, struct array_list *options,
 				//get ports
 				char ports_str[1024];
 				ports_str[0] = '\0';
-				for (int j = 0; j < array_list_length(ctr->ports); j++) {
+				for (int j = 0; j < arraylist_length(ctr->ports); j++) {
 					char port_str[100];
-					docker_container_ports *ports = array_list_get_idx(
+					docker_container_ports *ports = arraylist_get(
 							ctr->ports, 0);
 					sprintf(port_str, "%ld:%ld", ports->private_port,
 							ports->public_port);
@@ -64,12 +64,12 @@ cld_cmd_err ctr_ls_cmd_handler(void *handler_args, struct array_list *options,
 				//get names
 				char names[1024];
 				names[0] = '\0';
-				for (int j = 0; j < array_list_length(ctr->names); j++) {
+				for (int j = 0; j < arraylist_length(ctr->names); j++) {
 					if (j == 0) {
-						strcpy(names, array_list_get_idx(ctr->names, j));
+						strcpy(names, arraylist_get(ctr->names, j));
 					} else {
 						strcat(names, ",");
-						strcat(names, array_list_get_idx(ctr->names, j));
+						strcat(names, arraylist_get(ctr->names, j));
 					}
 				}
 				cld_table_set_row_val(ctr_tbl, i, 0, ctr->id);
@@ -90,19 +90,19 @@ cld_cmd_err ctr_ls_cmd_handler(void *handler_args, struct array_list *options,
 }
 
 cld_cmd_err ctr_create_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Image name not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* image_name_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* image_name_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* image_name = image_name_arg->val->str_value;
 		char* id = NULL;
@@ -125,19 +125,19 @@ cld_cmd_err ctr_create_cmd_handler(void *handler_args,
 }
 
 cld_cmd_err ctr_start_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_start_container(ctx, &res, container, NULL);
@@ -152,19 +152,19 @@ cld_cmd_err ctr_start_cmd_handler(void *handler_args,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_stop_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_stop_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_stop_container(ctx, &res, container, 0);
@@ -180,19 +180,19 @@ cld_cmd_err ctr_stop_cmd_handler(void *handler_args, struct array_list *options,
 }
 
 cld_cmd_err ctr_restart_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_restart_container(ctx, &res, container, 0);
@@ -207,19 +207,19 @@ cld_cmd_err ctr_restart_cmd_handler(void *handler_args,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_kill_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_kill_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_kill_container(ctx, &res, container, NULL);
@@ -234,23 +234,23 @@ cld_cmd_err ctr_kill_cmd_handler(void *handler_args, struct array_list *options,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_ren_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_ren_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 2) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container name and new name not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		char* new_name =
-				((cld_argument*) array_list_get_idx(args, 1))->val->str_value;
+				((cld_argument*) arraylist_get(args, 1))->val->str_value;
 		docker_rename_container(ctx, &res, container, new_name);
 		int created = is_ok(res);
 		handle_docker_error(res, success_handler, error_handler);
@@ -264,19 +264,19 @@ cld_cmd_err ctr_ren_cmd_handler(void *handler_args, struct array_list *options,
 }
 
 cld_cmd_err ctr_pause_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_pause_container(ctx, &res, container);
@@ -292,19 +292,19 @@ cld_cmd_err ctr_pause_cmd_handler(void *handler_args,
 }
 
 cld_cmd_err ctr_unpause_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_unpause_container(ctx, &res, container);
@@ -319,19 +319,19 @@ cld_cmd_err ctr_unpause_cmd_handler(void *handler_args,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_wait_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_wait_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_wait_container(ctx, &res, container, NULL);
@@ -346,19 +346,19 @@ cld_cmd_err ctr_wait_cmd_handler(void *handler_args, struct array_list *options,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_logs_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_logs_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		char* log;
@@ -376,19 +376,19 @@ cld_cmd_err ctr_logs_cmd_handler(void *handler_args, struct array_list *options,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err ctr_top_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err ctr_top_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_container_ps* ps;
@@ -401,19 +401,19 @@ cld_cmd_err ctr_top_cmd_handler(void *handler_args, struct array_list *options,
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 			cld_table* ctr_tbl;
-			int num_labels = array_list_length(ps->titles);
-			int num_processes = array_list_length(ps->processes);
+			int num_labels = arraylist_length(ps->titles);
+			int num_processes = arraylist_length(ps->processes);
 			if (create_cld_table(&ctr_tbl, num_processes, num_labels) == 0) {
 				for (int i = 0; i < num_labels; i++) {
 					cld_table_set_header(ctr_tbl, i,
-							(char *) array_list_get_idx(ps->titles, i));
+							(char *) arraylist_get(ps->titles, i));
 				}
 				for (int i = 0; i < num_processes; i++) {
-					array_list* psvals = (array_list*) array_list_get_idx(
+					arraylist* psvals = (arraylist*) arraylist_get(
 							ps->processes, i);
 					for (int j = 0; j < num_labels; j++) {
 						cld_table_set_row_val(ctr_tbl, i, j,
-								(char *) array_list_get_idx(psvals, j));
+								(char *) arraylist_get(psvals, j));
 					}
 				}
 				success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, ctr_tbl);
@@ -424,19 +424,19 @@ cld_cmd_err ctr_top_cmd_handler(void *handler_args, struct array_list *options,
 }
 
 cld_cmd_err ctr_remove_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		docker_remove_container(ctx, &res, container, 0, 0, 0);
@@ -492,19 +492,19 @@ void docker_container_stats_cb(docker_container_stats* stats, void* cbargs) {
 }
 
 cld_cmd_err ctr_stats_cmd_handler(void *handler_args,
-		struct array_list *options, struct array_list *args,
+		arraylist *options, arraylist *args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	int len = array_list_length(args);
+	int len = arraylist_length(args);
 	if (len != 1) {
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
 				"Container not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	} else {
-		cld_argument* container_arg = (cld_argument*) array_list_get_idx(args,
+		cld_argument* container_arg = (cld_argument*) arraylist_get(args,
 				0);
 		char* container = container_arg->val->str_value;
 		stats_args* sarg = (stats_args*) calloc(1, sizeof(stats_args));

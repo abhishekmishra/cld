@@ -23,14 +23,14 @@
 #include "docker_all.h"
 #include "cld_vol.h"
 
-cld_cmd_err vol_ls_cmd_handler(void *handler_args, struct array_list *options,
-		struct array_list *args, cld_command_output_handler success_handler,
+cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	array_list* volumes;
-	array_list* warnings;
+	arraylist* volumes;
+	arraylist* warnings;
 
 	d_err_t docker_error = docker_volumes_list(ctx, &res, &volumes, &warnings, 0, NULL, NULL, NULL);
 	int success = is_ok(res);
@@ -41,14 +41,14 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, struct array_list *options,
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 		int col_num = 0;
-		int len_volumes = array_list_length(volumes);
+		int len_volumes = arraylist_length(volumes);
 		cld_table* vol_tbl;
 		if (create_cld_table(&vol_tbl, len_volumes, 3) == 0) {
 			cld_table_set_header(vol_tbl, 0, "DRIVER");
 			cld_table_set_header(vol_tbl, 1, "VOLUME NAME");
 			cld_table_set_header(vol_tbl, 2, "MOUNT");
 			for (int i = 0; i < len_volumes; i++) {
-				docker_volume* vol = (docker_volume*) array_list_get_idx(volumes,
+				docker_volume* vol = (docker_volume*) arraylist_get(volumes,
 						i);
 				cld_table_set_row_val(vol_tbl, i, 0,vol->driver);
 				cld_table_set_row_val(vol_tbl, i, 1,vol->name);
@@ -73,13 +73,13 @@ cld_command *vol_commands() {
 //			cld_argument* image_name_arg;
 //			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
 //					"Name of Docker Image to be pulled.");
-//			array_list_add(imgpl_command->args, image_name_arg);
+//			arraylist_add(imgpl_command->args, image_name_arg);
 //
-//			array_list_add(image_command->sub_commands, imgpl_command);
+//			arraylist_add(image_command->sub_commands, imgpl_command);
 //		}
 		if (make_command(&volls_command, "list", "ls", "Docker Volumes List",
 				&vol_ls_cmd_handler) == CLD_COMMAND_SUCCESS) {
-			array_list_add(image_command->sub_commands, volls_command);
+			arraylist_add(image_command->sub_commands, volls_command);
 		}
 	}
 	return image_command;

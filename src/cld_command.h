@@ -23,7 +23,7 @@
 #define SRC_CLD_COMMAND_H_
 
 #include "docker_connection_util.h"
-#include <json-c/arraylist.h>
+#include <arraylist.h>
 
 typedef enum
 {
@@ -87,7 +87,7 @@ typedef cld_cmd_err (*cld_command_output_handler)(cld_cmd_err result_flag,
 		cld_result_type result_type, void* result);
 
 typedef cld_cmd_err (*cld_command_handler)(void* handler_args,
-		struct array_list* options, struct array_list* args,
+		arraylist* options, arraylist* args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler);
 
@@ -96,9 +96,9 @@ typedef struct cld_command_t
 	char* name;
 	char* short_name;
 	char* description;
-	struct array_list* sub_commands;
-	struct array_list* options;
-	struct array_list* args;
+	arraylist* sub_commands;
+	arraylist* options;
+	arraylist* args;
 	cld_command_handler handler;
 } cld_command;
 
@@ -207,7 +207,7 @@ void free_command(cld_command* command);
  * \param success_handler handle success results
  * \param error_handler handler error results
  */
-cld_cmd_err help_cmd_handler(struct array_list* commands, void* handler_args,
+cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
 		int argc, char** argv, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler);
 
@@ -218,8 +218,8 @@ cld_cmd_err help_cmd_handler(struct array_list* commands, void* handler_args,
  * \param arg_commands is a list of string
  * \return error code
  */
-cld_cmd_err get_help_for(char** help_str, struct array_list* commands,
-		struct array_list* arg_commands);
+cld_cmd_err get_help_for(char** help_str, arraylist* commands,
+		arraylist* arg_commands);
 
 /**
  * Execute a single line containing one top-level command.
@@ -232,7 +232,7 @@ cld_cmd_err get_help_for(char** help_str, struct array_list* commands,
  * \param success_handler handle success results
  * \param error_handler handler error results
  */
-cld_cmd_err exec_command(struct array_list* commands, void* handler_args,
+cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		int argc, char** argv, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler);
 
