@@ -30,7 +30,10 @@
  // #include <readline/history.h>
  // #endif
 
+#ifdef HAVE_LINENOISE
 #include <linenoise.h>
+#endif // HAVE_LINENOISE
+
 #include <histedit.h>
 
 #include <string.h>
@@ -61,11 +64,6 @@ arraylist* create_commands()
 	arraylist_add(commands, net_commands());
 	return commands;
 }
-
-// char *prompt(EditLine *e)
-// {
-// 	return "CLD> ";
-// }
 
 void print_table_result(void* result)
 {
@@ -287,7 +285,9 @@ int main(int argc, char* argv[])
 	/** Initialize docker context **/
 	make_docker_context_url(&ctx, DOCKER_DEFAULT_UNIX_SOCKET);
 
+#ifdef HAVE_LINENOISE
 	linenoiseInstallWindowChangeHandler();
+#endif
 
 	int c;
 
@@ -444,6 +444,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
+#ifdef HAVE_LINENOISE
 	if (interactive > command)
 	{
 		const char* file = "~/.cldhistory";
@@ -497,6 +498,7 @@ int main(int argc, char* argv[])
 		linenoiseHistorySave(file);
 		linenoiseHistoryFree();
 	}
+#endif //HAVE_LINENOISE
 
 	tok_end(tokenizer);
 	return 0;
