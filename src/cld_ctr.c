@@ -12,7 +12,7 @@ cld_cmd_err ctr_ls_cmd_handler(void *handler_args, arraylist *options,
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 	docker_containers_list *containers;
-	docker_container_list(ctx, &res, &containers, 1, 0, 1, NULL);
+	docker_container_list(ctx, &res, &containers, 0, 0, 1, NULL);
 	handle_docker_error(res, success_handler, error_handler);
 
 	if (quiet) {

@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
 	docker_log_set_quiet(1);
 
 	/** Initialize docker context **/
-	make_docker_context_url(&ctx, DOCKER_DEFAULT_UNIX_SOCKET);
+	//make_docker_context_default_local(&ctx);
 
 #ifdef HAVE_LINENOISE
 	linenoiseInstallWindowChangeHandler();
@@ -407,9 +407,9 @@ int main(int argc, char* argv[])
 
 	if (!connected)
 	{
-		url = DOCKER_DEFAULT_UNIX_SOCKET;
-		if (make_docker_context_socket(&ctx, url) == E_SUCCESS)
+		if (make_docker_context_default_local(&ctx) == E_SUCCESS)
 		{
+			url = str_clone(ctx->url);
 			connected = 1;
 		}
 	}
