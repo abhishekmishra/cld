@@ -61,10 +61,6 @@
 #define CLD_OPTION_MAIN_DEBUG_SHORT "D"
 #define CLD_OPTION_MAIN_DEBUG_DESC "Debug Mode"
 
-#define CLD_OPTION_MAIN_HELP_LONG "help"
-#define CLD_OPTION_MAIN_HELP_SHORT "H"
-#define CLD_OPTION_MAIN_HELP_DESC "Show Help"
-
 #define CLD_OPTION_MAIN_LOG_LEVEL_LONG "loglevel"
 #define CLD_OPTION_MAIN_LOG_LEVEL_SHORT "l"
 #define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set Log Level"
@@ -169,9 +165,9 @@ cld_command* create_main_command()
 	if (make_command(&main_command, main_command_name, "cld",
 		"CLD Docker Client",
 		&main_cmd_handler) == CLD_COMMAND_SUCCESS) {
-		cld_option* config_option, * debug_option, * help_option, * log_level_option, * tls_option,
+		cld_option* config_option, * debug_option, * log_level_option, * tls_option,
 			* tlscacert_option, * tlscert_option, * tlskey_option, * tlsverify_option, * interactive_option,
-			* host_option, * version_option;
+			* host_option, * version_option, * help_option;
 
 		make_option(&config_option, CLD_OPTION_MAIN_CONFIG_LONG,
 			CLD_OPTION_MAIN_CONFIG_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_CONFIG_DESC);
@@ -180,10 +176,6 @@ cld_command* create_main_command()
 		make_option(&debug_option, CLD_OPTION_MAIN_DEBUG_LONG,
 			CLD_OPTION_MAIN_DEBUG_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_DEBUG_DESC);
 		arraylist_add(main_command->options, debug_option);
-
-		make_option(&help_option, CLD_OPTION_MAIN_HELP_LONG,
-			CLD_OPTION_MAIN_HELP_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_HELP_DESC);
-		arraylist_add(main_command->options, help_option);
 
 		make_option(&log_level_option, CLD_OPTION_MAIN_LOG_LEVEL_LONG,
 			CLD_OPTION_MAIN_LOG_LEVEL_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_LOG_LEVEL_DESC);
@@ -220,6 +212,10 @@ cld_command* create_main_command()
 		make_option(&version_option, CLD_OPTION_MAIN_VERSION_LONG,
 			CLD_OPTION_MAIN_VERSION_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_VERSION_DESC);
 		arraylist_add(main_command->options, version_option);
+
+		make_option(&help_option, CLD_OPTION_HELP_LONG,
+			CLD_OPTION_HELP_SHORT, CLD_TYPE_FLAG, CLD_OPTION_HELP_DESC);
+		arraylist_add(main_command->options, help_option);
 
 		arraylist_add(main_command->sub_commands, sys_commands());
 		arraylist_add(main_command->sub_commands, ctr_commands());
@@ -450,7 +446,7 @@ int main(int argc, char* argv[])
 	tokenizer = tok_init(NULL);
 
 	/** No logging **/
-	docker_log_set_level(LOG_ERROR);
+	docker_log_set_level(LOG_DEBUG);
 
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);
@@ -470,7 +466,7 @@ int main(int argc, char* argv[])
 		{
 			docker_log_error("Error: invalid command.\n");
 		}
-	}
+}
 
 #ifdef HAVE_LINENOISE
 	if (interactive > command)
@@ -530,4 +526,4 @@ int main(int argc, char* argv[])
 
 	tok_end(tokenizer);
 	return 0;
-}
+	}

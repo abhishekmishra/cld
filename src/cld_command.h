@@ -25,6 +25,10 @@
 #include "docker_connection_util.h"
 #include <arraylist.h>
 
+#define CLD_OPTION_HELP_LONG "help"
+#define CLD_OPTION_HELP_SHORT "h"
+#define CLD_OPTION_HELP_DESC "Print help for command."
+
 typedef enum
 {
 	CLD_COMMAND_IS_RUNNING = -1,

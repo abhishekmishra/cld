@@ -24,6 +24,12 @@
 #include "cld_command.h"
 #include "docker_log.h"
 
+void print_args(int argc, char** argv) {
+	for (int i = 0; i < argc; i++) {
+		docker_log_debug("Arg%d = %s", i, argv[i]);
+	}
+}
+
  /**
   * Create a new value object of given type.
   *
@@ -318,39 +324,46 @@ arraylist* get_command_to_exec(arraylist* commands, int* argc,
 	cld_command* cmd_to_exec = NULL;
 
 	arraylist* cmd_list = commands;
-	for (int i = 0; i < *argc; i++)
-	{
-		char* cmd_name = argv[i];
+	while (1) {
 		int found = 0;
-		if (cmd_list != NULL)
+		for (int i = 0; i < *argc; i++)
 		{
-			for (int j = 0; j < arraylist_length(cmd_list); j++)
+			char* cmd_name = argv[i];
+			if (cmd_list != NULL)
 			{
-				cld_command* cmd = (cld_command*)arraylist_get(cmd_list,
-					j);
-				if (strcmp(cmd_name, cmd->name) == 0
-					|| strcmp(cmd_name, cmd->short_name) == 0)
+				for (int j = 0; j < arraylist_length(cmd_list); j++)
 				{
-					found = 1;
-					cmd_list = cmd->sub_commands;
-					arraylist_add(cmd_names, cmd->name);
-					docker_log_debug("found command %s\n", cmd->name);
-					cmd_to_exec = cmd;
-					arraylist_add(cmds_to_exec, cmd);
-					break;
+					cld_command* cmd = (cld_command*)arraylist_get(cmd_list,
+						j);
+					if (strcmp(cmd_name, cmd->name) == 0
+						|| strcmp(cmd_name, cmd->short_name) == 0)
+					{
+						found = 1;
+						cmd_list = cmd->sub_commands;
+						arraylist_add(cmd_names, cmd->name);
+						docker_log_debug("found command %s\n", cmd->name);
+						cmd_to_exec = cmd;
+						arraylist_add(cmds_to_exec, cmd);
+						break;
+					}
 				}
 			}
+			if (found) {
+				//gobble at location and break
+				*argc = gobble(*argc, argv, i);
+				break;
+			}
 		}
-		//if current name is not a command break
+		//if no command found in last loop, break
 		if (found == 0)
 		{
 			break;
 		}
 	}
-	for (int i = 0; i < arraylist_length(cmd_names); i++)
-	{
-		*argc = gobble(*argc, argv, 0);
-	}
+	//for (int i = 0; i < arraylist_length(cmd_names); i++)
+	//{
+	//	*argc = gobble(*argc, argv, 0);
+	//}
 	return cmds_to_exec;
 }
 
@@ -549,13 +562,13 @@ void print_options(arraylist* options) {
 			cld_option* o = arraylist_get(options, i);
 			switch (o->val->type) {
 			case CLD_TYPE_BOOLEAN:
-				printf("%s, %s = %d\n", o->name, o->short_name, o->val->bool_value);
+				docker_log_debug("Options%d %s, %s = %d\n", i, o->name, o->short_name, o->val->bool_value);
 				break;
 			case CLD_TYPE_FLAG:
-				printf("%s, %s = %d\n", o->name, o->short_name, o->val->bool_value);
+				docker_log_debug("Options%d %s, %s = %d\n", i, o->name, o->short_name, o->val->bool_value);
 				break;
 			case CLD_TYPE_STRING:
-				printf("%s, %s = %s\n", o->name, o->short_name, o->val->str_value);
+				docker_log_debug("Options%d %s, %s = %s\n", i, o->name, o->short_name, o->val->str_value);
 				break;
 			}
 		}
@@ -597,6 +610,8 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		}
 	}
 
+	print_args(argc, argv);
+
 	//Then read all options
 	err = parse_options(all_options, &argc, &argv);
 	if (err != CLD_COMMAND_SUCCESS)
@@ -604,36 +619,53 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		return err;
 	}
 
-	//print_options(all_options);
+	print_options(all_options);
 
-	for (int i = 0; i < len_cmds; i++) {
-		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
-		if (cmd_to_exec == NULL)
-		{
-			printf("No valid command found. Type help to get more help\n");
-			return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
-		}
-
-		// for the last command in the chain, it can have args
-		if (i == (len_cmds - 1)) {
-			//Now read all arguments
-			err = parse_args(cmd_to_exec->args, &argc, &argv);
-			if (err != CLD_COMMAND_SUCCESS)
+	cld_option* help_option = get_option_by_name(all_options, CLD_OPTION_HELP_LONG);
+	if (help_option->val->bool_value) {
+		if (arraylist_length(cmds_to_exec) > 0) {
+			cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, arraylist_length(cmds_to_exec) - 1);
+			if (cmd_to_exec == NULL)
 			{
-				return err;
+				error_handler(CLD_COMMAND_ERR_COMMAND_NOT_FOUND, CLD_RESULT_STRING,
+					"No valid command found. Type help to get more help\n");
+				return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
 			}
 
-			//anything leftover
-			if (argc > 0)
-			{
-				printf("%d extra arguments found.\n", argc);
-				return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
-			}
+			char* help_str = cmd_to_exec->description;
+			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, help_str);
 		}
+	}
+	else {
+		for (int i = 0; i < len_cmds; i++) {
+			cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
+			if (cmd_to_exec == NULL)
+			{
+				printf("No valid command found. Type help to get more help\n");
+				return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
+			}
 
-		if (cmd_to_exec->handler != NULL) {
-			err = cmd_to_exec->handler(handler_args, all_options,
-				all_args, success_handler, error_handler);
+			// for the last command in the chain, it can have args
+			if (i == (len_cmds - 1)) {
+				//Now read all arguments
+				err = parse_args(cmd_to_exec->args, &argc, &argv);
+				if (err != CLD_COMMAND_SUCCESS)
+				{
+					return err;
+				}
+
+				//anything leftover
+				if (argc > 0)
+				{
+					printf("%d extra arguments found.\n", argc);
+					return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
+				}
+			}
+
+			if (cmd_to_exec->handler != NULL) {
+				err = cmd_to_exec->handler(handler_args, all_options,
+					all_args, success_handler, error_handler);
+			}
 		}
 	}
 
