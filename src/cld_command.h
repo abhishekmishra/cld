@@ -87,13 +87,13 @@ typedef struct cld_argument_t
 	int optional;
 } cld_argument;
 
-typedef cld_cmd_err (*cld_command_output_handler)(cld_cmd_err result_flag,
-		cld_result_type result_type, void* result);
+typedef cld_cmd_err(*cld_command_output_handler)(cld_cmd_err result_flag,
+	cld_result_type result_type, void* result);
 
-typedef cld_cmd_err (*cld_command_handler)(void* handler_args,
-		arraylist* options, arraylist* args,
-		cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler);
+typedef cld_cmd_err(*cld_command_handler)(void* handler_args,
+	arraylist* options, arraylist* args,
+	cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler);
 
 typedef struct cld_command_t
 {
@@ -156,7 +156,7 @@ cld_cmd_err parse_cld_val(cld_val* val, char* input);
  * \return error code
  */
 cld_cmd_err make_option(cld_option** option, char* name, char* short_name,
-		cld_type type, char* description);
+	cld_type type, char* description);
 
 /**
  * Free resources used by option
@@ -175,7 +175,7 @@ cld_option* get_option_by_name(arraylist* options, char* name);
  * \return error code
  */
 cld_cmd_err make_argument(cld_argument** arg, char* name, cld_type type,
-		char* description);
+	char* description);
 
 /**
  * Free resources used by argument
@@ -196,12 +196,19 @@ void free_argument(cld_argument* arg);
  * \return error code
  */
 cld_cmd_err make_command(cld_command** command, char* name, char* short_name,
-		char* description, cld_command_handler handler);
+	char* description, cld_command_handler handler);
 
 /**
  * Free a command object
  */
 void free_command(cld_command* command);
+
+/**
+* Get help for a command
+* \param cld_command* command
+* \return string with command help
+*/
+char* get_help_for_command(cld_command* command);
 
 /**
  * Run the help command for all commands or single command
@@ -214,8 +221,8 @@ void free_command(cld_command* command);
  * \param error_handler handler error results
  */
 cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
-		int argc, char** argv, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler);
+	int argc, char** argv, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler);
 
 /**
  * Get the help string for the arg_commands from the registered commands list.
@@ -225,7 +232,7 @@ cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
  * \return error code
  */
 cld_cmd_err get_help_for(char** help_str, arraylist* commands,
-		arraylist* arg_commands);
+	arraylist* arg_commands);
 
 /**
  * Execute a single line containing one top-level command.
@@ -239,7 +246,7 @@ cld_cmd_err get_help_for(char** help_str, arraylist* commands,
  * \param error_handler handler error results
  */
 cld_cmd_err exec_command(arraylist* commands, void* handler_args,
-		int argc, char** argv, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler);
+	int argc, char** argv, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler);
 
 #endif /* SRC_CLD_COMMAND_H_ */

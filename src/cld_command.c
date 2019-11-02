@@ -24,19 +24,23 @@
 #include "cld_command.h"
 #include "docker_log.h"
 
+#define CLD_SIZE_OF_HELP_STR 1024
+
+static char help_str[CLD_SIZE_OF_HELP_STR];
+
 void print_args(int argc, char** argv) {
 	for (int i = 0; i < argc; i++) {
 		docker_log_debug("Arg%d = %s", i, argv[i]);
 	}
 }
 
- /**
-  * Create a new value object of given type.
-  *
-  * \param val object to create
-  * \param type
-  * \return error code
-  */
+/**
+ * Create a new value object of given type.
+ *
+ * \param val object to create
+ * \param type
+ * \return error code
+ */
 cld_cmd_err make_cld_val(cld_val** val, cld_type type)
 {
 	(*val) = (cld_val*)calloc(1, sizeof(cld_val));
@@ -285,6 +289,85 @@ void free_command(cld_command* command)
 	arraylist_free(command->sub_commands);
 	arraylist_free(command->args);
 	free(command);
+}
+
+char* get_program_name(char* command) {
+	char* p = command;
+	for (int i = 0; i < strlen(command); i++) {
+		if (command[i] == '/' || command[i] == '\\') {
+			p = command + i + 1;
+		}
+	}
+	return p;
+}
+
+char* get_help_for_command(cld_command* command) {
+	memset(help_str, NULL, CLD_SIZE_OF_HELP_STR);
+	sprintf(help_str, "Usage: %s", get_program_name(command->name));
+
+	size_t opt_len = arraylist_length(command->options);
+	if (opt_len > 0) {
+		strcat(help_str, " [OPTIONS]");
+	}
+
+	size_t sub_cmd_len = arraylist_length(command->sub_commands);
+	if (sub_cmd_len > 0) {
+		strcat(help_str, " COMMAND");
+	}
+
+	strcat(help_str, "\n\n");
+	strcat(help_str, command->description);
+	strcat(help_str, "\n\n");
+
+	if (opt_len > 0) {
+		strcat(help_str, "Options:\n\n");
+		for (size_t i = 0; i < opt_len; i++) {
+			cld_option* opt = arraylist_get(command->options, i);
+			strcat(help_str, "\t");
+			if (opt->short_name != NULL) {
+				strcat(help_str, "-");
+				strcat(help_str, opt->short_name);
+				strcat(help_str, ", ");
+			}
+			else {
+				strcat(help_str, "    ");
+			}
+
+			int used = 0;
+			if (opt->name != NULL) {
+				strcat(help_str, "--");
+				strcat(help_str, opt->name);
+				used = 2 + strlen(opt->name);
+				if (opt->val->type == CLD_TYPE_STRING) {
+					strcat(help_str, " string");
+					used += strlen(" string");
+				}
+			}
+			for (int sp = used; sp < 25; sp++) {
+				strcat(help_str, " ");
+			}
+			strcat(help_str, opt->description);
+			strcat(help_str, "\n");
+		}
+	}
+
+	if (sub_cmd_len > 0) {
+		strcat(help_str, "\nCommands:\n\n");
+		for (size_t i = 0; i < sub_cmd_len; i++) {
+			cld_command* sc = arraylist_get(command->sub_commands, i);
+			int used = 0;
+			strcat(help_str, "  ");
+			strcat(help_str, sc->name);
+			used = 2 + strlen(sc->name);
+			for (int sp = used; sp < 15; sp++) {
+				strcat(help_str, " ");
+			}
+			strcat(help_str, sc->description);
+			strcat(help_str, "\n");
+		}
+	}
+
+	return help_str;
 }
 
 int gobble(int argc, char** argv, int at_pos)
@@ -632,7 +715,7 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 				return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
 			}
 
-			char* help_str = cmd_to_exec->description;
+			char* help_str = get_help_for_command(cmd_to_exec);
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, help_str);
 		}
 	}
