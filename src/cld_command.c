@@ -23,16 +23,16 @@
 #include <string.h>
 #include "cld_command.h"
 
-/**
- * Create a new value object of given type.
- *
- * \param val object to create
- * \param type
- * \return error code
- */
+ /**
+  * Create a new value object of given type.
+  *
+  * \param val object to create
+  * \param type
+  * \return error code
+  */
 cld_cmd_err make_cld_val(cld_val** val, cld_type type)
 {
-	(*val) = (cld_val*) calloc(1, sizeof(cld_val));
+	(*val) = (cld_val*)calloc(1, sizeof(cld_val));
 	if ((*val) == NULL)
 	{
 		return CLD_COMMAND_ERR_ALLOC_FAILED;
@@ -143,9 +143,9 @@ cld_cmd_err parse_cld_val(cld_val* val, char* input)
  * \return error code
  */
 cld_cmd_err make_option(cld_option** option, char* name, char* short_name,
-		cld_type type, char* description)
+	cld_type type, char* description)
 {
-	(*option) = (cld_option*) calloc(1, sizeof(cld_option));
+	(*option) = (cld_option*)calloc(1, sizeof(cld_option));
 	if ((*option) == NULL)
 	{
 		return CLD_COMMAND_ERR_ALLOC_FAILED;
@@ -187,9 +187,9 @@ void free_option(cld_option* option)
  * \return error code
  */
 cld_cmd_err make_argument(cld_argument** arg, char* name, cld_type type,
-		char* description)
+	char* description)
 {
-	(*arg) = (cld_argument*) calloc(1, sizeof(cld_argument));
+	(*arg) = (cld_argument*)calloc(1, sizeof(cld_argument));
 	if ((*arg) == NULL)
 	{
 		return CLD_COMMAND_ERR_ALLOC_FAILED;
@@ -230,9 +230,9 @@ void free_argument(cld_argument* arg)
  * \return error code
  */
 cld_cmd_err make_command(cld_command** command, char* name, char* short_name,
-		char* description, cld_command_handler handler)
+	char* description, cld_command_handler handler)
 {
-	(*command) = (cld_command*) calloc(1, sizeof(cld_command));
+	(*command) = (cld_command*)calloc(1, sizeof(cld_command));
 	if ((*command) == NULL)
 	{
 		return CLD_COMMAND_ERR_ALLOC_FAILED;
@@ -241,9 +241,9 @@ cld_cmd_err make_command(cld_command** command, char* name, char* short_name,
 	(*command)->short_name = short_name;
 	(*command)->description = description;
 	(*command)->handler = handler;
-	arraylist_new(&((*command)->options), (void (*)(void *)) &free_option);
-	arraylist_new(&((*command)->sub_commands), (void (*)(void *)) &free_command);
-	arraylist_new(&((*command)->args), (void (*)(void *)) &free_argument);
+	arraylist_new(&((*command)->options), (void (*)(void*)) & free_option);
+	arraylist_new(&((*command)->sub_commands), (void (*)(void*)) & free_command);
+	arraylist_new(&((*command)->args), (void (*)(void*)) & free_argument);
 	return CLD_COMMAND_SUCCESS;
 }
 
@@ -291,13 +291,18 @@ int gobble(int argc, char** argv, int at_pos)
 }
 
 
-cld_command* get_command_to_exec(arraylist* commands, int* argc,
-		char** argv)
+arraylist* get_command_to_exec(arraylist* commands, int* argc,
+	char** argv)
 {
 	//First read all commands
 	arraylist* cmd_names;
 	arraylist_new(&cmd_names, &free);
+
+	arraylist* cmds_to_exec = NULL;
+	arraylist_new(&cmds_to_exec, NULL);
+
 	cld_command* cmd_to_exec = NULL;
+
 	arraylist* cmd_list = commands;
 	for (int i = 0; i < *argc; i++)
 	{
@@ -307,15 +312,17 @@ cld_command* get_command_to_exec(arraylist* commands, int* argc,
 		{
 			for (int j = 0; j < arraylist_length(cmd_list); j++)
 			{
-				cld_command* cmd = (cld_command*) arraylist_get(cmd_list,
-						j);
+				cld_command* cmd = (cld_command*)arraylist_get(cmd_list,
+					j);
 				if (strcmp(cmd_name, cmd->name) == 0
-						|| strcmp(cmd_name, cmd->short_name) == 0)
+					|| strcmp(cmd_name, cmd->short_name) == 0)
 				{
 					found = 1;
 					cmd_list = cmd->sub_commands;
 					arraylist_add(cmd_names, cmd->name);
+					printf("found command %s\n", cmd->name);
 					cmd_to_exec = cmd;
+					arraylist_add(cmds_to_exec, cmd);
 					break;
 				}
 			}
@@ -330,7 +337,7 @@ cld_command* get_command_to_exec(arraylist* commands, int* argc,
 	{
 		*argc = gobble(*argc, argv, 0);
 	}
-	return cmd_to_exec;
+	return cmds_to_exec;
 }
 
 /**
@@ -344,20 +351,23 @@ cld_command* get_command_to_exec(arraylist* commands, int* argc,
  * \param error_handler handler error results
  */
 cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
-		int argc, char** argv, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler)
+	int argc, char** argv, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
 	//First read all commands
-	cld_command* cmd_to_exec = get_command_to_exec(commands, &argc, argv);
-	if (cmd_to_exec == NULL)
-	{
-		error_handler(CLD_COMMAND_ERR_COMMAND_NOT_FOUND, CLD_RESULT_STRING,
+	arraylist* cmds_to_exec = get_command_to_exec(commands, &argc, argv);
+	if (arraylist_length(cmds_to_exec) > 0) {
+		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, arraylist_length(cmds_to_exec) - 1);
+		if (cmd_to_exec == NULL)
+		{
+			error_handler(CLD_COMMAND_ERR_COMMAND_NOT_FOUND, CLD_RESULT_STRING,
 				"No valid command found. Type help to get more help\n");
-		return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
-	}
+			return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
+		}
 
-	char* help_str = cmd_to_exec->description;
-	success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, help_str);
+		char* help_str = cmd_to_exec->description;
+		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, help_str);
+	}
 	return CLD_COMMAND_SUCCESS;
 }
 
@@ -369,7 +379,7 @@ cld_cmd_err help_cmd_handler(arraylist* commands, void* handler_args,
  * \return error code
  */
 cld_cmd_err get_help_for(char** help_str, arraylist* commands,
-		arraylist* arg_commands)
+	arraylist* arg_commands)
 {
 	arraylist* cmd_list = commands;
 	for (int i = 0; i < arraylist_length(arg_commands); i++)
@@ -430,14 +440,14 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char*** argv)
 			for (int j = 0; j < options_len; j++)
 			{
 				cld_option* opt = arraylist_get(options, j);
-				if (long_option_name)
+				if (long_option_name && opt->name != NULL)
 				{
 					if (strcmp(long_option_name, opt->name) == 0)
 					{
 						found = opt;
 					}
 				}
-				if (short_option_name)
+				if (short_option_name && opt->short_name != NULL)
 				{
 					if (strcmp(short_option_name, opt->short_name) == 0)
 					{
@@ -452,8 +462,12 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char*** argv)
 			}
 			else
 			{
+				skip_count += 1;
 				//read option value if it is not a flag
-				if (found->val->type != CLD_TYPE_FLAG)
+				if (found->val->type == CLD_TYPE_FLAG) {
+					found->val->bool_value = true;
+				}
+				else
 				{
 					if (i == (ac - 1))
 					{
@@ -462,6 +476,7 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char*** argv)
 					}
 					else
 					{
+						skip_count += 1;
 						i = i + 1;
 						char* value = av[i];
 						parse_cld_val(found->val, value);
@@ -472,14 +487,13 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char*** argv)
 		else
 		{
 			//not an option, break
-			skip_count = i;
 			break;
 		}
 	}
 
 	for (int i = 0; i < skip_count; i++)
 	{
-		ac = gobble(ac, av, 0);
+		*argc = gobble(*argc, argv, 0);
 	}
 
 	return CLD_COMMAND_SUCCESS;
@@ -490,7 +504,7 @@ cld_cmd_err parse_args(arraylist* args, int* argc, char*** argv)
 	int ac = (*argc);
 	char** av = (*argv);
 	int args_len = arraylist_length(args);
-//	printf("args len %d\n", args_len);
+	//	printf("args len %d\n", args_len);
 	if (args_len == ac)
 	{
 		for (int i = 0; i < args_len; i++)
@@ -499,7 +513,7 @@ cld_cmd_err parse_args(arraylist* args, int* argc, char*** argv)
 			char* argval = av[i];
 			//check if we have
 			parse_cld_val(arg->val, argval);
-//			printf("Argval %s\n", argval);
+			//			printf("Argval %s\n", argval);
 		}
 	}
 	else
@@ -509,9 +523,29 @@ cld_cmd_err parse_args(arraylist* args, int* argc, char*** argv)
 	for (int i = 0; i < args_len; i++)
 	{
 		(*argc) = gobble((*argc), av, 0);
-//		printf("new argc = %d\n", (*argc));
+		//		printf("new argc = %d\n", (*argc));
 	}
 	return CLD_COMMAND_SUCCESS;
+}
+
+void print_options(arraylist* options) {
+	if (options != NULL) {
+		int options_len = arraylist_length(options);
+		for (int i = 0; i < options_len; i++) {
+			cld_option* o = arraylist_get(options, i);
+			switch (o->val->type) {
+			case CLD_TYPE_BOOLEAN:
+				printf("%s, %s = %d\n", o->name, o->short_name, o->val->bool_value);
+				break;
+			case CLD_TYPE_FLAG:
+				printf("%s, %s = %d\n", o->name, o->short_name, o->val->bool_value);
+				break;
+			case CLD_TYPE_STRING:
+				printf("%s, %s = %s\n", o->name, o->short_name, o->val->str_value);
+				break;
+			}
+		}
+	}
 }
 
 /**
@@ -526,40 +560,82 @@ cld_cmd_err parse_args(arraylist* args, int* argc, char*** argv)
  * \param error_handler handler error results
  */
 cld_cmd_err exec_command(arraylist* commands, void* handler_args,
-		int argc, char** argv, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler)
+	int argc, char** argv, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
+	cld_cmd_err err = CLD_COMMAND_SUCCESS;
+
 	//First read all commands
-	cld_command* cmd_to_exec = get_command_to_exec(commands, &argc, argv);
-	if (cmd_to_exec == NULL)
-	{
-		printf("No valid command found. Type help to get more help\n");
-		return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
+	arraylist* cmds_to_exec = get_command_to_exec(commands, &argc, argv);
+	int len_cmds = arraylist_length(cmds_to_exec);
+	arraylist* all_options, * all_args;
+	arraylist_new(&all_options, NULL);
+	arraylist_new(&all_args, NULL);
+
+	for (int i = 0; i < len_cmds; i++) {
+		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
+		int len_options = arraylist_length(cmd_to_exec->options);
+		for (int j = 0; j < len_options; j++) {
+			arraylist_add(all_options, arraylist_get(cmd_to_exec->options, j));
+		}
+		for (int j = 0; j < len_options; j++) {
+			arraylist_add(all_args, arraylist_get(cmd_to_exec->args, j));
+		}
 	}
 
 	//Then read all options
-	cld_cmd_err err = parse_options(cmd_to_exec->options, &argc, &argv);
+	err = parse_options(all_options, &argc, &argv);
 	if (err != CLD_COMMAND_SUCCESS)
 	{
 		return err;
 	}
 
-	//Now read all arguments
-	err = parse_args(cmd_to_exec->args, &argc, &argv);
-	if (err != CLD_COMMAND_SUCCESS)
-	{
-		return err;
-	}
+	print_options(all_options);
 
-	//anything leftover
-	if (argc > 0)
-	{
-		printf("%d extra arguments found.\n", argc);
-		return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
-	}
+	////Now read all arguments
+	//err = parse_args(all_args, &argc, &argv);
+	//if (err != CLD_COMMAND_SUCCESS)
+	//{
+	//	return err;
+	//}
 
-	err = cmd_to_exec->handler(handler_args, cmd_to_exec->options,
-			cmd_to_exec->args, success_handler, error_handler);
+	////anything leftover
+	//if (argc > 0)
+	//{
+	//	printf("%d extra arguments found.\n", argc);
+	//	return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
+	//}
+
+	for (int i = 0; i < len_cmds; i++) {
+		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
+		if (cmd_to_exec == NULL)
+		{
+			printf("No valid command found. Type help to get more help\n");
+			return CLD_COMMAND_ERR_COMMAND_NOT_FOUND;
+		}
+
+		// for the last command in the chain, it can have args
+		if (i == (len_cmds - 1)) {
+			//Now read all arguments
+			err = parse_args(cmd_to_exec->args, &argc, &argv);
+			if (err != CLD_COMMAND_SUCCESS)
+			{
+				return err;
+			}
+
+			//anything leftover
+			if (argc > 0)
+			{
+				printf("%d extra arguments found.\n", argc);
+				return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
+			}
+		}
+
+		if (cmd_to_exec->handler != NULL) {
+			err = cmd_to_exec->handler(handler_args, all_options,
+				all_args, success_handler, error_handler);
+		}
+	}
 
 	return err;
 }
