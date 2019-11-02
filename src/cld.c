@@ -446,7 +446,7 @@ int main(int argc, char* argv[])
 	tokenizer = tok_init(NULL);
 
 	/** No logging **/
-	docker_log_set_level(LOG_DEBUG);
+	docker_log_set_level(LOG_INFO);
 
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);
