@@ -206,7 +206,7 @@ cld_command* create_main_command()
 		arraylist_add(main_command->options, interactive_option);
 
 		make_option(&host_option, CLD_OPTION_MAIN_HOST_LONG,
-			CLD_OPTION_MAIN_HOST_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_HOST_DESC);
+			CLD_OPTION_MAIN_HOST_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_HOST_DESC);
 		arraylist_add(main_command->options, host_option);
 
 		make_option(&version_option, CLD_OPTION_MAIN_VERSION_LONG,
@@ -446,7 +446,7 @@ int main(int argc, char* argv[])
 	tokenizer = tok_init(NULL);
 
 	/** No logging **/
-	docker_log_set_level(LOG_INFO);
+	docker_log_set_level(LOG_DEBUG);
 
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);

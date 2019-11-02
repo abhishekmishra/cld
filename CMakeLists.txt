@@ -20,7 +20,7 @@ include_directories( src )
 
 # Lists
 # Setup the list of source files
-set( CLDCLIENT_SOURCES 
+set( CLDCLIENT_SOURCES
   src/cld_command.c
   src/cld_common.c
   src/cld_ctr.c
@@ -47,36 +47,44 @@ set( CLDCLIENT_SOURCES
   src/histedit.h
 )
 
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS ">>> Linux, using pkg-config since vcpkg is broken")
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(json-c REQUIRED IMPORTED_TARGET json-c)
+	pkg_check_modules(curl REQUIRED IMPORTED_TARGET libcurl)
+	pkg_check_modules(archive REQUIRED IMPORTED_TARGET libarchive)
+endif()
+
 add_executable( ${PROJECT_NAME} ${CLDCLIENT_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
-# find_package(json-c CONFIG REQUIRED)
-# target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+	target_link_libraries(${PROJECT_NAME} PUBLIC json-c)
+	target_link_libraries(${PROJECT_NAME} PUBLIC curl)
+	target_link_libraries(${PROJECT_NAME} PUBLIC archive)
+else()
+	find_package(json-c CONFIG REQUIRED)
+	target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
 
-# find_package(CURL CONFIG REQUIRED)
-# target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
+	find_package(CURL CONFIG REQUIRED)
+	target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
+
+	# To find and use linenoise, as the vcpkg build does not have cmake config
+	find_path(LINENOISE_INCLUDE_DIR linenoise.h)
+	find_library(LINENOISE_LIBRARY linenoise)
+	include_directories(${LINENOISE_INCLUDE_DIR})
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${LINENOISE_LIBRARY})
+endif()
 
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
-
-find_package(clibdocker CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
 
 find_package(coll CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
 
-find_package(json-c CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
-
-find_package(CURL CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
-
-# To find and use linenoise, as the vcpkg build does not have cmake config
-#find_path(LINENOISE_INCLUDE_DIR linenoise.h)
-#find_library(LINENOISE_LIBRARY linenoise)
-#include_directories(${LINENOISE_INCLUDE_DIR})
-#target_link_libraries(${PROJECT_NAME} PUBLIC ${LINENOISE_LIBRARY})
+find_package(clibdocker CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
 
 check_include_file("getopt.h" HAVE_GETOPT)
 
