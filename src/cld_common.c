@@ -16,9 +16,9 @@ docker_context* get_docker_context(void* handler_args) {
 void handle_docker_error(docker_result* res,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
-	char res_str[1024];
-	memset(res_str, NULL, 1024);
-	//sprintf(res_str,"\nURL: %s\n", res->url);
+	char res_str[4096];
+	memset(res_str, NULL, 4096);
+	sprintf(res_str,"\nURL: %s\n", res->url);
 	success_handler(CLD_COMMAND_IS_RUNNING, CLD_RESULT_STRING, res_str);
 	if (!is_ok(res)) {
 		printf("DOCKER RESULT: Response error_code = %d, http_response = %ld\n",

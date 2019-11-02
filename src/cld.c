@@ -63,7 +63,13 @@
 
 #define CLD_OPTION_MAIN_LOG_LEVEL_LONG "loglevel"
 #define CLD_OPTION_MAIN_LOG_LEVEL_SHORT "l"
-#define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set Log Level"
+#define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set the Log Level\n(\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\")\n(default \"info\")"
+
+#define CLD_LOGLEVEL_DEBUG "debug"
+#define CLD_LOGLEVEL_INFO "info"
+#define CLD_LOGLEVEL_WARN "warn"
+#define CLD_LOGLEVEL_ERROR "error"
+#define CLD_LOGLEVEL_FATAL "fatal"
 
 #define CLD_OPTION_MAIN_TLS_LONG "tls"
 #define CLD_OPTION_MAIN_TLS_SHORT NULL
@@ -156,6 +162,26 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 	else {
 		exit(-1);
 	}
+
+	cld_option* debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
+	if (debug_option->val->str_value != NULL) {
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_DEBUG) == 0) {
+			docker_log_set_level(LOG_DEBUG);
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_INFO) == 0) {
+			docker_log_set_level(LOG_INFO);
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_WARN) == 0) {
+			docker_log_set_level(LOG_WARN);
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_ERROR) == 0) {
+			docker_log_set_level(LOG_ERROR);
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_FATAL) == 0) {
+			docker_log_set_level(LOG_FATAL);
+		}
+	}
+
 	return CLD_COMMAND_SUCCESS;
 }
 
