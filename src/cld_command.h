@@ -159,6 +159,8 @@ cld_cmd_err make_option(cld_option** option, char* name, char* short_name,
  */
 void free_option(cld_option* option);
 
+cld_option* get_option_by_name(arraylist* options, char* name);
+
 /**
  * Create a new argument given a name and type.
  *

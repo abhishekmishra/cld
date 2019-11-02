@@ -102,13 +102,73 @@
 #define CLD_OPTION_MAIN_VERSION_DESC "Show CLD version."
 
 static char* main_command_name;
+static docker_context* ctx;
+static bool connected = false;
+
+cld_cmd_err main_cmd_handler(void* handler_args,
+	arraylist* options, arraylist* args,
+	cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler) {
+
+	cld_option* host_option = get_option_by_name(options, CLD_OPTION_MAIN_HOST_LONG);
+
+	if (!connected) {
+		docker_result* res;
+		char* url;
+
+		if (host_option->val->str_value == NULL) {
+			{
+				if (make_docker_context_default_local(&ctx) == E_SUCCESS)
+				{
+					url = str_clone(ctx->url);
+					connected = 1;
+				}
+			}
+
+		}
+		else {
+			url = host_option->val->str_value;
+			if (is_http_url(url))
+			{
+				if (make_docker_context_url(&ctx, url) == E_SUCCESS)
+				{
+					connected = true;
+				}
+			}
+			else if (is_unix_socket(url))
+			{
+				if (make_docker_context_socket(&ctx, url) == E_SUCCESS)
+				{
+					connected = true;
+				}
+			}
+		}
+
+		if (connected)
+		{
+			if (docker_ping(ctx, &res) != E_SUCCESS)
+			{
+				docker_log_fatal("Could not ping the server %s", url);
+				connected = 0;
+			}
+			else
+			{
+				docker_log_info("%s is alive.", url);
+			}
+		}
+	}
+	else {
+		exit(-1);
+	}
+	return CLD_COMMAND_SUCCESS;
+}
 
 cld_command* create_main_command()
 {
 	cld_command* main_command;
 	if (make_command(&main_command, main_command_name, "cld",
 		"CLD Docker Client",
-		NULL) == CLD_COMMAND_SUCCESS) {
+		&main_cmd_handler) == CLD_COMMAND_SUCCESS) {
 		cld_option* config_option, * debug_option, * help_option, * log_level_option, * tls_option,
 			* tlscacert_option, * tlscert_option, * tlskey_option, * tlsverify_option, * interactive_option,
 			* host_option, * version_option;
@@ -368,8 +428,6 @@ int parse_line_help_command(Tokenizer* tokenizer, const char* line,
 
 int main(int argc, char* argv[])
 {
-	static docker_context* ctx;
-
 	// EditLine *el;
 	// History *myhistory;
 	Tokenizer* tokenizer;
@@ -392,7 +450,7 @@ int main(int argc, char* argv[])
 	tokenizer = tok_init(NULL);
 
 	/** No logging **/
-	docker_log_set_quiet(1);
+	docker_log_set_level(LOG_ERROR);
 
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);
@@ -402,172 +460,17 @@ int main(int argc, char* argv[])
 #endif
 
 	if (argc > 0) {
-		printf("command name is %s\n", argv[0]);
+		docker_log_debug("command name is %s\n", argv[0]);
 		main_command_name = argv[0];
 
-		cld_cmd_err err = exec_command(create_commands(), ctx, argc,
+		cld_cmd_err err = exec_command(create_commands(), &ctx, argc,
 			argv, (cld_command_output_handler)&print_handler,
 			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
 		{
-			printf("Error: invalid command.\n");
+			docker_log_error("Error: invalid command.\n");
 		}
 	}
-
-	//int c;
-
-	//while (1)
-	//{
-	//	/* These options don’t set a flag.
-	//	 We distinguish them by their indices. */
-	//	static struct option long_options[] =
-	//	{
-	//		{"config", required_argument, 0, 0},
-	//		{"debug", no_argument, 0, 'D'},
-	//		{"help", no_argument, 0, 'h'},
-	//		{"log-level", required_argument, 0, 'l'},
-	//		{"tls",
-	//		 no_argument, 0, 0},
-	//		{"tlscacert", required_argument, 0, 0},
-	//		{"tlscert", required_argument, 0, 0},
-	//		{"tlskey",
-	//		 required_argument, 0, 0},
-	//		{"tlsverify", no_argument, 0, 0},
-	//		{"command", required_argument, 0, 'c'},
-	//		{"interactive",
-	//		 no_argument, 0, 'i'},
-	//		{"host",
-	//		 required_argument, 0, 'H'},
-	//		{"version",
-	//		 no_argument, 0, 'v'},
-	//		{0, 0, 0, 0} };
-	//	/* getopt_long stores the option index here. */
-	//	int option_index = 0;
-
-	//	c = getopt_long(argc, argv, "Dhl:c:iH:v", long_options, &option_index);
-
-	//	/* Detect the end of the options. */
-	//	if (c == -1)
-	//		break;
-
-	//	switch (c)
-	//	{
-	//	case 0:
-	//		/* If this option set a flag, do nothing else now. */
-	//		if (long_options[option_index].flag != 0)
-	//			break;
-	//		printf("option %s", long_options[option_index].name);
-	//		if (optarg)
-	//			printf(" with arg %s", optarg);
-	//		printf("\n");
-	//		break;
-
-	//	case 'i':
-	//		//puts("option -i\n");
-	//		interactive = 2;
-	//		break;
-
-	//		//		case 'c':
-	//		////			printf("option -c with value `%s'\n", optarg);
-	//		//			command = 1;
-	//		//			command_str = optarg;
-	//		//			break;
-
-	//	case 'h':
-	//		show_help = 1;
-	//		break;
-
-	//	case 'H':
-	//		url = optarg;
-	//		if (is_http_url(url))
-	//		{
-	//			if (make_docker_context_url(&ctx, url) == E_SUCCESS)
-	//			{
-	//				connected = 1;
-	//			}
-	//		}
-	//		else if (is_unix_socket(url))
-	//		{
-	//			if (make_docker_context_socket(&ctx, url) == E_SUCCESS)
-	//			{
-	//				connected = 1;
-	//			}
-	//		}
-	//		break;
-
-	//	case '?':
-	//		/* getopt_long already printed an error message. */
-	//		break;
-
-	//	default:
-	//		abort();
-	//	}
-	//}
-
-	/* Print any remaining command line arguments (not options). */
-	//docker_result* res;
-	//if (optind < argc)
-	//{
-	//	//		printf("There are extra arguments: ");
-	//	command = 1;
-	//	int total_len = 1;
-	//	for (int i = optind; i < argc; i++)
-	//	{
-	//		total_len += strlen(argv[i]);
-	//		total_len += 1; // for space
-	//	}
-	//	command_str = (char*)calloc(total_len, sizeof(char));
-	//	memset(command_str, 0, total_len);
-	//	for (int i = optind; i < argc; i++)
-	//	{
-	//		//printf("%s ", argv[optind++]);
-	//		strcat(command_str, argv[i]);
-	//		if (i != (argc - 1))
-	//		{
-	//			strcat(command_str, " ");
-	//		}
-	//	}
-	//	//printf("Command is <%s>\n", command_str);
-	//}
-
-	//if (!connected)
-	//{
-	//	if (make_docker_context_default_local(&ctx) == E_SUCCESS)
-	//	{
-	//		url = str_clone(ctx->url);
-	//		connected = 1;
-	//	}
-	//}
-
-	//if (connected)
-	//{
-	//	if (docker_ping(ctx, &res) != E_SUCCESS)
-	//	{
-	//		docker_log_fatal("Could not ping the server %s", url);
-	//		connected = 0;
-	//	}
-	//	else
-	//	{
-	//		docker_log_info("%s is alive.", url);
-	//	}
-	//}
-	//else {
-	//	exit(-1);
-	//}
-
-	//if (command)
-	//{
-	//	if (show_help == 1)
-	//	{
-	//		int tok_err = parse_line_help_command(tokenizer, command_str,
-	//			&cmd_argc, &cmd_argv, ctx);
-	//	}
-	//	else
-	//	{
-	//		int tok_err = parse_line_run_command(tokenizer, command_str,
-	//			&cmd_argc, &cmd_argv, ctx);
-	//	}
-	//}
 
 #ifdef HAVE_LINENOISE
 	if (interactive > command)

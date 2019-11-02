@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cld_command.h"
+#include "docker_log.h"
 
  /**
   * Create a new value object of given type.
@@ -177,6 +178,19 @@ void free_option(cld_option* option)
 	free(option);
 }
 
+cld_option* get_option_by_name(arraylist* options, char* name) {
+	if (name != NULL) {
+		size_t opt_len = arraylist_length(options);
+		for (size_t i = 0; i < opt_len; i++) {
+			cld_option* x = arraylist_get(options, i);
+			if ((x->name != NULL && strcmp(x->name, name) == 0) || (x->short_name != NULL && strcmp(x->short_name, name) == 0)) {
+				return x;
+			}
+		}
+	}
+	return NULL;
+}
+
 /**
  * Create a new argument given a name and type.
  *
@@ -320,7 +334,7 @@ arraylist* get_command_to_exec(arraylist* commands, int* argc,
 					found = 1;
 					cmd_list = cmd->sub_commands;
 					arraylist_add(cmd_names, cmd->name);
-					printf("found command %s\n", cmd->name);
+					docker_log_debug("found command %s\n", cmd->name);
 					cmd_to_exec = cmd;
 					arraylist_add(cmds_to_exec, cmd);
 					break;
@@ -590,21 +604,7 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		return err;
 	}
 
-	print_options(all_options);
-
-	////Now read all arguments
-	//err = parse_args(all_args, &argc, &argv);
-	//if (err != CLD_COMMAND_SUCCESS)
-	//{
-	//	return err;
-	//}
-
-	////anything leftover
-	//if (argc > 0)
-	//{
-	//	printf("%d extra arguments found.\n", argc);
-	//	return CLD_COMMAND_ERR_EXTRA_ARGS_FOUND;
-	//}
+	//print_options(all_options);
 
 	for (int i = 0; i < len_cmds; i++) {
 		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
