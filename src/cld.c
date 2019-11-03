@@ -155,11 +155,12 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 			}
 			else
 			{
-				docker_log_info("%s is alive.", url);
+				docker_log_debug("%s is alive.", url);
 			}
 		}
 	}
-	else {
+	
+	if(!connected) {
 		exit(-1);
 	}
 
