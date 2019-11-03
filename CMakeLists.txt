@@ -10,8 +10,8 @@ set( CLD_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 
 # It's useful to setup the current version of our code in the build system
 # using a `semver` style
-set ( CLD_VERSION_MAJOR 1 )
-set ( CLD_VERSION_MINOR 0 )
+set ( CLD_VERSION_MAJOR 0 )
+set ( CLD_VERSION_MINOR 1 )
 set ( CLD_VERSION_PATCH 0 )
 
 # Include Directories
@@ -89,3 +89,33 @@ if(NOT HAVE_GETOPT)
 	include_directories(${GETOPT_INCLUDE_DIR})
 	target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})
 endif (NOT HAVE_GETOPT)
+
+# See https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Packaging-With-CPack
+INCLUDE(InstallRequiredSystemLibraries)
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CLD: A Docker Command Line Client")
+SET(CPACK_PACKAGE_VENDOR "Abhishek Mishra <abhishekmishra3@gmail.com>")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_VERSION_MAJOR "0")
+SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CLD")
+IF(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+  FILE(GLOB files "${CMAKE_CURRENT_BINARY_DIR}/Debug/*")
+  INSTALL(FILES ${files} DESTINATION bin)
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "Debug\\\\cld.exe")
+  SET(CPACK_NSIS_DISPLAY_NAME "CLD")
+  SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\github.com/abhishekmishra/cld")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\github.com/abhishekmishra/cld")
+  SET(CPACK_NSIS_CONTACT "abhishekmishra3@gmail.com")
+  SET(CPACK_NSIS_MODIFY_PATH ON)
+ELSE(WIN32 AND NOT UNIX)
+  SET(CPACK_STRIP_FILES "cld")
+  SET(CPACK_SOURCE_STRIP_FILES "")
+ENDIF(WIN32 AND NOT UNIX)
+SET(CPACK_PACKAGE_EXECUTABLES "cld" "cld")
+INCLUDE(CPack)
