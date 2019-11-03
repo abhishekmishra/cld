@@ -329,6 +329,14 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 			strcat(help_str, " COMMAND");
 		}
 
+		size_t cmd_args_len = arraylist_length(command->args);
+		for(int ac = 0; ac < cmd_args_len; ac++) {
+			cld_argument* arg = arraylist_get(command->args, ac);
+			strcat(help_str, " <");
+			strcat(help_str, arg->name);
+			strcat(help_str, ">");
+		}
+
 		strcat(help_str, "\n\n");
 		strcat(help_str, command->description);
 		strcat(help_str, "\n\n");
