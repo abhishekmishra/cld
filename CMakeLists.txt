@@ -70,12 +70,6 @@ else()
 
 	find_package(CURL CONFIG REQUIRED)
 	target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
-
-	# To find and use linenoise, as the vcpkg build does not have cmake config
-	find_path(LINENOISE_INCLUDE_DIR linenoise.h)
-	find_library(LINENOISE_LIBRARY linenoise)
-	include_directories(${LINENOISE_INCLUDE_DIR})
-	target_link_libraries(${PROJECT_NAME} PUBLIC ${LINENOISE_LIBRARY})
 endif()
 
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
