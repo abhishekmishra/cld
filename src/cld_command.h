@@ -205,10 +205,10 @@ void free_command(cld_command* command);
 
 /**
 * Get help for a command
-* \param cld_command* command
+* \param cmds_to_exec the list of commands and subcommands parsed
 * \return string with command help
 */
-char* get_help_for_command(cld_command* command);
+char* get_help_for_command(arraylist* cmds_to_exec);
 
 /**
  * Run the help command for all commands or single command
