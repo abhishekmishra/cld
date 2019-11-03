@@ -304,6 +304,9 @@ char* get_program_name(arraylist* cmds_to_exec) {
 			}
 		}
 		strcat(progname_str, p);
+		if (i != (cmd_len - 1)) {
+			strcat(progname_str, " ");
+		}
 	}
 	return progname_str;
 }

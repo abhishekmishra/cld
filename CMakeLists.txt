@@ -2,17 +2,17 @@ cmake_minimum_required ( VERSION 3.9 )
 
 include(CheckIncludeFile)
 
-project ( cldclient C )
+project ( cld C )
 
 # Set the project source dir (just convention)
-set( CLDCLIENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
-set( CLDCLIENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} )
+set( CLD_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
+set( CLD_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 
 # It's useful to setup the current version of our code in the build system
 # using a `semver` style
-set ( CLDCLIENT_VERSION_MAJOR 1 )
-set ( CLDCLIENT_VERSION_MINOR 0 )
-set ( CLDCLIENT_VERSION_PATCH 0 )
+set ( CLD_VERSION_MAJOR 1 )
+set ( CLD_VERSION_MINOR 0 )
+set ( CLD_VERSION_PATCH 0 )
 
 # Include Directories
 # In GCC, this will invoke the "-I" command
@@ -20,7 +20,7 @@ include_directories( src )
 
 # Lists
 # Setup the list of source files
-set( CLDCLIENT_SOURCES
+set( CLD_SOURCES
   src/cld_command.c
   src/cld_common.c
   src/cld_ctr.c
@@ -55,7 +55,7 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 	pkg_check_modules(archive REQUIRED IMPORTED_TARGET libarchive)
 endif()
 
-add_executable( ${PROJECT_NAME} ${CLDCLIENT_SOURCES} )
+add_executable( ${PROJECT_NAME} ${CLD_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)

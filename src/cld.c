@@ -63,7 +63,7 @@
 
 #define CLD_OPTION_MAIN_LOG_LEVEL_LONG "loglevel"
 #define CLD_OPTION_MAIN_LOG_LEVEL_SHORT "l"
-#define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set the Log Level\n(\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\")\n(default \"info\")"
+#define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set the Log Level (\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\") (default \"info\")"
 
 #define CLD_LOGLEVEL_DEBUG "debug"
 #define CLD_LOGLEVEL_INFO "info"
