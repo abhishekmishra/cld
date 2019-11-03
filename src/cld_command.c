@@ -363,6 +363,7 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 				strcat(help_str, opt->description);
 				strcat(help_str, "\n");
 			}
+			strcat(help_str, "\n");
 		}
 
 		if (sub_cmd_len > 0) {
@@ -379,6 +380,7 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 				strcat(help_str, sc->description);
 				strcat(help_str, "\n");
 			}
+			strcat(help_str, "\n");
 		}
 
 		return help_str;
