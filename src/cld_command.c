@@ -28,6 +28,7 @@
 #define CLD_SIZE_OF_PROGNAME_STR 1024
 static char help_str[CLD_SIZE_OF_HELP_STR];
 static char progname_str[CLD_SIZE_OF_PROGNAME_STR];
+static char short_progname_str[CLD_SIZE_OF_PROGNAME_STR];
 
 void print_args(int argc, char** argv) {
 	for (int i = 0; i < argc; i++) {
@@ -311,6 +312,25 @@ char* get_program_name(arraylist* cmds_to_exec) {
 	return progname_str;
 }
 
+char* get_short_program_name(arraylist* cmds_to_exec) {
+	size_t cmd_len = arraylist_length(cmds_to_exec);
+	memset(short_progname_str, NULL, CLD_SIZE_OF_PROGNAME_STR);
+	for (int i = 0; i < cmd_len; i++) {
+		char* command = ((cld_command*)arraylist_get(cmds_to_exec, i))->short_name;
+		char* p = command;
+		for (int i = 0; i < strlen(command); i++) {
+			if (command[i] == '/' || command[i] == '\\') {
+				p = command + i + 1;
+			}
+		}
+		strcat(short_progname_str, p);
+		if (i != (cmd_len - 1)) {
+			strcat(short_progname_str, " ");
+		}
+	}
+	return short_progname_str;
+}
+
 char* get_help_for_command(arraylist* cmds_to_exec) {
 	if (arraylist_length(cmds_to_exec) > 0) {
 		cld_command* command = arraylist_get(cmds_to_exec, arraylist_length(cmds_to_exec) - 1);
@@ -330,7 +350,25 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 		}
 
 		size_t cmd_args_len = arraylist_length(command->args);
-		for(int ac = 0; ac < cmd_args_len; ac++) {
+		for (int ac = 0; ac < cmd_args_len; ac++) {
+			cld_argument* arg = arraylist_get(command->args, ac);
+			strcat(help_str, " <");
+			strcat(help_str, arg->name);
+			strcat(help_str, ">");
+		}
+
+		strcat(help_str, "\nOR:    ");
+		strcat(help_str, get_short_program_name(cmds_to_exec));
+
+		if (opt_len > 0) {
+			strcat(help_str, " [OPTIONS]");
+		}
+
+		if (sub_cmd_len > 0) {
+			strcat(help_str, " COMMAND");
+		}
+
+		for (int ac = 0; ac < cmd_args_len; ac++) {
 			cld_argument* arg = arraylist_get(command->args, ac);
 			strcat(help_str, " <");
 			strcat(help_str, arg->name);
