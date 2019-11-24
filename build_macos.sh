@@ -7,5 +7,8 @@ cd ./build
 # generate the build files
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/Users/abhishekmishra/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TESTS=On
 
+# build
+make clean all
+
 # go back to parent directory
 cd ..
