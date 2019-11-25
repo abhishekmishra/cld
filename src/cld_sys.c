@@ -47,9 +47,6 @@ cld_cmd_err sys_connection_cmd_handler(void* handler_args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	docker_context* ctx = get_docker_context(handler_args);
-	if (ctx->socket) {
-		printf("Connected to unix socket: %s\n", ctx->socket);
-	}
 	if (ctx->url) {
 		printf("Connected to URL: %s\n", ctx->url);
 	}

@@ -139,7 +139,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 			}
 			else if (is_unix_socket(url))
 			{
-				if (make_docker_context_socket(&ctx, url) == E_SUCCESS)
+				if (make_docker_context_url(&ctx, url) == E_SUCCESS)
 				{
 					connected = true;
 				}
