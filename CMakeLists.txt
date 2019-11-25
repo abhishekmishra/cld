@@ -47,30 +47,39 @@ set( CLD_SOURCES
   src/histedit.h
 )
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-	message(STATUS ">>> Linux, using pkg-config since vcpkg is broken")
-	find_package(PkgConfig REQUIRED)
-	pkg_check_modules(json-c REQUIRED IMPORTED_TARGET json-c)
-	pkg_check_modules(curl REQUIRED IMPORTED_TARGET libcurl)
-	pkg_check_modules(archive REQUIRED IMPORTED_TARGET libarchive)
-endif()
+#if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+#	message(STATUS ">>> Linux, using pkg-config since vcpkg is broken")
+#	find_package(PkgConfig REQUIRED)
+#	pkg_check_modules(json-c REQUIRED IMPORTED_TARGET json-c)
+#	pkg_check_modules(curl REQUIRED IMPORTED_TARGET libcurl)
+#	pkg_check_modules(archive REQUIRED IMPORTED_TARGET libarchive)
+#endif()
 
 add_executable( ${PROJECT_NAME} ${CLD_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-	target_link_libraries(${PROJECT_NAME} PUBLIC json-c)
-	target_link_libraries(${PROJECT_NAME} PUBLIC curl)
-	target_link_libraries(${PROJECT_NAME} PUBLIC archive)
-else()
-	find_package(json-c CONFIG REQUIRED)
-	target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
+#if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+#	target_link_libraries(${PROJECT_NAME} PUBLIC json-c)
+#	target_link_libraries(${PROJECT_NAME} PUBLIC curl)
+#	target_link_libraries(${PROJECT_NAME} PUBLIC archive)
+#else()
+find_package(json-c CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
 
-	find_package(CURL CONFIG REQUIRED)
-	target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
-endif()
+find_package(CURL CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
+
+# To find and use libarchive, as the vcpkg build does not have cmake config
+# See https://github.com/microsoft/vcpkg/issues/8839#issuecomment-558066466
+# for additional lookup to ZLIB
+find_package(ZLIB REQUIRED)
+find_path(LIBARCHIVE_INCLUDE_DIR archive.h)
+find_library(LIBARCHIVE_LIBRARY archive)
+include_directories(${LIBARCHIVE_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} ZLIB::ZLIB)
+#endif()
 
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
 
