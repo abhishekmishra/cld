@@ -38,7 +38,6 @@
 
 #include <string.h>
 #include <getopt.h>
-#include <arraylist.h>
 
 #include "docker_all.h"
 #include "cld_command.h"
@@ -50,6 +49,7 @@
 #include "cld_table.h"
 #include "cld_dict.h"
 #include "cld_progress.h"
+#include <arraylist.h>
 
 #define CMD_NOT_FOUND -1
 
@@ -106,6 +106,7 @@
 static char* main_command_name;
 static docker_context* ctx;
 static bool connected = false;
+static arraylist* CLD_COMMANDS;
 
 cld_cmd_err main_cmd_handler(void* handler_args,
 	arraylist* options, arraylist* args,
@@ -254,10 +255,13 @@ cld_command* create_main_command()
 }
 
 arraylist* create_commands() {
-	arraylist* commands;
-	arraylist_new(&commands, &free_command);
-	arraylist_add(commands, create_main_command());
-	return commands;
+	int err = arraylist_new(&CLD_COMMANDS, (void (*)(void *))&free_command);
+	if(err == 0) {
+		arraylist_add(CLD_COMMANDS, create_main_command());
+	} else {
+		printf("Error creating commands list");
+	}
+	return CLD_COMMANDS;
 }
 
 void print_table_result(void* result)
@@ -404,7 +408,7 @@ int parse_line_run_command(Tokenizer* tokenizer, const char* line,
 		(const char***) & *cmd_argv);
 	if (tok_err == 0)
 	{
-		cld_cmd_err err = exec_command(create_commands(), ctx, *cmd_argc,
+		cld_cmd_err err = exec_command(CLD_COMMANDS, ctx, *cmd_argc,
 			*cmd_argv, (cld_command_output_handler)&print_handler,
 			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
@@ -430,7 +434,7 @@ int parse_line_help_command(Tokenizer* tokenizer, const char* line,
 		(const char***) & *cmd_argv);
 	if (tok_err == 0)
 	{
-		cld_cmd_err err = help_cmd_handler(create_commands(), ctx, *cmd_argc,
+		cld_cmd_err err = help_cmd_handler(CLD_COMMANDS, ctx, *cmd_argc,
 			*cmd_argv, (cld_command_output_handler)&print_handler,
 			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
@@ -478,6 +482,12 @@ int main(int argc, char* argv[])
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);
 
+	/* Create COMMANDS */
+	create_commands();
+	// for(int i = 0; arraylist_length(CLD_COMMANDS); i++) {
+	// 	printf("found command #%d\n", i);
+	// }
+
 #ifdef HAVE_LINENOISE
 	linenoiseInstallWindowChangeHandler();
 #endif
@@ -486,14 +496,14 @@ int main(int argc, char* argv[])
 		docker_log_debug("command name is %s\n", argv[0]);
 		main_command_name = argv[0];
 
-		cld_cmd_err err = exec_command(create_commands(), &ctx, argc,
+		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
 			argv, (cld_command_output_handler)&print_handler,
 			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
 		{
 			docker_log_error("Error: invalid command.\n");
 		}
-}
+	}
 
 #ifdef HAVE_LINENOISE
 	if (interactive > command)
@@ -552,5 +562,6 @@ int main(int argc, char* argv[])
 #endif //HAVE_LINENOISE
 
 	tok_end(tokenizer);
+	//arraylist_free(CLD_COMMANDS);
 	return 0;
 	}
