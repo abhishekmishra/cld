@@ -482,12 +482,6 @@ int main(int argc, char* argv[])
 	/** Initialize docker context **/
 	//make_docker_context_default_local(&ctx);
 
-	/* Create COMMANDS */
-	create_commands();
-	// for(int i = 0; arraylist_length(CLD_COMMANDS); i++) {
-	// 	printf("found command #%d\n", i);
-	// }
-
 #ifdef HAVE_LINENOISE
 	linenoiseInstallWindowChangeHandler();
 #endif
@@ -495,6 +489,12 @@ int main(int argc, char* argv[])
 	if (argc > 0) {
 		docker_log_debug("command name is %s\n", argv[0]);
 		main_command_name = argv[0];
+
+		/* Create COMMANDS */
+		create_commands();
+		// for(int i = 0; arraylist_length(CLD_COMMANDS); i++) {
+		// 	printf("found command #%d\n", i);
+		// }
 
 		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
 			argv, (cld_command_output_handler)&print_handler,
