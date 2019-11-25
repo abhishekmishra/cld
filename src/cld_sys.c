@@ -39,6 +39,9 @@ cld_cmd_err sys_version_cmd_handler(void* handler_args,
 		free_cld_dict(ver_dict);
 	}
 
+	if(res != NULL) {
+		free_docker_result(&res);
+	}
 	return CLD_COMMAND_SUCCESS;
 }
 

@@ -805,5 +805,8 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		}
 	}
 
+	arraylist_free(cmds_to_exec);
+	arraylist_free(all_options);
+	arraylist_free(all_args);
 	return err;
 }
