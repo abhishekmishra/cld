@@ -186,6 +186,9 @@ void free_option(cld_option* option)
 	}
 
 	free(option->val);
+	if(option->default_val) {
+		free(option->default_val);
+	}
 	free(option->name);
 	free(option);
 }
@@ -238,6 +241,9 @@ void free_argument(cld_argument* arg)
 		free(arg->description);
 	}
 	free(arg->val);
+	if(arg->default_val) {
+		free(arg->default_val);
+	}
 	free(arg->name);
 	free(arg);
 }
@@ -487,7 +493,7 @@ arraylist* get_command_to_exec(arraylist* commands, int* argc,
 					{
 						found = 1;
 						cmd_list = cmd->sub_commands;
-						arraylist_add(cmd_names, cmd->name);
+						arraylist_add(cmd_names, str_clone(cmd->name));
 						docker_log_debug("found command %s\n", cmd->name);
 						cmd_to_exec = cmd;
 						arraylist_add(cmds_to_exec, cmd);
@@ -507,6 +513,7 @@ arraylist* get_command_to_exec(arraylist* commands, int* argc,
 			break;
 		}
 	}
+	arraylist_free(cmd_names);
 	return cmds_to_exec;
 }
 

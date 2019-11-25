@@ -158,6 +158,9 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 			{
 				docker_log_debug("%s is alive.", url);
 			}
+			if(res != NULL) {
+				free_docker_result(&res);
+			}
 		}
 	}
 	
@@ -504,7 +507,7 @@ int main(int argc, char* argv[])
 			docker_log_error("Error: invalid command.\n");
 		}
 
-		//arraylist_free(CLD_COMMANDS);
+		arraylist_free(CLD_COMMANDS);
 	}
 
 #ifdef HAVE_LINENOISE
