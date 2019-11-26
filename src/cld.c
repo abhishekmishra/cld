@@ -507,7 +507,7 @@ int main(int argc, char* argv[])
 			docker_log_error("Error: invalid command.\n");
 		}
 
-		arraylist_free(CLD_COMMANDS);
+		//arraylist_free(CLD_COMMANDS);
 	}
 
 #ifdef HAVE_LINENOISE

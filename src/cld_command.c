@@ -513,7 +513,7 @@ arraylist* get_command_to_exec(arraylist* commands, int* argc,
 			break;
 		}
 	}
-	arraylist_free(cmd_names);
+	//arraylist_free(cmd_names);
 	return cmds_to_exec;
 }
 
