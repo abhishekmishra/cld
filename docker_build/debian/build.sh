@@ -101,9 +101,13 @@ echo "Valgrind output file is at " $VALGRIND_OUT
 
 $CODE_HOME/cld/build/cld -H $CLD_TEST_HOST $CLD_TEST_COMMAND
 
+#valgrind --leak-check=full \
+#         --show-leak-kinds=all \
+#         --track-origins=yes \
+#         --verbose \
+#         --log-file=${VALGRIND_OUT} \
+#         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+
 valgrind --leak-check=full \
-         --show-leak-kinds=all \
-         --track-origins=yes \
-         --verbose \
          --log-file=${VALGRIND_OUT} \
          "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
