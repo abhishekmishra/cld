@@ -6,6 +6,10 @@ SW_HOME="/sw"
 export VCPKG_HOME="${SW_HOME}/vcpkg"
 CODE_HOME="/code"
 
+BUILD_COLL=0
+BUILD_CLIBDOCKER=0
+BUILD_CLD=0
+
 # vcpkg installation
 if [ -d "${VCPKG_HOME}" ]; then
     # looks like vcpkg is installed.
@@ -31,15 +35,19 @@ echo "VCPKG packages installed."
 if [ -d "$CODE_HOME/coll" ]; then
     echo "coll is already cloned."
     cd "$CODE_HOME/coll"
-    git pull
+    if ! git diff-index --quiet HEAD --; then
+        git pull
+        BUILD_COLL=1
+    fi
     cd -
 else
     cd "$CODE_HOME"
     git clone https://github.com/abhishekmishra/coll.git
+    BUILD_COLL=1
     cd -
 fi
 
-if [ -d "$CODE_HOME/coll" ]; then
+if [ -d "$CODE_HOME/coll" ] && [ "$BUILD_COLL" == "1" ]; then
     echo "Start coll build"
     cd "$CODE_HOME/coll"
     rm -fR ./build
@@ -85,3 +93,18 @@ if [ -d "$CODE_HOME/cld" ]; then
     ./build_linux.sh
     cd -
 fi
+
+VALGRIND_OUT=$CODE_HOME/valgrind-out.txt
+
+echo "CLD Docker Test Host is " $CLD_TEST_HOST
+echo "CLD Test Command is " $CLD_TEST_COMMAND
+echo "Valgrind output file is at " $VALGRIND_OUT
+
+"$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --verbose \
+         --log-file=${VALGRIND_OUT} \
+         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND

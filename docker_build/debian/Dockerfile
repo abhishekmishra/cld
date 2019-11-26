@@ -18,7 +18,7 @@ RUN apt-get update && \
 
 # two volumes one for any required software,
 # another for the code to be built
-VOLUME [ "/sw", "/code" ]
+VOLUME [ "/sw", "/code" , "/root/.cmake"]
 
 COPY build.sh /root/build.sh
 
