@@ -1,0 +1,7 @@
+.vs
+.vscode
+build
+out
+*~
+run_docker_build.sh
+create_docker_image.sh
