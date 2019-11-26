@@ -18,7 +18,7 @@ else
     cd ${SW_HOME}
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
-    ./bootstrap-vcpkg.sh
+    ./bootstrap-vcpkg.sh -disableMetrics
     ./vcpkg integrate install
     cd /
 fi
@@ -59,15 +59,19 @@ fi
 if [ -d "$CODE_HOME/clibdocker" ]; then
     echo "clibdocker is already cloned."
     cd "$CODE_HOME/clibdocker"
-    git pull
+    if ! git diff-index --quiet HEAD --; then
+        git pull
+        BUILD_CLIBDOCKER=1
+    fi
     cd -
 else
     cd "$CODE_HOME"
     git clone https://github.com/abhishekmishra/clibdocker.git
+    BUILD_CLIBDOCKER=1
     cd -
 fi
 
-if [ -d "$CODE_HOME/clibdocker" ]; then
+if [ -d "$CODE_HOME/clibdocker" ] && [ "$BUILD_CLIBDOCKER" == "1" ]; then
     echo "Start clibdocker build"
     cd "$CODE_HOME/clibdocker"
     rm -fR ./build
@@ -78,15 +82,19 @@ fi
 if [ -d "$CODE_HOME/cld" ]; then
     echo "cld is already cloned."
     cd "$CODE_HOME/cld"
-    git pull
+    if ! git diff-index --quiet HEAD --; then
+        git pull
+        BUILD_CLD=1
+    fi
     cd -
 else
     cd "$CODE_HOME"
     git clone https://github.com/abhishekmishra/cld.git
+    BUILD_CLD=1
     cd -
 fi
 
-if [ -d "$CODE_HOME/cld" ]; then
+if [ -d "$CODE_HOME/cld" ] && [ "$BUILD_CLD" == "1" ]; then
     echo "Start cld build"
     cd "$CODE_HOME/cld"
     rm -fR ./build
@@ -100,11 +108,12 @@ echo "CLD Docker Test Host is " $CLD_TEST_HOST
 echo "CLD Test Command is " $CLD_TEST_COMMAND
 echo "Valgrind output file is at " $VALGRIND_OUT
 
-"$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+$CODE_HOME/cld/build/cld -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+/code/cld/build/cld -H http://host.docker.internal:2376/ sys ver
 
-valgrind --leak-check=full \
-         --show-leak-kinds=all \
-         --track-origins=yes \
-         --verbose \
-         --log-file=${VALGRIND_OUT} \
-         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+#valgrind --leak-check=full \
+#         --show-leak-kinds=all \
+#         --track-origins=yes \
+#         --verbose \
+#         --log-file=${VALGRIND_OUT} \
+#         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
