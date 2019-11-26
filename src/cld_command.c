@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "docker_util.h"
 #include <stdlib.h>
 #include <string.h>
 #include "cld_command.h"
@@ -301,7 +302,7 @@ void free_command(cld_command* command)
 
 char* get_program_name(arraylist* cmds_to_exec) {
 	size_t cmd_len = arraylist_length(cmds_to_exec);
-	memset(progname_str, NULL, CLD_SIZE_OF_PROGNAME_STR);
+	memset(progname_str, 0, CLD_SIZE_OF_PROGNAME_STR);
 	for (int i = 0; i < cmd_len; i++) {
 		char* command = ((cld_command*)arraylist_get(cmds_to_exec, i))->name;
 		char* p = command;
@@ -320,7 +321,7 @@ char* get_program_name(arraylist* cmds_to_exec) {
 
 char* get_short_program_name(arraylist* cmds_to_exec) {
 	size_t cmd_len = arraylist_length(cmds_to_exec);
-	memset(short_progname_str, NULL, CLD_SIZE_OF_PROGNAME_STR);
+	memset(short_progname_str, 0, CLD_SIZE_OF_PROGNAME_STR);
 	for (int i = 0; i < cmd_len; i++) {
 		char* command = ((cld_command*)arraylist_get(cmds_to_exec, i))->short_name;
 		char* p = command;
@@ -342,7 +343,7 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 		cld_command* command = arraylist_get(cmds_to_exec, arraylist_length(cmds_to_exec) - 1);
 
 
-		memset(help_str, NULL, CLD_SIZE_OF_HELP_STR);
+		memset(help_str, 0, CLD_SIZE_OF_HELP_STR);
 		sprintf(help_str, "Usage: %s", get_program_name(cmds_to_exec));
 
 		size_t opt_len = arraylist_length(command->options);
@@ -399,7 +400,7 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 					strcat(help_str, "    ");
 				}
 
-				int used = 0;
+				size_t used = 0;
 				if (opt->name != NULL) {
 					strcat(help_str, "--");
 					strcat(help_str, opt->name);
@@ -409,7 +410,7 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 						used += strlen(" string");
 					}
 				}
-				for (int sp = used; sp < 25; sp++) {
+				for (size_t sp = used; sp < 25; sp++) {
 					strcat(help_str, " ");
 				}
 				strcat(help_str, opt->description);
@@ -422,11 +423,11 @@ char* get_help_for_command(arraylist* cmds_to_exec) {
 			strcat(help_str, "\nCommands:\n\n");
 			for (size_t i = 0; i < sub_cmd_len; i++) {
 				cld_command* sc = arraylist_get(command->sub_commands, i);
-				int used = 0;
+				size_t used = 0;
 				strcat(help_str, "  ");
 				strcat(help_str, sc->name);
 				used = 2 + strlen(sc->name);
-				for (int sp = used; sp < 15; sp++) {
+				for (size_t sp = used; sp < 15; sp++) {
 					strcat(help_str, " ");
 				}
 				strcat(help_str, sc->description);
@@ -611,7 +612,7 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char** argv)
 					//short option
 					short_option_name = option + 1;
 				}
-				int options_len = arraylist_length(options);
+				size_t options_len = arraylist_length(options);
 				for (int j = 0; j < options_len; j++)
 				{
 					cld_option* opt = arraylist_get(options, j);
@@ -677,7 +678,7 @@ cld_cmd_err parse_options(arraylist* options, int* argc, char** argv)
 
 cld_cmd_err parse_args(arraylist* args, int* argc, char** argv)
 {
-	int args_len = arraylist_length(args);
+	size_t args_len = arraylist_length(args);
 	//	printf("args len %d\n", args_len);
 	if (args_len == *argc)
 	{
@@ -704,7 +705,7 @@ cld_cmd_err parse_args(arraylist* args, int* argc, char** argv)
 
 void print_options(arraylist* options) {
 	if (options != NULL) {
-		int options_len = arraylist_length(options);
+		size_t options_len = arraylist_length(options);
 		for (int i = 0; i < options_len; i++) {
 			cld_option* o = arraylist_get(options, i);
 			switch (o->val->type) {
@@ -741,14 +742,14 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 
 	//First read all commands
 	arraylist* cmds_to_exec = get_command_to_exec(commands, &argc, argv);
-	int len_cmds = arraylist_length(cmds_to_exec);
+	size_t len_cmds = arraylist_length(cmds_to_exec);
 	arraylist* all_options, * all_args;
 	arraylist_new(&all_options, NULL);
 	arraylist_new(&all_args, NULL);
 
 	for (int i = 0; i < len_cmds; i++) {
 		cld_command* cmd_to_exec = arraylist_get(cmds_to_exec, i);
-		int len_options = arraylist_length(cmd_to_exec->options);
+		size_t len_options = arraylist_length(cmd_to_exec->options);
 		for (int j = 0; j < len_options; j++) {
 			arraylist_add(all_options, arraylist_get(cmd_to_exec->options, j));
 		}
