@@ -6,9 +6,10 @@ SW_HOME="/sw"
 export VCPKG_HOME="${SW_HOME}/vcpkg"
 CODE_HOME="/code"
 
-BUILD_COLL=0
-BUILD_CLIBDOCKER=0
-BUILD_CLD=0
+# TODO git status check is broken
+BUILD_COLL=1
+BUILD_CLIBDOCKER=1
+BUILD_CLD=1
 
 # vcpkg installation
 if [ -d "${VCPKG_HOME}" ]; then
@@ -35,10 +36,7 @@ echo "VCPKG packages installed."
 if [ -d "$CODE_HOME/coll" ]; then
     echo "coll is already cloned."
     cd "$CODE_HOME/coll"
-    if ! git diff-index --quiet HEAD --; then
-        git pull
-        BUILD_COLL=1
-    fi
+    git pull
     cd -
 else
     cd "$CODE_HOME"
@@ -59,10 +57,7 @@ fi
 if [ -d "$CODE_HOME/clibdocker" ]; then
     echo "clibdocker is already cloned."
     cd "$CODE_HOME/clibdocker"
-    if ! git diff-index --quiet HEAD --; then
-        git pull
-        BUILD_CLIBDOCKER=1
-    fi
+    git pull
     cd -
 else
     cd "$CODE_HOME"
@@ -82,15 +77,11 @@ fi
 if [ -d "$CODE_HOME/cld" ]; then
     echo "cld is already cloned."
     cd "$CODE_HOME/cld"
-    if ! git diff-index --quiet HEAD --; then
-        git pull
-        BUILD_CLD=1
-    fi
+    git pull
     cd -
 else
     cd "$CODE_HOME"
     git clone https://github.com/abhishekmishra/cld.git
-    BUILD_CLD=1
     cd -
 fi
 
@@ -109,11 +100,10 @@ echo "CLD Test Command is " $CLD_TEST_COMMAND
 echo "Valgrind output file is at " $VALGRIND_OUT
 
 $CODE_HOME/cld/build/cld -H $CLD_TEST_HOST $CLD_TEST_COMMAND
-/code/cld/build/cld -H http://host.docker.internal:2376/ sys ver
 
-#valgrind --leak-check=full \
-#         --show-leak-kinds=all \
-#         --track-origins=yes \
-#         --verbose \
-#         --log-file=${VALGRIND_OUT} \
-#         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --verbose \
+         --log-file=${VALGRIND_OUT} \
+         "$CODE_HOME/cld/build/cld" -H $CLD_TEST_HOST $CLD_TEST_COMMAND

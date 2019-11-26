@@ -9,7 +9,7 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake -
 #cmake .. -DENABLE_TESTS=On
 
 # run build
-make clean all
+make all
 
 # go back to parent directory
 cd ..
