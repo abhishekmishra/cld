@@ -5,7 +5,7 @@ mkdir -p ./build
 cd ./build
 
 # generate the build files
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/abhishek/code/vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_TESTS=On
+cmake .. -DCMAKE_TOOLCHAIN_FILE=${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake -DENABLE_TESTS=On
 #cmake .. -DENABLE_TESTS=On
 
 # run build
