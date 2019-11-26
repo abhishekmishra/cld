@@ -66,3 +66,22 @@ if [ -d "$CODE_HOME/clibdocker" ]; then
     ./build_linux.sh
     cd -
 fi
+
+if [ -d "$CODE_HOME/cld" ]; then
+    echo "cld is already cloned."
+    cd "$CODE_HOME/cld"
+    git pull
+    cd -
+else
+    cd "$CODE_HOME"
+    git clone https://github.com/abhishekmishra/cld.git
+    cd -
+fi
+
+if [ -d "$CODE_HOME/cld" ]; then
+    echo "Start cld build"
+    cd "$CODE_HOME/cld"
+    rm -fR ./build
+    ./build_linux.sh
+    cd -
+fi
