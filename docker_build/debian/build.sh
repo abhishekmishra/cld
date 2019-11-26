@@ -47,3 +47,22 @@ if [ -d "$CODE_HOME/coll" ]; then
     ./build/coll_test
     cd -
 fi
+
+if [ -d "$CODE_HOME/clibdocker" ]; then
+    echo "clibdocker is already cloned."
+    cd "$CODE_HOME/clibdocker"
+    git pull
+    cd -
+else
+    cd "$CODE_HOME"
+    git clone https://github.com/abhishekmishra/clibdocker.git
+    cd -
+fi
+
+if [ -d "$CODE_HOME/clibdocker" ]; then
+    echo "Start clibdocker build"
+    cd "$CODE_HOME/clibdocker"
+    rm -fR ./build
+    ./build_linux.sh
+    cd -
+fi
