@@ -29,8 +29,8 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	arraylist* volumes;
-	arraylist* warnings;
+	docker_volume_list* volumes;
+	docker_volume_warnings* warnings;
 
 	d_err_t docker_error = docker_volumes_list(ctx, &res, &volumes, &warnings, 0, NULL, NULL, NULL);
 	int success = is_ok(res);
@@ -41,18 +41,18 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 		int col_num = 0;
-		int len_volumes = arraylist_length(volumes);
+		size_t len_volumes = docker_volume_list_length(volumes);
 		cld_table* vol_tbl;
 		if (create_cld_table(&vol_tbl, len_volumes, 3) == 0) {
 			cld_table_set_header(vol_tbl, 0, "DRIVER");
 			cld_table_set_header(vol_tbl, 1, "VOLUME NAME");
 			cld_table_set_header(vol_tbl, 2, "MOUNT");
 			for (int i = 0; i < len_volumes; i++) {
-				docker_volume* vol = (docker_volume*) arraylist_get(volumes,
+				docker_volume* vol = (docker_volume*)docker_volume_list_get_idx(volumes,
 						i);
-				cld_table_set_row_val(vol_tbl, i, 0,vol->driver);
-				cld_table_set_row_val(vol_tbl, i, 1,vol->name);
-				cld_table_set_row_val(vol_tbl, i, 2,vol->mountpoint);
+				cld_table_set_row_val(vol_tbl, i, 0, docker_volume_driver_get(vol));
+				cld_table_set_row_val(vol_tbl, i, 1, docker_volume_name_get(vol));
+				cld_table_set_row_val(vol_tbl, i, 2, docker_volume_mountpoint_vol_get(vol));
 			}
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, vol_tbl);
 		}

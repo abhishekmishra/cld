@@ -159,7 +159,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 				docker_log_debug("%s is alive.", url);
 			}
 			if(res != NULL) {
-				free_docker_result(&res);
+				free_docker_result(res);
 			}
 		}
 	}

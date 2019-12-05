@@ -1,9 +1,9 @@
+#include "docker_all.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "cld_img.h"
 #include "cld_table.h"
-#include "docker_all.h"
 #include "cld_progress.h"
 
 typedef struct
@@ -128,16 +128,16 @@ cld_cmd_err img_pl_cmd_handler(void *handler_args, struct arraylist *options,
 	free_cld_multi_progress(upd_args->multi_progress);
 }
 
-char* concat_tags(arraylist* tags_ls)
+char* concat_tags(json_object* tags_ls)
 {
 	char* tags = NULL;
 	if (tags_ls)
 	{
-		int len_tags = arraylist_length(tags_ls);
+		int len_tags = json_object_array_length(tags_ls);
 		int tag_strlen = 0;
 		for (int i = 0; i < len_tags; i++)
 		{
-			tag_strlen += strlen((char*) arraylist_get(tags_ls, i));
+			tag_strlen += strlen((char*)json_object_array_get_idx(tags_ls, i));
 			tag_strlen += 1; //for newline
 		}
 		tag_strlen += 1; //for null terminator
@@ -147,7 +147,7 @@ char* concat_tags(arraylist* tags_ls)
 			tags[0] = '\0';
 			for (int i = 0; i < len_tags; i++)
 			{
-				strcat(tags, (char*) arraylist_get(tags_ls, i));
+				strcat(tags, (char*)json_object_array_get_idx(tags_ls, i));
 				if (i != (len_tags - 1))
 				{
 					strcat(tags, "\n");
@@ -160,7 +160,7 @@ char* concat_tags(arraylist* tags_ls)
 
 char* get_image_tags_concat(docker_image* img)
 {
-	arraylist* tags_ls = img->repo_tags;
+	json_object* tags_ls = docker_image_repo_tags_get(img);
 	char* tags = concat_tags(tags_ls);
 	return tags;
 }
@@ -172,7 +172,7 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
 	int quiet = 0;
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
-	arraylist* images;
+	docker_image_list* images;
 
 	d_err_t docker_error = docker_images_list(ctx, &res, &images, 1, 1, NULL, 0,
 	NULL, NULL, NULL);
@@ -185,7 +185,7 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 		int col_num = 0;
-		int len_images = arraylist_length(images);
+		int len_images = docker_image_list_length(images);
 		cld_table* img_tbl;
 		if (create_cld_table(&img_tbl, len_images, 6) == 0)
 		{
@@ -197,20 +197,20 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
 			cld_table_set_header(img_tbl, 5, "SIZE");
 			for (int i = 0; i < len_images; i++)
 			{
-				docker_image* img = (docker_image*) arraylist_get(images,
+				docker_image* img = (docker_image*)docker_image_list_get_idx(images,
 						i);
 				col_num = 0;
 				char cstr[1024];
-				sprintf(cstr, "%ld", img->created);
+				sprintf(cstr, "%s", docker_image_created_get(img));
 				char sstr[1024];
-				sprintf(sstr, "%ld", img->size);
+				sprintf(sstr, "%ld", docker_image_size_get(img));
 				cld_table_set_row_val(img_tbl, i, 0,
-						concat_tags(img->repo_tags));
+						concat_tags(docker_image_repo_tags_get(img)));
 				cld_table_set_row_val(img_tbl, i, 1,
 						get_image_tags_concat(img));
 				cld_table_set_row_val(img_tbl, i, 2,
-						concat_tags(img->repo_digests));
-				cld_table_set_row_val(img_tbl, i, 3, img->id);
+						concat_tags(docker_image_repo_digests_get(img)));
+				cld_table_set_row_val(img_tbl, i, 3, docker_image_id_get(img));
 				cld_table_set_row_val(img_tbl, i, 4, cstr);
 				cld_table_set_row_val(img_tbl, i, 5, sstr);
 			}

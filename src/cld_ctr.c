@@ -1,8 +1,8 @@
+#include "docker_all.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "cld_ctr.h"
-#include "docker_all.h"
 #include "cld_table.h"
 
 cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
@@ -31,19 +31,19 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 
 	docker_result* res;
 	docker_context* ctx = get_docker_context(handler_args);
-	docker_containers_list* containers;
+	docker_ctr_list* containers;
 	docker_container_list(ctx, &res, &containers, all, 0, 1, NULL);
 	handle_docker_error(res, success_handler, error_handler);
 
 	if (quiet) {
-		for (int i = 0; i < docker_containers_list_length(containers); i++) {
-			docker_container_list_item* ctr = docker_containers_list_get_idx(
+		for (int i = 0; i < docker_ctr_list_length(containers); i++) {
+			docker_ctr_ls_item* ctr = docker_ctr_list_get_idx(
 				containers, i);
-			printf("%.*s\n", 12, ctr->id);
+			printf("%.*s\n", 12, docker_ctr_ls_item_id_get(ctr));
 		}
 	}
 	else {
-		int num_containers = docker_containers_list_length(containers);
+		int num_containers = docker_ctr_list_length(containers);
 		cld_table* ctr_tbl;
 		if (create_cld_table(&ctr_tbl, num_containers, 7) == 0) {
 			cld_table_set_header(ctr_tbl, 0, "CONTAINER ID");
@@ -54,20 +54,19 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 			cld_table_set_header(ctr_tbl, 5, "PORTS");
 			cld_table_set_header(ctr_tbl, 6, "NAMES");
 
-			for (int i = 0; i < docker_containers_list_length(containers);
+			for (int i = 0; i < docker_ctr_list_length(containers);
 				i++) {
-				docker_container_list_item* ctr =
-					docker_containers_list_get_idx(containers, i);
+				docker_ctr_ls_item* ctr =
+					docker_ctr_list_get_idx(containers, i);
 
 				//get ports
 				char ports_str[1024];
 				ports_str[0] = '\0';
-				for (int j = 0; j < arraylist_length(ctr->ports); j++) {
+				for (int j = 0; j < docker_ctr_ls_item_ports_length(ctr); j++) {
 					char port_str[100];
-					docker_container_ports* ports = arraylist_get(
-						ctr->ports, 0);
-					sprintf(port_str, "%ld:%ld", ports->private_port,
-						ports->public_port);
+					docker_ctr_port* ports = docker_ctr_ls_item_ports_get_idx(ctr, 0);
+					sprintf(port_str, "%ld:%ld", docker_ctr_port_private_port_get(ports),
+						docker_ctr_port_public_port_get(ports));
 					if (j == 0) {
 						strcpy(ports_str, port_str);
 					}
@@ -78,7 +77,7 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 				}
 
 				//get created time
-				time_t t = (time_t)ctr->created;
+				time_t t = (time_t)docker_ctr_ls_item_created_get(ctr);
 				struct tm* timeinfo = localtime(&t);
 				char evt_time_str[256];
 				strftime(evt_time_str, 255, "%d-%m-%Y:%H:%M:%S", timeinfo);
@@ -86,20 +85,20 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 				//get names
 				char names[1024];
 				names[0] = '\0';
-				for (int j = 0; j < arraylist_length(ctr->names); j++) {
+				for (int j = 0; j < docker_ctr_ls_item_names_length(ctr); j++) {
 					if (j == 0) {
-						strcpy(names, arraylist_get(ctr->names, j));
+						strcpy(names, docker_ctr_ls_item_names_get_idx(ctr, j));
 					}
 					else {
 						strcat(names, ",");
-						strcat(names, arraylist_get(ctr->names, j));
+						strcat(names, docker_ctr_ls_item_names_get_idx(ctr, j));
 					}
 				}
-				cld_table_set_row_val(ctr_tbl, i, 0, ctr->id);
-				cld_table_set_row_val(ctr_tbl, i, 1, ctr->image);
-				cld_table_set_row_val(ctr_tbl, i, 2, ctr->command);
+				cld_table_set_row_val(ctr_tbl, i, 0, docker_ctr_ls_item_id_get(ctr));
+				cld_table_set_row_val(ctr_tbl, i, 1, docker_ctr_ls_item_image_get(ctr));
+				cld_table_set_row_val(ctr_tbl, i, 2, docker_ctr_ls_item_command_get(ctr));
 				cld_table_set_row_val(ctr_tbl, i, 3, evt_time_str);
-				cld_table_set_row_val(ctr_tbl, i, 4, ctr->status);
+				cld_table_set_row_val(ctr_tbl, i, 4, docker_ctr_ls_item_status_get(ctr));
 				cld_table_set_row_val(ctr_tbl, i, 5, ports_str);
 				cld_table_set_row_val(ctr_tbl, i, 6, names);
 			}
@@ -108,7 +107,7 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 		}
 	}
 
-	arraylist_free(containers);
+	free_docker_ctr_list(containers);
 	return CLD_COMMAND_SUCCESS;
 }
 
@@ -130,9 +129,8 @@ cld_cmd_err ctr_create_cmd_handler(void* handler_args,
 			0);
 		char* image_name = image_name_arg->val->str_value;
 		char* id = NULL;
-		docker_create_container_params* p;
-		make_docker_create_container_params(&p);
-		p->image = image_name;
+		docker_ctr_create_params* p = make_docker_ctr_create_params();
+		docker_ctr_create_params_image_set(p, image_name);
 		docker_create_container(ctx, &res, &id, p);
 		int created = is_ok(res);
 		handle_docker_error(res, success_handler, error_handler);
@@ -509,11 +507,11 @@ void docker_container_stats_cb(docker_container_stats* stats, void* cbargs) {
 		cld_table_set_row_val(ctr_tbl, 0, 1, sarg->name);
 
 		char cpu_usg_str[128];
-		sprintf(cpu_usg_str, "%ld", stats->cpu_stats->total_usage);
+		sprintf(cpu_usg_str, "%ld", docker_container_cpu_stats_cpu_usage_get(docker_container_stats_cpu_stats_get(stats)));
 		cld_table_set_row_val(ctr_tbl, 0, 2, cpu_usg_str);
 
 		char mem_usg_str[128];
-		sprintf(mem_usg_str, "%ld", stats->mem_stats->usage);
+		sprintf(mem_usg_str, "%ld", docker_container_mem_stats_usage_get(docker_container_stats_mem_stats_get(stats)));
 		cld_table_set_row_val(ctr_tbl, 0, 3, mem_usg_str);
 
 		cld_table_set_row_val(ctr_tbl, 0, 4, "");

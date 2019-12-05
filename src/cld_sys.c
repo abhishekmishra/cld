@@ -22,17 +22,17 @@ cld_cmd_err sys_version_cmd_handler(void* handler_args,
 
 	cld_dict* ver_dict;
 	if (create_cld_dict(&ver_dict) == 0) {
-		cld_dict_put(ver_dict, "Docker Version", version->version);
-		cld_dict_put(ver_dict, "OS", version->os);
-		cld_dict_put(ver_dict, "Kernel", version->kernel_version);
-		cld_dict_put(ver_dict, "Arch", version->arch);
-		cld_dict_put(ver_dict, "API Version", version->api_version);
-		cld_dict_put(ver_dict, "Min API Version", version->min_api_version);
-		cld_dict_put(ver_dict, "Go Version", version->go_version);
-		cld_dict_put(ver_dict, "Git Commit", version->git_commit);
-		cld_dict_put(ver_dict, "Build Time", version->build_time);
+		cld_dict_put(ver_dict, "Docker Version", docker_version_version_get(version));
+		cld_dict_put(ver_dict, "OS", docker_version_os_get(version));
+		cld_dict_put(ver_dict, "Kernel", docker_version_kernel_version_get(version));
+		cld_dict_put(ver_dict, "Arch", docker_version_arch_get(version));
+		cld_dict_put(ver_dict, "API Version", docker_version_api_version_get(version));
+		cld_dict_put(ver_dict, "Min API Version", docker_version_min_api_version_get(version));
+		cld_dict_put(ver_dict, "Go Version", docker_version_go_version_get(version));
+		cld_dict_put(ver_dict, "Git Commit", docker_version_git_commit_get(version));
+		cld_dict_put(ver_dict, "Build Time", docker_version_build_time_get(version));
 		cld_dict_put(ver_dict, "Experimental",
-				version->experimental == 0 ? "False" : "True");
+			docker_version_experimental_get(version) == 0 ? "False" : "True");
 
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_DICT, ver_dict);
 
@@ -63,19 +63,20 @@ void docker_events_cb(docker_event* event, void* cbargs) {
 	cld_command_output_handler success_handler = (cld_command_output_handler)cbargs;
 	char* content = (char*) calloc(2048, sizeof(char));
 	strcat(content, "");
-	struct tm* timeinfo = localtime(&event->time);
+	time_t x = (time_t)(docker_event_time_get(event));
+	struct tm* timeinfo = localtime(&x);
 	char evt_time_str[256];
 	//sprintf(evt_time_str, "%s", asctime(timeinfo));
 	strftime(evt_time_str, 255, "%d-%m-%Y:%H:%M:%S", timeinfo);
 	strcat(content, evt_time_str);
 	strcat(content, ": ");
-	strcat(content, event->type);
+	strcat(content, docker_event_type_get(event));
 	strcat(content, " | ");
-	strcat(content, event->action);
+	strcat(content, docker_event_action_get(event));
 	//		strcat(content, "</td><td>");
 	//
 	strcat(content, " | ");
-	strcat(content, event->actor_id);
+	strcat(content, docker_event_actor_id_get(event));
 	//		strcat(content, "</td><td>");
 	//
 	//		strcat(content, json_object_get_string(event->actor_attributes));
