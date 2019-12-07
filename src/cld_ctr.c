@@ -84,7 +84,8 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 					//get names
 					char names[1024];
 					names[0] = '\0';
-					for (int j = 0; j < docker_ctr_ls_item_names_length(ctr); j++) {
+					size_t names_len = docker_ctr_ls_item_names_length(ctr);
+					for (size_t j = 0; j < names_len; j++) {
 						if (j == 0) {
 							strcpy(names, docker_ctr_ls_item_names_get_idx(ctr, j));
 						}
