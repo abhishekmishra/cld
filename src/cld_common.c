@@ -18,7 +18,7 @@ void handle_docker_error(docker_result* res,
 		cld_command_output_handler error_handler) {
 	char res_str[4096];
 	memset(res_str, NULL, 4096);
-	sprintf(res_str,"\nURL: %s\n", res->url);
+	//sprintf(res_str,"\nURL: %s\n", res->url);
 	success_handler(CLD_COMMAND_IS_RUNNING, CLD_RESULT_STRING, res_str);
 	if (!is_ok(res)) {
 		printf("DOCKER RESULT: Response error_code = %d, http_response = %ld\n",
@@ -30,5 +30,4 @@ void handle_docker_error(docker_result* res,
 			success_handler(CLD_COMMAND_IS_RUNNING, CLD_RESULT_STRING, res->message);
 		}
 	}
-	//free_docker_result(&res);
 }

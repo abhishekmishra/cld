@@ -29,85 +29,85 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 		}
 	}
 
-	docker_result* res;
 	docker_context* ctx = get_docker_context(handler_args);
 	docker_ctr_list* containers;
-	docker_container_list(ctx, &res, &containers, all, 0, 1, NULL);
-	handle_docker_error(res, success_handler, error_handler);
+	d_err_t err = docker_container_list(ctx, &containers, all, 0, 1, NULL);
 
-	if (quiet) {
-		for (int i = 0; i < docker_ctr_list_length(containers); i++) {
-			docker_ctr_ls_item* ctr = docker_ctr_list_get_idx(
-				containers, i);
-			printf("%.*s\n", 12, docker_ctr_ls_item_id_get(ctr));
-		}
-	}
-	else {
-		int num_containers = docker_ctr_list_length(containers);
-		cld_table* ctr_tbl;
-		if (create_cld_table(&ctr_tbl, num_containers, 7) == 0) {
-			cld_table_set_header(ctr_tbl, 0, "CONTAINER ID");
-			cld_table_set_header(ctr_tbl, 1, "IMAGE");
-			cld_table_set_header(ctr_tbl, 2, "COMMAND");
-			cld_table_set_header(ctr_tbl, 3, "CREATED");
-			cld_table_set_header(ctr_tbl, 4, "STATUS");
-			cld_table_set_header(ctr_tbl, 5, "PORTS");
-			cld_table_set_header(ctr_tbl, 6, "NAMES");
-
-			for (int i = 0; i < docker_ctr_list_length(containers);
-				i++) {
-				docker_ctr_ls_item* ctr =
-					docker_ctr_list_get_idx(containers, i);
-
-				//get ports
-				char ports_str[1024];
-				ports_str[0] = '\0';
-				for (int j = 0; j < docker_ctr_ls_item_ports_length(ctr); j++) {
-					char port_str[100];
-					docker_ctr_port* ports = docker_ctr_ls_item_ports_get_idx(ctr, 0);
-					sprintf(port_str, "%ld:%ld", docker_ctr_port_private_port_get(ports),
-						docker_ctr_port_public_port_get(ports));
-					if (j == 0) {
-						strcpy(ports_str, port_str);
-					}
-					else {
-						strcat(ports_str, ", ");
-						strcat(ports_str, port_str);
-					}
-				}
-
-				//get created time
-				time_t t = (time_t)docker_ctr_ls_item_created_get(ctr);
-				struct tm* timeinfo = localtime(&t);
-				char evt_time_str[256];
-				strftime(evt_time_str, 255, "%d-%m-%Y:%H:%M:%S", timeinfo);
-
-				//get names
-				char names[1024];
-				names[0] = '\0';
-				for (int j = 0; j < docker_ctr_ls_item_names_length(ctr); j++) {
-					if (j == 0) {
-						strcpy(names, docker_ctr_ls_item_names_get_idx(ctr, j));
-					}
-					else {
-						strcat(names, ",");
-						strcat(names, docker_ctr_ls_item_names_get_idx(ctr, j));
-					}
-				}
-				cld_table_set_row_val(ctr_tbl, i, 0, docker_ctr_ls_item_id_get(ctr));
-				cld_table_set_row_val(ctr_tbl, i, 1, docker_ctr_ls_item_image_get(ctr));
-				cld_table_set_row_val(ctr_tbl, i, 2, docker_ctr_ls_item_command_get(ctr));
-				cld_table_set_row_val(ctr_tbl, i, 3, evt_time_str);
-				cld_table_set_row_val(ctr_tbl, i, 4, docker_ctr_ls_item_status_get(ctr));
-				cld_table_set_row_val(ctr_tbl, i, 5, ports_str);
-				cld_table_set_row_val(ctr_tbl, i, 6, names);
+	if (err == E_SUCCESS) {
+		if (quiet) {
+			for (int i = 0; i < docker_ctr_list_length(containers); i++) {
+				docker_ctr_ls_item* ctr = docker_ctr_list_get_idx(
+					containers, i);
+				printf("%.*s\n", 12, docker_ctr_ls_item_id_get(ctr));
 			}
-			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, ctr_tbl);
-			free_cld_table(ctr_tbl);
 		}
-	}
+		else {
+			int num_containers = docker_ctr_list_length(containers);
+			cld_table* ctr_tbl;
+			if (create_cld_table(&ctr_tbl, num_containers, 7) == 0) {
+				cld_table_set_header(ctr_tbl, 0, "CONTAINER ID");
+				cld_table_set_header(ctr_tbl, 1, "IMAGE");
+				cld_table_set_header(ctr_tbl, 2, "COMMAND");
+				cld_table_set_header(ctr_tbl, 3, "CREATED");
+				cld_table_set_header(ctr_tbl, 4, "STATUS");
+				cld_table_set_header(ctr_tbl, 5, "PORTS");
+				cld_table_set_header(ctr_tbl, 6, "NAMES");
 
-	free_docker_ctr_list(containers);
+				for (int i = 0; i < docker_ctr_list_length(containers);
+					i++) {
+					docker_ctr_ls_item* ctr =
+						docker_ctr_list_get_idx(containers, i);
+
+					//get ports
+					char ports_str[1024];
+					ports_str[0] = '\0';
+					for (int j = 0; j < docker_ctr_ls_item_ports_length(ctr); j++) {
+						char port_str[100];
+						docker_ctr_port* ports = docker_ctr_ls_item_ports_get_idx(ctr, 0);
+						sprintf(port_str, "%ld:%ld", docker_ctr_port_private_port_get(ports),
+							docker_ctr_port_public_port_get(ports));
+						if (j == 0) {
+							strcpy(ports_str, port_str);
+						}
+						else {
+							strcat(ports_str, ", ");
+							strcat(ports_str, port_str);
+						}
+					}
+
+					//get created time
+					time_t t = (time_t)docker_ctr_ls_item_created_get(ctr);
+					struct tm* timeinfo = localtime(&t);
+					char evt_time_str[256];
+					strftime(evt_time_str, 255, "%d-%m-%Y:%H:%M:%S", timeinfo);
+
+					//get names
+					char names[1024];
+					names[0] = '\0';
+					for (int j = 0; j < docker_ctr_ls_item_names_length(ctr); j++) {
+						if (j == 0) {
+							strcpy(names, docker_ctr_ls_item_names_get_idx(ctr, j));
+						}
+						else {
+							strcat(names, ",");
+							strcat(names, docker_ctr_ls_item_names_get_idx(ctr, j));
+						}
+					}
+					cld_table_set_row_val(ctr_tbl, i, 0, docker_ctr_ls_item_id_get(ctr));
+					cld_table_set_row_val(ctr_tbl, i, 1, docker_ctr_ls_item_image_get(ctr));
+					cld_table_set_row_val(ctr_tbl, i, 2, docker_ctr_ls_item_command_get(ctr));
+					cld_table_set_row_val(ctr_tbl, i, 3, evt_time_str);
+					cld_table_set_row_val(ctr_tbl, i, 4, docker_ctr_ls_item_status_get(ctr));
+					cld_table_set_row_val(ctr_tbl, i, 5, ports_str);
+					cld_table_set_row_val(ctr_tbl, i, 6, names);
+				}
+				success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, ctr_tbl);
+				free_cld_table(ctr_tbl);
+			}
+		}
+
+		free_docker_ctr_list(containers);
+	}
 	return CLD_COMMAND_SUCCESS;
 }
 

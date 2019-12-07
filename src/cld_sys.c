@@ -5,45 +5,41 @@
  *      Author: abhis
  */
 
+#include "docker_all.h"
 #include <string.h>
 #include "cld_sys.h"
-#include "docker_all.h"
 #include "cld_dict.h"
 
 cld_cmd_err sys_version_cmd_handler(void* handler_args,
 		arraylist* options, arraylist* args,
 		cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
-	docker_result* res;
-	docker_version* version;
+	docker_version* version = NULL;
 	docker_context* ctx = get_docker_context(handler_args);
-	docker_system_version(ctx, &res, &version);
-	handle_docker_error(res, success_handler, error_handler);
+	d_err_t err = docker_system_version(ctx, &version);
+	if (err == E_SUCCESS) {
+		cld_dict* ver_dict;
+		if (create_cld_dict(&ver_dict) == 0) {
+			cld_dict_put(ver_dict, "Docker Version", docker_version_version_get(version));
+			cld_dict_put(ver_dict, "OS", docker_version_os_get(version));
+			cld_dict_put(ver_dict, "Kernel", docker_version_kernel_version_get(version));
+			cld_dict_put(ver_dict, "Arch", docker_version_arch_get(version));
+			cld_dict_put(ver_dict, "API Version", docker_version_api_version_get(version));
+			cld_dict_put(ver_dict, "Min API Version", docker_version_min_api_version_get(version));
+			cld_dict_put(ver_dict, "Go Version", docker_version_go_version_get(version));
+			cld_dict_put(ver_dict, "Git Commit", docker_version_git_commit_get(version));
+			cld_dict_put(ver_dict, "Build Time", docker_version_build_time_get(version));
+			cld_dict_put(ver_dict, "Experimental",
+				docker_version_experimental_get(version) == 0 ? "False" : "True");
 
-	cld_dict* ver_dict;
-	if (create_cld_dict(&ver_dict) == 0) {
-		cld_dict_put(ver_dict, "Docker Version", docker_version_version_get(version));
-		cld_dict_put(ver_dict, "OS", docker_version_os_get(version));
-		cld_dict_put(ver_dict, "Kernel", docker_version_kernel_version_get(version));
-		cld_dict_put(ver_dict, "Arch", docker_version_arch_get(version));
-		cld_dict_put(ver_dict, "API Version", docker_version_api_version_get(version));
-		cld_dict_put(ver_dict, "Min API Version", docker_version_min_api_version_get(version));
-		cld_dict_put(ver_dict, "Go Version", docker_version_go_version_get(version));
-		cld_dict_put(ver_dict, "Git Commit", docker_version_git_commit_get(version));
-		cld_dict_put(ver_dict, "Build Time", docker_version_build_time_get(version));
-		cld_dict_put(ver_dict, "Experimental",
-			docker_version_experimental_get(version) == 0 ? "False" : "True");
+			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_DICT, ver_dict);
 
-		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_DICT, ver_dict);
+			free_cld_dict(ver_dict);
+		}
 
-		free_cld_dict(ver_dict);
-	}
-
-	if(res != NULL) {
-		free_docker_result(&res);
-	}
-	if(version != NULL) {
-		free_docker_version(version);
+		if (version != NULL) {
+			free_docker_version(version);
+		}
 	}
 	return CLD_COMMAND_SUCCESS;
 }
@@ -93,14 +89,13 @@ cld_cmd_err sys_events_cmd_handler(void *handler_args,
 
 	arraylist* events;
 	time_t now = time(NULL);
-	docker_system_events_cb(ctx, &res, &docker_events_cb, success_handler, &events,  now - (3600 * 24), 0);
-		int done = is_ok(res);
-		handle_docker_error(res, success_handler, error_handler);
-		if (done) {
-			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, "done.");
-		}
+	d_err_t err = docker_system_events_cb(ctx, &docker_events_cb, success_handler, &events,  now - (3600 * 24), 0);
+	if (err == E_SUCCESS) {
+		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, "done.");
+	}
 	return CLD_COMMAND_SUCCESS;
 }
+
 cld_command* sys_commands() {
 	cld_command* system_command;
 	if (make_command(&system_command, "system", "sys", "Docker System Commands",
