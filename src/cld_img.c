@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "cld_img.h"
 #include "cld_table.h"
 #include "cld_progress.h"
@@ -191,35 +192,58 @@ cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 		int col_num = 0;
 		size_t len_images = docker_image_list_length(images);
 		cld_table* img_tbl;
-		if (create_cld_table(&img_tbl, len_images, 6) == 0)
+		if (create_cld_table(&img_tbl, len_images, 5) == 0)
 		{
-			cld_table_set_header(img_tbl, 0, "REPOSITORY");
-			cld_table_set_header(img_tbl, 1, "TAG");
-			cld_table_set_header(img_tbl, 2, "DIGEST");
-			cld_table_set_header(img_tbl, 3, "IMAGE ID");
-			cld_table_set_header(img_tbl, 4, "CREATED");
-			cld_table_set_header(img_tbl, 5, "SIZE");
+			int col = 0;
+			cld_table_set_header(img_tbl, col++, "REPOSITORY");
+			cld_table_set_header(img_tbl, col++, "TAG");
+			cld_table_set_header(img_tbl, col++, "IMAGE ID");
+			cld_table_set_header(img_tbl, col++, "CREATED");
+			cld_table_set_header(img_tbl, col++, "SIZE");
+
 			for (size_t i = 0; i < len_images; i++)
 			{
-				docker_image* img = (docker_image*)docker_image_list_get_idx(images,
+				docker_image* img = docker_image_list_get_idx(images,
 					i);
+
 				col_num = 0;
 				char cstr[1024];
 				const time_t created_time = (time_t)docker_image_created_get(img);
 				struct tm* ctm = gmtime(&created_time);
-				strftime(cstr, 1024, "%d/%m/%Y %H:%M:%S", ctm);
+				int len = strftime(cstr, 1023, "%d/%m/%Y %H:%M:%S", ctm);
+				cstr[len] = '\0';
+
 				char sstr[1024];
 				sprintf(sstr, "%s", calculate_size(docker_image_size_get(img)));
-				
-				cld_table_set_row_val(img_tbl, i, 0,
-					concat_tags(docker_image_repo_tags_get(img)));
-				cld_table_set_row_val(img_tbl, i, 1,
-					get_image_tags_concat(img));
-				cld_table_set_row_val(img_tbl, i, 2,
-					concat_tags(docker_image_repo_digests_get(img)));
-				cld_table_set_row_val(img_tbl, i, 3, docker_image_id_get(img));
-				cld_table_set_row_val(img_tbl, i, 4, cstr);
-				cld_table_set_row_val(img_tbl, i, 5, sstr);
+
+				col = 0;
+				if (docker_image_repo_tags_get(img) != NULL
+					&& docker_image_repo_tags_length(img) > 0) {
+					char* repo_tag = docker_image_repo_tags_get_idx(img, 0);
+					char* tag = strrchr(repo_tag, ':');
+					if (tag == NULL) {
+						cld_table_set_row_val(img_tbl, i, col++, repo_tag);
+						cld_table_set_row_val(img_tbl, i, col++, "<none>");
+					}
+					else {
+						char* repo_val = (char*)calloc(tag - repo_tag + 1, sizeof(char));
+						if (repo_val == NULL) {
+							return CLD_COMMAND_ERR_ALLOC_FAILED;
+						}
+						strncpy(repo_val, repo_tag, tag - repo_tag);
+						repo_val[tag - repo_tag] = '\0';
+						cld_table_set_row_val(img_tbl, i, col++, repo_val);
+						cld_table_set_row_val(img_tbl, i, col++, tag + 1);
+						free(repo_val);
+					}
+				}
+				else {
+					cld_table_set_row_val(img_tbl, i, col++, "<none>");
+					cld_table_set_row_val(img_tbl, i, col++, "<none>");
+				}
+				cld_table_set_row_val(img_tbl, i, col++, docker_image_id_get(img));
+				cld_table_set_row_val(img_tbl, i, col++, cstr);
+				cld_table_set_row_val(img_tbl, i, col++, sstr);
 			}
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, img_tbl);
 		}
