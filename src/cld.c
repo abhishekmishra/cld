@@ -243,7 +243,7 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	return CLD_COMMAND_SUCCESS;
 }
 
-void docker_result_handler(docker_result* res) {
+void docker_result_handler(docker_context* ctx, docker_result* res) {
 	handle_docker_error(res, (cld_command_output_handler)&print_handler, (cld_command_output_handler)&print_handler);
 }
 
@@ -287,7 +287,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 
 		if (connected)
 		{
-			docker_context_set_result_handler(ctx, (docker_result_handler_fn*)&docker_result_handler);
+			docker_context_result_handler_set(ctx, (docker_result_handler_fn*)&docker_result_handler);
 			//if (docker_ping(ctx) != E_SUCCESS)
 			//{
 			//	docker_log_fatal("Could not ping the server %s", url);
