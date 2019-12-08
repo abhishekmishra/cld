@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "cld_img.h"
 #include "cld_table.h"
 #include "cld_progress.h"
@@ -204,9 +205,12 @@ cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 					i);
 				col_num = 0;
 				char cstr[1024];
-				sprintf(cstr, "%s", docker_image_created_get(img));
+				const time_t created_time = (time_t)docker_image_created_get(img);
+				struct tm* ctm = gmtime(&created_time);
+				strftime(cstr, 1024, "%d/%m/%Y %H:%M:%S", ctm);
 				char sstr[1024];
-				sprintf(sstr, "%lld", docker_image_size_get(img));
+				sprintf(sstr, "%s", calculate_size(docker_image_size_get(img)));
+				
 				cld_table_set_row_val(img_tbl, i, 0,
 					concat_tags(docker_image_repo_tags_get(img)));
 				cld_table_set_row_val(img_tbl, i, 1,
