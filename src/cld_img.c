@@ -5,6 +5,7 @@
 #include "cld_img.h"
 #include "cld_table.h"
 #include "cld_progress.h"
+#include "cld_command.h"
 
 typedef struct
 {
@@ -14,19 +15,19 @@ typedef struct
 
 void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 {
-	docker_image_update_args* upd_args = (docker_image_update_args*) client_cbargs;
+	docker_image_update_args* upd_args = (docker_image_update_args*)client_cbargs;
 	if (status)
 	{
 		if (status->id)
 		{
-			int len = arraylist_length(upd_args->multi_progress->progress_ls);
-			int new_len = len;
-			int found = 0;
-			int loc = -1;
-			for (int i = 0; i < len; i++)
+			size_t len = arraylist_length(upd_args->multi_progress->progress_ls);
+			size_t new_len = len;
+			size_t found = 0;
+			size_t loc = -1;
+			for (size_t i = 0; i < len; i++)
 			{
-				cld_progress* p = (cld_progress*) arraylist_get(
-						upd_args->multi_progress->progress_ls, i);
+				cld_progress* p = (cld_progress*)arraylist_get(
+					upd_args->multi_progress->progress_ls, i);
 				if (strcmp(status->id, p->name) == 0)
 				{
 					found = 1;
@@ -39,8 +40,8 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 				if (create_cld_progress(&p, status->id, 0, 0) == 0)
 				{
 					arraylist_add(upd_args->multi_progress->progress_ls, p);
-					upd_args->multi_progress->old_count = arraylist_length(
-							upd_args->multi_progress->progress_ls) - 1;
+					upd_args->multi_progress->old_count = (int)arraylist_length(
+						upd_args->multi_progress->progress_ls) - 1;
 					new_len += 1;
 					p->message = status->status;
 					if (status->progress != NULL)
@@ -57,10 +58,10 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 			}
 			else
 			{
-				cld_progress* p = (cld_progress*) arraylist_get(
-						upd_args->multi_progress->progress_ls, loc);
-				upd_args->multi_progress->old_count = arraylist_length(
-						upd_args->multi_progress->progress_ls);
+				cld_progress* p = (cld_progress*)arraylist_get(
+					upd_args->multi_progress->progress_ls, loc);
+				upd_args->multi_progress->old_count = (int)arraylist_length(
+					upd_args->multi_progress->progress_ls);
 				p->message = status->status;
 				if (status->progress != NULL)
 				{
@@ -74,47 +75,51 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 				}
 			}
 			upd_args->success_handler(CLD_COMMAND_IS_RUNNING,
-					CLD_RESULT_PROGRESS, upd_args->multi_progress);
+				CLD_RESULT_PROGRESS, upd_args->multi_progress);
 		}
 		else
 		{
 			upd_args->success_handler(CLD_COMMAND_IS_RUNNING, CLD_RESULT_STRING,
-					status->status);
+				status->status);
 		}
 	}
 }
 
-cld_cmd_err img_pl_cmd_handler(void *handler_args, struct arraylist *options,
-		struct arraylist *args, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler)
+cld_cmd_err img_pl_cmd_handler(void* handler_args, arraylist* options,
+	arraylist* args, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
 	int quiet = 0;
-	docker_result *res;
-	docker_context *ctx = get_docker_context(handler_args);
+	docker_context* ctx = get_docker_context(handler_args);
 
-	docker_image_update_args* upd_args = (docker_image_update_args*) calloc(1,
-			sizeof(docker_image_update_args));
+	docker_image_update_args* upd_args = (docker_image_update_args*)calloc(1,
+		sizeof(docker_image_update_args));
+	if (upd_args == NULL) {
+		return CLD_COMMAND_ERR_ALLOC_FAILED;
+	}
 	upd_args->success_handler = success_handler;
 	create_cld_multi_progress(&(upd_args->multi_progress));
 
-	int len = arraylist_length(args);
+	size_t len = arraylist_length(args);
 	if (len != 1)
 	{
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
-				"Image name not provided.");
+			"Image name not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		cld_argument* image_name_arg = (cld_argument*) arraylist_get(args,
-				0);
+		cld_argument* image_name_arg = (cld_argument*)arraylist_get(args,
+			0);
 		char* image_name = image_name_arg->val->str_value;
-		d_err_t docker_error = docker_image_create_from_image_cb(ctx, &res,
-				&log_pull_message, upd_args, image_name, NULL, NULL);
-		handle_docker_error(res, success_handler, error_handler);
+		d_err_t docker_error = docker_image_create_from_image_cb(ctx,
+			&log_pull_message, upd_args, image_name, NULL, NULL);
 		if (docker_error == E_SUCCESS)
 		{
-			char* res_str = (char*) calloc(1024, sizeof(char));
+			char* res_str = (char*)calloc(strlen(image_name) + 100, sizeof(char));
+			if (res_str == NULL) {
+				return CLD_COMMAND_ERR_ALLOC_FAILED;
+			}
 			sprintf(res_str, "Image pull successful -> %s", image_name);
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 			free(res_str);
@@ -133,19 +138,19 @@ char* concat_tags(json_object* tags_ls)
 	char* tags = NULL;
 	if (tags_ls)
 	{
-		int len_tags = json_object_array_length(tags_ls);
-		int tag_strlen = 0;
-		for (int i = 0; i < len_tags; i++)
+		size_t len_tags = json_object_array_length(tags_ls);
+		size_t tag_strlen = 0;
+		for (size_t i = 0; i < len_tags; i++)
 		{
 			tag_strlen += strlen((char*)json_object_array_get_idx(tags_ls, i));
 			tag_strlen += 1; //for newline
 		}
 		tag_strlen += 1; //for null terminator
-		tags = (char*) calloc(tag_strlen, sizeof(char));
+		tags = (char*)calloc(tag_strlen, sizeof(char));
 		if (tags != NULL)
 		{
 			tags[0] = '\0';
-			for (int i = 0; i < len_tags; i++)
+			for (size_t i = 0; i < len_tags; i++)
 			{
 				strcat(tags, (char*)json_object_array_get_idx(tags_ls, i));
 				if (i != (len_tags - 1))
@@ -165,27 +170,25 @@ char* get_image_tags_concat(docker_image* img)
 	return tags;
 }
 
-cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
-		struct arraylist *args, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler)
+cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
+	arraylist* args, cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
 	int quiet = 0;
-	docker_result *res;
-	docker_context *ctx = get_docker_context(handler_args);
+	docker_context* ctx = get_docker_context(handler_args);
 	docker_image_list* images;
 
-	d_err_t docker_error = docker_images_list(ctx, &res, &images, 1, 1, NULL, 0,
-	NULL, NULL, NULL);
-	int success = is_ok(res);
-	handle_docker_error(res, success_handler, error_handler);
-	if (success)
+	d_err_t docker_error = docker_images_list(ctx, &images, 1, 1, NULL, 0,
+		NULL, NULL, NULL);
+
+	if (docker_error == E_SUCCESS)
 	{
 		char res_str[1024];
 		sprintf(res_str, "Listing images");
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
 		int col_num = 0;
-		int len_images = docker_image_list_length(images);
+		size_t len_images = docker_image_list_length(images);
 		cld_table* img_tbl;
 		if (create_cld_table(&img_tbl, len_images, 6) == 0)
 		{
@@ -195,21 +198,21 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
 			cld_table_set_header(img_tbl, 3, "IMAGE ID");
 			cld_table_set_header(img_tbl, 4, "CREATED");
 			cld_table_set_header(img_tbl, 5, "SIZE");
-			for (int i = 0; i < len_images; i++)
+			for (size_t i = 0; i < len_images; i++)
 			{
 				docker_image* img = (docker_image*)docker_image_list_get_idx(images,
-						i);
+					i);
 				col_num = 0;
 				char cstr[1024];
 				sprintf(cstr, "%s", docker_image_created_get(img));
 				char sstr[1024];
-				sprintf(sstr, "%ld", docker_image_size_get(img));
+				sprintf(sstr, "%lld", docker_image_size_get(img));
 				cld_table_set_row_val(img_tbl, i, 0,
-						concat_tags(docker_image_repo_tags_get(img)));
+					concat_tags(docker_image_repo_tags_get(img)));
 				cld_table_set_row_val(img_tbl, i, 1,
-						get_image_tags_concat(img));
+					get_image_tags_concat(img));
 				cld_table_set_row_val(img_tbl, i, 2,
-						concat_tags(docker_image_repo_digests_get(img)));
+					concat_tags(docker_image_repo_digests_get(img)));
 				cld_table_set_row_val(img_tbl, i, 3, docker_image_id_get(img));
 				cld_table_set_row_val(img_tbl, i, 4, cstr);
 				cld_table_set_row_val(img_tbl, i, 5, sstr);
@@ -225,49 +228,53 @@ cld_cmd_err img_ls_cmd_handler(void *handler_args, struct arraylist *options,
 }
 
 void log_build_message(docker_build_status* status, void* client_cbargs) {
-	docker_image_update_args* upd_args = (docker_image_update_args*) client_cbargs;
+	docker_image_update_args* upd_args = (docker_image_update_args*)client_cbargs;
 	if (status)
 	{
 		if (status->stream)
 		{
 			upd_args->success_handler(CLD_COMMAND_IS_RUNNING,
-					CLD_RESULT_STRING, status->stream);
+				CLD_RESULT_STRING, status->stream);
 		}
 	}
 }
 
-cld_cmd_err img_build_cmd_handler(void *handler_args,
-		struct arraylist *options, struct arraylist *args,
-		cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler)
+cld_cmd_err img_build_cmd_handler(void* handler_args,
+	arraylist* options, arraylist* args,
+	cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
 	int quiet = 0;
-	docker_result *res;
-	docker_context *ctx = get_docker_context(handler_args);
+	docker_context* ctx = get_docker_context(handler_args);
 
-	docker_image_update_args* upd_args = (docker_image_update_args*) calloc(1,
-			sizeof(docker_image_update_args));
+	docker_image_update_args* upd_args = (docker_image_update_args*)calloc(1,
+		sizeof(docker_image_update_args));
+	if (upd_args == NULL) {
+		return CLD_COMMAND_ERR_ALLOC_FAILED;
+	}
 	upd_args->success_handler = success_handler;
 	create_cld_multi_progress(&(upd_args->multi_progress));
 
-	int len = arraylist_length(args);
+	size_t len = arraylist_length(args);
 	if (len != 1)
 	{
 		error_handler(CLD_COMMAND_ERR_UNKNOWN, CLD_RESULT_STRING,
-				"Image name not provided.");
+			"Image name not provided.");
 		return CLD_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		cld_argument* folder_url_dash_arg = (cld_argument*) arraylist_get(
-				args, 0);
+		cld_argument* folder_url_dash_arg = (cld_argument*)arraylist_get(
+			args, 0);
 		char* folder_url_dash = folder_url_dash_arg->val->str_value;
-		d_err_t docker_error = docker_image_build_cb(ctx, &res, folder_url_dash,
-		NULL, &log_build_message, upd_args, NULL);
-		handle_docker_error(res, success_handler, error_handler);
+		d_err_t docker_error = docker_image_build_cb(ctx, folder_url_dash,
+			NULL, &log_build_message, upd_args, NULL);
 		if (docker_error == E_SUCCESS)
 		{
-			char* res_str = (char*) calloc(1024, sizeof(char));
+			char* res_str = (char*)calloc(strlen(folder_url_dash) + 100, sizeof(char));
+			if (res_str == NULL) {
+				return CLD_COMMAND_ERR_ALLOC_FAILED;
+			}
 			sprintf(res_str, "Image pull successful -> %s\n", folder_url_dash);
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 			free(res_str);
@@ -281,36 +288,36 @@ cld_cmd_err img_build_cmd_handler(void *handler_args,
 	free_cld_multi_progress(upd_args->multi_progress);
 }
 
-cld_command *img_commands()
+cld_command* img_commands()
 {
-	cld_command *image_command;
+	cld_command* image_command;
 	if (make_command(&image_command, "image", "img", "Docker Image Commands",
-	NULL) == CLD_COMMAND_SUCCESS)
+		NULL) == CLD_COMMAND_SUCCESS)
 	{
-		cld_command *imgpl_command, *imgls_command, *imgbuild_command;
+		cld_command* imgpl_command, * imgls_command, * imgbuild_command;
 		if (make_command(&imgpl_command, "pull", "pl", "Docker Image Pull",
-				&img_pl_cmd_handler) == CLD_COMMAND_SUCCESS)
+			&img_pl_cmd_handler) == CLD_COMMAND_SUCCESS)
 		{
 			cld_argument* image_name_arg;
 			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
-					"Name of Docker Image to be pulled.");
+				"Name of Docker Image to be pulled.");
 			arraylist_add(imgpl_command->args, image_name_arg);
 
 			arraylist_add(image_command->sub_commands, imgpl_command);
 		}
 		if (make_command(&imgls_command, "list", "ls", "Docker Image List",
-				&img_ls_cmd_handler) == CLD_COMMAND_SUCCESS)
+			&img_ls_cmd_handler) == CLD_COMMAND_SUCCESS)
 		{
 			arraylist_add(image_command->sub_commands, imgls_command);
 		}
 		if (make_command(&imgbuild_command, "build", "make",
-				"Docker Image Build", &img_build_cmd_handler)
-				== CLD_COMMAND_SUCCESS)
+			"Docker Image Build", &img_build_cmd_handler)
+			== CLD_COMMAND_SUCCESS)
 		{
 			cld_argument* folder_or_url_or_dash;
 			make_argument(&folder_or_url_or_dash, "Folder | URL | -",
-					CLD_TYPE_STRING,
-					"Docker resources to build (folder/url/stdin)");
+				CLD_TYPE_STRING,
+				"Docker resources to build (folder/url/stdin)");
 			arraylist_add(imgbuild_command->args, folder_or_url_or_dash);
 
 			arraylist_add(image_command->sub_commands, imgbuild_command);

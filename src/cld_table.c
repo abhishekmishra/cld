@@ -9,7 +9,7 @@
 #include "docker_util.h"
 #include "cld_table.h"
 
-int create_cld_table(cld_table** table, int num_rows, int num_cols) {
+int create_cld_table(cld_table** table, size_t num_rows, size_t num_cols) {
 	(*table) = (cld_table*) calloc(1, sizeof(cld_table));
 	if (!(*table)) {
 		return 1;
@@ -31,12 +31,12 @@ int create_cld_table(cld_table** table, int num_rows, int num_cols) {
 }
 
 void free_cld_table(cld_table* table) {
-	for (int i = 0; i < table->num_cols; i++) {
+	for (size_t i = 0; i < table->num_cols; i++) {
 		free(table->header[i]);
 	}
 	free(table->header);
-	for (int i = 0; i < table->num_rows; i++) {
-		for (int j = 0; j < table->num_cols; j++) {
+	for (size_t i = 0; i < table->num_rows; i++) {
+		for (size_t j = 0; j < table->num_cols; j++) {
 			free(table->values[i][j]);
 		}
 		free(table->values[i]);
@@ -45,7 +45,7 @@ void free_cld_table(cld_table* table) {
 	free(table);
 }
 
-int cld_table_set_header(cld_table* table, int col_id, char* name) {
+int cld_table_set_header(cld_table* table, size_t col_id, char* name) {
 	if (col_id >= 0 && col_id < table->num_cols) {
 		table->header[col_id] = str_clone(name);
 		return 0;
@@ -54,7 +54,7 @@ int cld_table_set_header(cld_table* table, int col_id, char* name) {
 	}
 }
 
-int cld_table_set_row_val(cld_table* table, int row_id, int col_id, char* value) {
+int cld_table_set_row_val(cld_table* table, size_t row_id, size_t col_id, char* value) {
 	if (col_id >= 0 && col_id < table->num_cols && row_id >= 0
 			&& row_id < table->num_rows) {
 		table->values[row_id][col_id] = str_clone(value);
@@ -64,7 +64,7 @@ int cld_table_set_row_val(cld_table* table, int row_id, int col_id, char* value)
 	}
 }
 
-int cld_table_get_header(char** name, cld_table* table, int col_id) {
+int cld_table_get_header(char** name, cld_table* table, size_t col_id) {
 	if (col_id >= 0 && col_id < table->num_cols) {
 		(*name) = table->header[col_id];
 		return 0;
@@ -72,8 +72,8 @@ int cld_table_get_header(char** name, cld_table* table, int col_id) {
 	return -1;
 }
 
-int cld_table_get_row_val(char** value, cld_table* table, int row_id,
-		int col_id) {
+int cld_table_get_row_val(char** value, cld_table* table, size_t row_id,
+	size_t col_id) {
 	if (col_id >= 0 && col_id < table->num_cols && row_id >= 0
 			&& row_id < table->num_rows) {
 		(*value) = table->values[row_id][col_id];

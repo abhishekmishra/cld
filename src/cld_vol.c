@@ -27,27 +27,24 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
-	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 	docker_volume_list* volumes;
 	docker_volume_warnings* warnings;
 
-	d_err_t docker_error = docker_volumes_list(ctx, &res, &volumes, &warnings, 0, NULL, NULL, NULL);
-	int success = is_ok(res);
-	handle_docker_error(res, success_handler, error_handler);
-	if (success) {
+	d_err_t docker_error = docker_volumes_list(ctx, &volumes, &warnings, 0, NULL, NULL, NULL);
+	if (docker_error == E_SUCCESS) {
 		char res_str[1024];
 		sprintf(res_str, "Listing volumes");
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
-		int col_num = 0;
+		size_t col_num = 0;
 		size_t len_volumes = docker_volume_list_length(volumes);
 		cld_table* vol_tbl;
 		if (create_cld_table(&vol_tbl, len_volumes, 3) == 0) {
 			cld_table_set_header(vol_tbl, 0, "DRIVER");
 			cld_table_set_header(vol_tbl, 1, "VOLUME NAME");
 			cld_table_set_header(vol_tbl, 2, "MOUNT");
-			for (int i = 0; i < len_volumes; i++) {
+			for (size_t i = 0; i < len_volumes; i++) {
 				docker_volume* vol = (docker_volume*)docker_volume_list_get_idx(volumes,
 						i);
 				cld_table_set_row_val(vol_tbl, i, 0, docker_volume_driver_get(vol));

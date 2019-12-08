@@ -27,28 +27,25 @@ cld_cmd_err net_ls_cmd_handler(void *handler_args, arraylist *options,
 		arraylist *args, cld_command_output_handler success_handler,
 		cld_command_output_handler error_handler) {
 	int quiet = 0;
-	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 	docker_network_list* networks;
 
-	d_err_t docker_error = docker_networks_list(ctx, &res, &networks, NULL,
+	d_err_t docker_error = docker_networks_list(ctx, &networks, NULL,
 			NULL, NULL, NULL, NULL, NULL);
-	int success = is_ok(res);
-	handle_docker_error(res, success_handler, error_handler);
-	if (success) {
+	if (docker_error == E_SUCCESS) {
 		char res_str[1024];
 		sprintf(res_str, "Listing networks");
 		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
 
-		int col_num = 0;
-		int len_networks = docker_network_list_length(networks);
+		size_t col_num = 0;
+		size_t len_networks = docker_network_list_length(networks);
 		cld_table* net_tbl;
 		if (create_cld_table(&net_tbl, len_networks, 4) == 0) {
 			cld_table_set_header(net_tbl, 0, "NETWORK ID");
 			cld_table_set_header(net_tbl, 1, "NAME");
 			cld_table_set_header(net_tbl, 2, "DRIVER");
 			cld_table_set_header(net_tbl, 3, "SCOPE");
-			for (int i = 0; i < len_networks; i++) {
+			for (size_t i = 0; i < len_networks; i++) {
 				docker_network* net = (docker_network*) docker_network_list_get_idx(
 						networks, i);
 				cld_table_set_row_val(net_tbl, i, 0, docker_network_id_get(net));
