@@ -180,7 +180,7 @@ cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 	docker_context* ctx = get_docker_context(handler_args);
 	docker_image_list* images;
 
-	d_err_t docker_error = docker_images_list(ctx, &images, 1, 1, NULL, 0,
+	d_err_t docker_error = docker_images_list(ctx, &images, 0, 1, NULL, 0,
 		NULL, NULL, NULL);
 
 	if (docker_error == E_SUCCESS)
@@ -241,7 +241,14 @@ cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 					cld_table_set_row_val(img_tbl, i, col++, "<none>");
 					cld_table_set_row_val(img_tbl, i, col++, "<none>");
 				}
-				cld_table_set_row_val(img_tbl, i, col++, docker_image_id_get(img));
+				char* img_id = docker_image_id_get(img);
+				char* id_val = strrchr(img_id, ':');
+				if (id_val == NULL) {
+					cld_table_set_row_val(img_tbl, i, col++, img_id);
+				}
+				else {
+					cld_table_set_row_val(img_tbl, i, col++, id_val + 1);
+				}
 				cld_table_set_row_val(img_tbl, i, col++, cstr);
 				cld_table_set_row_val(img_tbl, i, col++, sstr);
 			}
