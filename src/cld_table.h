@@ -22,6 +22,8 @@
 #ifndef SRC_CLD_TABLE_H_
 #define SRC_CLD_TABLE_H_
 
+#include <stdlib.h>
+
 typedef struct cld_table_t {
 	size_t num_rows;
 	size_t num_cols;
