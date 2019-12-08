@@ -288,15 +288,15 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 		if (connected)
 		{
 			docker_context_set_result_handler(ctx, (docker_result_handler_fn*)&docker_result_handler);
-			if (docker_ping(ctx) != E_SUCCESS)
-			{
-				docker_log_fatal("Could not ping the server %s", url);
-				connected = 0;
-			}
-			else
-			{
-				docker_log_debug("%s is alive.", url);
-			}
+			//if (docker_ping(ctx) != E_SUCCESS)
+			//{
+			//	docker_log_fatal("Could not ping the server %s", url);
+			//	connected = 0;
+			//}
+			//else
+			//{
+			//	docker_log_debug("%s is alive.", url);
+			//}
 		}
 	}
 	
