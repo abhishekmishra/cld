@@ -753,7 +753,8 @@ cld_cmd_err exec_command(arraylist* commands, void* handler_args,
 		for (int j = 0; j < len_options; j++) {
 			arraylist_add(all_options, arraylist_get(cmd_to_exec->options, j));
 		}
-		for (int j = 0; j < len_options; j++) {
+		size_t len_args = arraylist_length(cmd_to_exec->args);
+		for (int j = 0; j < len_args; j++) {
 			arraylist_add(all_args, arraylist_get(cmd_to_exec->args, j));
 		}
 	}

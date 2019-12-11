@@ -350,6 +350,12 @@ cld_cmd_err ctr_wait_cmd_handler(void* handler_args, arraylist* options,
 	return CLD_COMMAND_SUCCESS;
 }
 
+void cld_log_line_handler(void* args, int stream_id, int line_num, char* line) {
+	cld_command_output_handler success_handler = (cld_command_output_handler)args;
+	docker_log_info("Stream %d, line# %d :: %s", stream_id, line_num, line);
+	success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, line);
+}
+
 cld_cmd_err ctr_logs_cmd_handler(void* handler_args, arraylist* options,
 	arraylist* args, cld_command_output_handler success_handler,
 	cld_command_output_handler error_handler) {
@@ -366,13 +372,15 @@ cld_cmd_err ctr_logs_cmd_handler(void* handler_args, arraylist* options,
 			0);
 		char* container = container_arg->val->str_value;
 		char* log;
-		d_err_t e = docker_container_logs(ctx, &log, container, 0, 1, 1, -1, -1, 1,
+		size_t log_len;
+		d_err_t e = docker_container_logs(ctx, &log, &log_len, container, 0, 1, 1, -1, -1, 1,
 			10);
 		if (e == E_SUCCESS) {
 			char res_str[1024];
 			sprintf(res_str, "Logs for container %s", container);
 			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
-			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, log);
+			//success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, log);
+			docker_container_logs_foreach(success_handler, log, log_len, &cld_log_line_handler);
 		}
 	}
 	return CLD_COMMAND_SUCCESS;
