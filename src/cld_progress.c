@@ -1,8 +1,8 @@
-/*
- * cld_progress.c
- *
- *  Created on: 19-Mar-2019
- *      Author: abhis
+/**
+ * Copyright (c) 2020 Abhishek Mishra
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
  */
 
 #include <stdlib.h>

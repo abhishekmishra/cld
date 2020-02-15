@@ -1,8 +1,8 @@
-/*
- * cld_sys.c
- *
- *  Created on: 17-Feb-2019
- *      Author: abhis
+/**
+ * Copyright (c) 2020 Abhishek Mishra
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
  */
 
 #include "docker_all.h"

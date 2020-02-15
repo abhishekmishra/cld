@@ -1,9 +1,7 @@
-/*
- * cld_dict.h
- *
- *  Created on: 19-Mar-2019
- *      Author: abhis
- */
+// Copyright (c) 2020 Abhishek Mishra
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
 
 #ifndef SRC_CLD_DICT_H_
 #define SRC_CLD_DICT_H_
