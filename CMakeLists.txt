@@ -47,24 +47,20 @@ set( CLD_SOURCES
   src/histedit.h
 )
 
-#if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-#	message(STATUS ">>> Linux, using pkg-config since vcpkg is broken")
-#	find_package(PkgConfig REQUIRED)
-#	pkg_check_modules(json-c REQUIRED IMPORTED_TARGET json-c)
-#	pkg_check_modules(curl REQUIRED IMPORTED_TARGET libcurl)
-#	pkg_check_modules(archive REQUIRED IMPORTED_TARGET libarchive)
-#endif()
+include(FindLua)
+if (LUA_FOUND)
+  message("-- lua found at ${LUA_LIBRARIES} ${LUA_INCLUDE_DIR}")
+  message("-- lua version is ${LUA_VERSION_STRING}")
+  add_compile_definitions(LUA_ENABLED)
+else ()
+  message( FATAL_ERROR " -- ERROR: lua not found.")
+endif (LUA_FOUND)
 
 add_executable( ${PROJECT_NAME} ${CLD_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
-#if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-#	target_link_libraries(${PROJECT_NAME} PUBLIC json-c)
-#	target_link_libraries(${PROJECT_NAME} PUBLIC curl)
-#	target_link_libraries(${PROJECT_NAME} PUBLIC archive)
-#else()
 find_package(json-c CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
 
@@ -79,7 +75,6 @@ find_path(LIBARCHIVE_INCLUDE_DIR archive.h)
 find_library(LIBARCHIVE_LIBRARY archive)
 include_directories(${LIBARCHIVE_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} ZLIB::ZLIB)
-#endif()
 
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
 

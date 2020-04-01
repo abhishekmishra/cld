@@ -1,7 +1,8 @@
+# create the build directory
+New-Item -path . -name build -itemtype directory
+
 # change to the build directory
 Set-Location .\build
-
-#$env:CMAKE_PREFIX_PATH += ";..\..\coll\build"
 
 # generate the build files
 cmake .. -DCMAKE_TOOLCHAIN_FILE=d:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DENABLE_TESTS=On
