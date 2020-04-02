@@ -394,6 +394,8 @@ int main(int argc, char *argv[])
 {
 	docker_log_set_level(LOG_INFO);
 
+	start_lua_interpreter();
+
 	if (argc > 0)
 	{
 		docker_log_debug("command name is %s\n", argv[0]);
@@ -409,5 +411,8 @@ int main(int argc, char *argv[])
 			docker_log_error("Error: invalid command.\n");
 		}
 	}
+
+	stop_lua_interpreter();
+	
 	return 0;
 }

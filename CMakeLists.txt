@@ -33,6 +33,7 @@ set( CLD_SOURCES
   src/cld_vol.c
   src/cld.c
   src/tokenizer.c
+  src/cld_lua.c
 
   src/cld_command.h
   src/cld_common.h
@@ -45,6 +46,7 @@ set( CLD_SOURCES
   src/cld_table.h
   src/cld_vol.h
   src/histedit.h
+  src/cld_lua.h
 )
 
 include(FindLua)

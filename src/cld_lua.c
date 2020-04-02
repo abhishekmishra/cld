@@ -12,6 +12,8 @@ cld_cmd_err start_lua_interpreter() {
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_dostring(L, "print('Started Lua interpreter.')");
+    luaL_dostring(L, "require('cmd_container')\ndocker = require('luaclibdocker')\nd=docker.connect()\noutput = cmd_ctr_ls(d)\nprint(output[1].Names[1])");
+    luaL_dofile(L, "./lua/test/main.lua");
 }
 
 cld_cmd_err stop_lua_interpreter() {
