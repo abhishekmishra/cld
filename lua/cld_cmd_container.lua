@@ -1,7 +1,9 @@
 json = require("json")
 docker = require("luaclibdocker")
 
-function cmd_ctr_ls(d, options, args)
+local cld_cmd_container = {}
+
+function cld_cmd_container.cmd_ctr_ls(d, options, args)
     all = false
     limit = 0
     size = true
@@ -38,3 +40,5 @@ function cmd_ctr_ls(d, options, args)
     end
     return output
 end
+
+return cld_cmd_container
