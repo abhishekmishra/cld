@@ -8,26 +8,25 @@ function cld_cmd_container.dummy(d)
 end
 
 function cld_cmd_container.ls(d, options, args)
-    print(options)
     all = false
     limit = 0
     size = true
 
-    for k, v in ipairs(options) do
-        print (k .. " = ")
-        print(type(v))
-        for k1, v1 in pairs(v) do
-            print(k1 .. " = " .. v1)
-        end
-    end
+    -- for k, v in pairs(args) do
+    --     print (k .. " = " .. tostring(v))
+    -- end
 
-    -- for k, v in ipairs(options[1]) do
-    --     print (k .. " = " .. v)
+    -- for k, v in pairs(options) do
+    --     print (k .. " = ")
+    --     print(type(v))
+    --     for k1, v1 in pairs(v) do
+    --         print(k1 .. " = " .. tostring(v1))
+    --     end
     -- end
 
     if options ~= nil then
-        if options["--all"] ~= nil then
-            all = options["--all"].val
+        if options["all"] ~= nil then
+            all = options["all"].val
         end
     end
 

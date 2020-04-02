@@ -60,12 +60,31 @@ cld_cmd_err execute_lua_command(const char* module_name, const char *command_nam
         lua_pushnil(L);
     }
     else {
-        convert_to_lua_array(options, L);
-        //cld_option_to_lua(L, (cld_option*)arraylist_get(options, 0));
+        size_t len = arraylist_length(options);
+        lua_createtable(L, 0, len);
+        for (size_t i = 0; i < len; i++) {
+            cld_option* o = (cld_option*)arraylist_get(options, i);
+            options->convert_to_lua(L, i, o);
+            lua_setfield(L, -2, o->name);
+        }
     }
 
-    /* do the call (2 arguments, 1 result) */
-    if (lua_pcall(L, 2, 1, 0) != 0)
+    //second arg is command args
+    if (args == NULL) {
+        lua_pushnil(L);
+    }
+    else {
+        size_t len = arraylist_length(args);
+        lua_createtable(L, 0, len);
+        for (size_t i = 0; i < len; i++) {
+            cld_option* o = (cld_option*)arraylist_get(args, i);
+            args->convert_to_lua(L, i, o);
+            lua_setfield(L, -2, o->name);
+        }
+    }
+
+    /* do the call (3 arguments, 1 result) */
+    if (lua_pcall(L, 3, 1, 0) != 0)
     {
         luaL_error(L, "error running function '%s': %s", command_name,
               lua_tostring(L, -1));

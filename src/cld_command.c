@@ -144,6 +144,7 @@ int cld_val_to_lua(lua_State *L, cld_val *val)
 	{
 		switch (val->type)
 		{
+		case CLD_TYPE_FLAG:
 		case CLD_TYPE_BOOLEAN:
 			lua_pushboolean(L, val->bool_value);
 			break;
