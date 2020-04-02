@@ -31,11 +31,11 @@ ls_options = {
     },
 }
 output = cld_cmd.ctr.ls(d, ls_options)
-for k, v in ipairs(output) do
-    print("Container #" .. k)
-    for kt, vt in pairs(v) do
-        print("\t" .. kt .. " = ")
-        print(vt)
-    end
-    print()
-end
+-- for k, v in ipairs(output) do
+--     print("Container #" .. k)
+--     for kt, vt in pairs(v) do
+--         print("\t" .. kt .. " = ")
+--         print(vt)
+--     end
+--     print()
+-- end

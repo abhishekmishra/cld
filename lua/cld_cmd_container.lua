@@ -1,5 +1,6 @@
 json = require("json")
 docker = require("luaclibdocker")
+cld_cmd_util = require("cld_cmd_util")
 
 local cld_cmd_container = {}
 
@@ -11,18 +12,6 @@ function cld_cmd_container.ls(d, options, args)
     all = false
     limit = 0
     size = true
-
-    -- for k, v in pairs(args) do
-    --     print (k .. " = " .. tostring(v))
-    -- end
-
-    -- for k, v in pairs(options) do
-    --     print (k .. " = ")
-    --     print(type(v))
-    --     for k1, v1 in pairs(v) do
-    --         print(k1 .. " = " .. tostring(v1))
-    --     end
-    -- end
 
     if options ~= nil then
         if options["all"] ~= nil then
@@ -36,25 +25,51 @@ function cld_cmd_container.ls(d, options, args)
 
     output = {}
     for k, v in ipairs(ctr_ls) do
-        ctr = {}
-        ctr["Command"] = v.Command
-        ctr["CreatedAt"] = v.Created
-        ctr["ID"] = v.Id
-        ctr["Image"] = v.Image
-        ctr["Labels"] = v.Labels
-        ctr["LocalVolumes"] = v.Mounts
-        ctr["Mounts"] = v.Mounts
-        ctr["Names"] = v.Names
-        ctr["Networks"] = v.NetworkSettings.Networks
-        ctr["Ports"] = v.Ports
-        ctr["RunningFor"] = nil
-        ctr["Size"] = v.SizeRootFs
-        ctr["Status"] = v.Status
+        c = {}
+        c["Command"] = v.Command
+        c["CreatedAt"] = v.Created
+        c["ID"] = v.Id
+        c["Image"] = v.Image
+        c["Labels"] = v.Labels
+        c["LocalVolumes"] = v.Mounts
+        c["Mounts"] = v.Mounts
+        c["Names"] = v.Names
+        c["Networks"] = v.NetworkSettings.Networks
+        c["Ports"] = v.Ports
+        c["RunningFor"] = nil
+        c["Size"] = v.SizeRootFs
+        c["Status"] = v.Status
 
-        table.insert(output, ctr)
+        table.insert(output, c)
         print("Container #" .. k .. " is " .. v.Names[1])
     end
+
+    fmt_output = cld_cmd_container.ls_format(output)
+
+    cld_cmd_util.display_table(fmt_output)
+
     return output
+end
+
+function cld_cmd_container.ls_format(output)
+    fmtout = {}
+    fmtout["CONTAINER ID"] = {}
+    fmtout["IMAGE"] = {}
+    fmtout["COMMAND"] = {}
+    fmtout["CREATED"] = {}
+    fmtout["STATUS"] = {}
+    -- fmtout["CONTAINER ID"] = {}
+    -- fmtout["CONTAINER ID"] = {}
+    for k, c in ipairs(output) do
+        table.insert(fmtout["CONTAINER ID"], c["ID"])
+        table.insert(fmtout["IMAGE"], c["Image"])
+        table.insert(fmtout["COMMAND"], c["Command"])
+        table.insert(fmtout["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
+        table.insert(fmtout["STATUS"], c["Status"])
+        -- fmtout["PORTS"], c["Ports"])
+        -- fmtout["NAMES"], c["ID"])
+    end
+    return fmtout
 end
 
 return cld_cmd_container
