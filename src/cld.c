@@ -5,23 +5,6 @@
  * https://opensource.org/licenses/MIT
  */
 
-//based on example at http://www.cs.utah.edu/~bigler/code/libedit.html
-//see https://stackoverflow.com/questions/36953960/is-editline-tab-completion-supposed-to-work
-// #if defined(__linux__) // can also use Linux here
-// #include <editline/readline.h>
-// #elif defined(__OpenBSD__)
-// #include <readline/readline.h>
-// #elif defined(_WIN32)
-// #include <readline/readline.h>
-// #include <readline/history.h>
-// #endif
-
-#ifdef HAVE_LINENOISE
-#include <linenoise.h>
-#endif // HAVE_LINENOISE
-
-#include <histedit.h>
-
 #include <string.h>
 #include <getopt.h>
 
