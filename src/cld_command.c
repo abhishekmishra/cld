@@ -142,8 +142,6 @@ int cld_val_to_lua(lua_State *L, cld_val *val)
 	}
 	else
 	{
-		int v;
-		double d;
 		switch (val->type)
 		{
 		case CLD_TYPE_BOOLEAN:
@@ -156,7 +154,12 @@ int cld_val_to_lua(lua_State *L, cld_val *val)
 			lua_pushnumber(L, val->dbl_value);
 			break;
 		case CLD_TYPE_STRING:
-			lua_pushstring(L, val->str_value);
+			if (val->str_value == NULL) {
+				lua_pushnil(L);
+			}
+			else {
+				lua_pushstring(L, val->str_value);
+			}
 			break;
 		default:
 			lua_pushnil(L);
@@ -237,25 +240,30 @@ int cld_option_to_lua(lua_State *L, cld_option *option)
 
 	if (option != NULL)
 	{
-		lua_pushstring(L, "name");
 		lua_pushstring(L, option->name);
-		lua_settable(L, -3);
+		lua_setfield(L, -2, "name");
 
-		lua_pushstring(L, "short_name");
-		lua_pushstring(L, option->short_name);
-		lua_settable(L, -3);
+		if (option->short_name == NULL) {
+			lua_pushnil(L);
+		}
+		else {
+			lua_pushstring(L, option->short_name);
+		}
+		lua_setfield(L, -2, "short_name");
 
-		lua_pushstring(L, "val");
 		cld_val_to_lua(L, option->val);
-		lua_settable(L, -3);
+		lua_setfield(L, -2, "val");
 
-		lua_pushstring(L, "default_val");
 		cld_val_to_lua(L, option->default_val);
-		lua_settable(L, -3);
+		lua_setfield(L, -2, "default_val");
 
-		lua_pushstring(L, "description");
-		lua_pushstring(L, option->description);
-		lua_settable(L, -3);
+		if (option->description == NULL) {
+			lua_pushnil(L);
+		}
+		else {
+			lua_pushstring(L, option->description);
+		}
+		lua_setfield(L, -2, "description");
 	}
 
 	return 1;
@@ -876,7 +884,9 @@ cld_cmd_err exec_command(arraylist *commands, void *handler_args,
 	size_t len_cmds = arraylist_length(cmds_to_exec);
 	arraylist *all_options, *all_args;
 	arraylist_new(&all_options, NULL);
+	set_lua_convertor(all_options, &arraylist_cld_option_to_lua);
 	arraylist_new(&all_args, NULL);
+	set_lua_convertor(all_args, &arraylist_cld_argument_to_lua);
 
 	for (int i = 0; i < len_cmds; i++)
 	{

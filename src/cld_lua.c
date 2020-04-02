@@ -46,13 +46,26 @@ cld_cmd_err execute_lua_command(const char* module_name, const char *command_nam
                                 cld_command_output_handler error_handler)
 {
     /* push functions and arguments */
+
+    //function name is cld_cmd.`module_name`.`command_name`
     lua_getglobal(L, "cld_cmd");
     lua_getfield(L, -1, module_name);
     lua_getfield(L, -1, command_name);
+
+    //first arg is docker client
     lua_getglobal(L, "d");                 /* push 1st argument */
 
+    //second arg is command options
+    if (options == NULL) {
+        lua_pushnil(L);
+    }
+    else {
+        convert_to_lua_array(options, L);
+        //cld_option_to_lua(L, (cld_option*)arraylist_get(options, 0));
+    }
+
     /* do the call (2 arguments, 1 result) */
-    if (lua_pcall(L, 1, 1, 0) != 0)
+    if (lua_pcall(L, 2, 1, 0) != 0)
     {
         luaL_error(L, "error running function '%s': %s", command_name,
               lua_tostring(L, -1));
