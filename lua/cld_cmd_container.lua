@@ -57,7 +57,9 @@ function cld_cmd_container.ls_format(output)
         "IMAGE",
         "COMMAND",
         "CREATED",
-        "STATUS"
+        "STATUS",
+        "PORTS",
+        "NAMES"
     }
     fmtout = {}
     colwdths = {}
@@ -66,21 +68,41 @@ function cld_cmd_container.ls_format(output)
     fmtout["COMMAND"] = {}
     fmtout["CREATED"] = {}
     fmtout["STATUS"] = {}
+    fmtout["PORTS"] = {}
+    fmtout["NAMES"] = {}
     colwdths["CONTAINER ID"] = 15
     colwdths["IMAGE"] = 15
     colwdths["COMMAND"] = 25
     colwdths["CREATED"] = 25
-    colwdths["STATUS"] = 50
-    -- fmtout["CONTAINER ID"] = {}
-    -- fmtout["CONTAINER ID"] = {}
+    colwdths["STATUS"] = 20
+    colwdths["PORTS"] = 25
+    colwdths["NAMES"] = 50
     for k, c in ipairs(output) do
+        local ports_str = ""
+        local count = 1
+        for _, p in ipairs(c["Ports"]) do
+            ports_str = ports_str .. p.IP .. ":" .. p.PublicPort .. "->" .. p.PrivatePort .. "/" .. p.Type
+            if count < #c["Ports"] then
+                ports_str = ports_str .. ", "
+            end
+        end
+
+        local names_str = ""
+        count = 1
+        for _, p in ipairs(c["Names"]) do
+            names_str = names_str .. p
+            if count < #c["Names"] then
+                names_str = names_str .. ", "
+            end
+        end
+
         table.insert(fmtout["CONTAINER ID"], c["ID"])
         table.insert(fmtout["IMAGE"], c["Image"])
         table.insert(fmtout["COMMAND"], c["Command"])
         table.insert(fmtout["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
         table.insert(fmtout["STATUS"], c["Status"])
-        -- fmtout["PORTS"], c["Ports"])
-        -- fmtout["NAMES"], c["ID"])
+        table.insert(fmtout["PORTS"], ports_str)
+        table.insert(fmtout["NAMES"], names_str)
     end
     return hdrs, fmtout, colwdths
 end
