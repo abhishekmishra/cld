@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-#define LUA_LIB
 #include "lua.h"
 #include "lauxlib.h"
 

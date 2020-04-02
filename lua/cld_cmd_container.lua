@@ -7,7 +7,7 @@ function cld_cmd_container.dummy(d)
     print("Running dummy fn")
 end
 
-function cld_cmd_container.cmd_ctr_ls(d, options, args)
+function cld_cmd_container.ls(d, options, args)
     all = false
     limit = 0
     size = true
@@ -40,7 +40,7 @@ function cld_cmd_container.cmd_ctr_ls(d, options, args)
         ctr["Status"] = v.Status
 
         table.insert(output, ctr)
-        -- print("Container #" .. k .. " is " .. v.Names[1])
+        print("Container #" .. k .. " is " .. v.Names[1])
     end
     return output
 end

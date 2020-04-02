@@ -8,6 +8,8 @@
 
 #include "docker_connection_util.h"
 #include <arraylist.h>
+#include <lua.h>
+#include <lauxlib.h>
 
 #define CLD_OPTION_HELP_LONG "help"
 #define CLD_OPTION_HELP_SHORT "h"
@@ -53,6 +55,8 @@ typedef struct cld_val_t
 	char* description;
 } cld_val;
 
+int cld_val_to_lua(lua_State *L, cld_val* val);
+
 typedef struct cld_option_t
 {
 	char* name;
@@ -62,6 +66,9 @@ typedef struct cld_option_t
 	char* description;
 } cld_option;
 
+int cld_option_to_lua(lua_State *L, cld_option* option);
+void arraylist_cld_option_to_lua(lua_State *L, int index, void *data);
+
 typedef struct cld_argument_t
 {
 	char* name;
@@ -70,6 +77,9 @@ typedef struct cld_argument_t
 	char* description;
 	int optional;
 } cld_argument;
+
+int cld_argument_to_lua(lua_State *L, cld_argument* arg);
+void arraylist_cld_argument_to_lua(lua_State *L, int index, void *data);
 
 typedef cld_cmd_err(*cld_command_output_handler)(cld_cmd_err result_flag,
 	cld_result_type result_type, void* result);
