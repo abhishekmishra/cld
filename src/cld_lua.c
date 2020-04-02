@@ -4,15 +4,16 @@
 // https://opensource.org/licenses/MIT
 
 #include "cld_lua.h"
+#include <docker_log.h>
 
 static lua_State *L;
 
 cld_cmd_err start_lua_interpreter()
 {
-    printf("Starting LUA interpreter...\n");
+    docker_log_debug("Starting LUA interpreter...\n");
     L = luaL_newstate();
     luaL_openlibs(L);
-    luaL_dostring(L, "print('Started LUA interpreter.')");
+    //luaL_dostring(L, "print('Started LUA interpreter.')");
 
     //Load the cld_cmd library
     luaL_dostring(L, "cld_cmd = require('cld_cmd')");
@@ -24,14 +25,14 @@ cld_cmd_err start_lua_interpreter()
     luaL_dostring(L, "d=docker.connect()");
     
     //execute a dummy command to ensure all is well.
-    execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
+    //execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
 
     return CLD_COMMAND_SUCCESS;
 }
 
 cld_cmd_err stop_lua_interpreter()
 {
-    printf("Stopping LUA interpreter...\n");
+    docker_log_debug("Stopping LUA interpreter...\n");
     lua_close(L);
 
     return CLD_COMMAND_SUCCESS;

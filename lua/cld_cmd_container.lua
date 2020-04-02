@@ -41,23 +41,36 @@ function cld_cmd_container.ls(d, options, args)
         c["Status"] = v.Status
 
         table.insert(output, c)
-        print("Container #" .. k .. " is " .. v.Names[1])
+        -- print("Container #" .. k .. " is " .. v.Names[1])
     end
 
-    fmt_output = cld_cmd_container.ls_format(output)
+    hdrs, fmt_output, colwdths = cld_cmd_container.ls_format(output)
 
-    cld_cmd_util.display_table(fmt_output)
+    cld_cmd_util.display_table(hdrs, fmt_output, colwdths)
 
     return output
 end
 
 function cld_cmd_container.ls_format(output)
+    hdrs = {
+        "CONTAINER ID",
+        "IMAGE",
+        "COMMAND",
+        "CREATED",
+        "STATUS"
+    }
     fmtout = {}
+    colwdths = {}
     fmtout["CONTAINER ID"] = {}
     fmtout["IMAGE"] = {}
     fmtout["COMMAND"] = {}
     fmtout["CREATED"] = {}
     fmtout["STATUS"] = {}
+    colwdths["CONTAINER ID"] = 15
+    colwdths["IMAGE"] = 15
+    colwdths["COMMAND"] = 25
+    colwdths["CREATED"] = 25
+    colwdths["STATUS"] = 50
     -- fmtout["CONTAINER ID"] = {}
     -- fmtout["CONTAINER ID"] = {}
     for k, c in ipairs(output) do
@@ -69,7 +82,7 @@ function cld_cmd_container.ls_format(output)
         -- fmtout["PORTS"], c["Ports"])
         -- fmtout["NAMES"], c["ID"])
     end
-    return fmtout
+    return hdrs, fmtout, colwdths
 end
 
 return cld_cmd_container
