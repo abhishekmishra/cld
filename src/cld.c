@@ -390,62 +390,6 @@ arraylist *create_commands()
 	return CLD_COMMANDS;
 }
 
-int parse_line_run_command(Tokenizer *tokenizer, const char *line,
-						   int *cmd_argc, char ***cmd_argv, docker_context *ctx)
-{
-	if (strcmp(line, "\n") == 0)
-	{
-		return 0;
-	}
-	int tok_err = tok_str(tokenizer, line, &*cmd_argc,
-						  (const char ***)&*cmd_argv);
-	if (tok_err == 0)
-	{
-		cld_cmd_err err = exec_command(CLD_COMMANDS, ctx, *cmd_argc,
-									   *cmd_argv, (cld_command_output_handler)&print_handler,
-									   (cld_command_output_handler)&print_handler);
-		if (err != CLD_COMMAND_SUCCESS)
-		{
-			printf("Error: invalid command.\n");
-		}
-	}
-	else
-	{
-		printf("Error: invalid command.\n");
-	}
-
-	//reset tokenizer;
-	tok_reset(tokenizer);
-
-	return tok_err;
-}
-
-int parse_line_help_command(Tokenizer *tokenizer, const char *line,
-							int *cmd_argc, char ***cmd_argv, docker_context *ctx)
-{
-	int tok_err = tok_str(tokenizer, line, &*cmd_argc,
-						  (const char ***)&*cmd_argv);
-	if (tok_err == 0)
-	{
-		cld_cmd_err err = help_cmd_handler(CLD_COMMANDS, ctx, *cmd_argc,
-										   *cmd_argv, (cld_command_output_handler)&print_handler,
-										   (cld_command_output_handler)&print_handler);
-		if (err != CLD_COMMAND_SUCCESS)
-		{
-			printf("Error: invalid command.\n");
-		}
-	}
-	else
-	{
-		printf("Error: invalid command.\n");
-	}
-
-	//reset tokenizer;
-	tok_reset(tokenizer);
-
-	return tok_err;
-}
-
 int main(int argc, char *argv[])
 {
 	docker_log_set_level(LOG_INFO);
