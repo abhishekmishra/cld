@@ -3,6 +3,10 @@ docker = require("luaclibdocker")
 
 local cld_cmd_container = {}
 
+function cld_cmd_container.dummy(d)
+    print("Running dummy fn")
+end
+
 function cld_cmd_container.cmd_ctr_ls(d, options, args)
     all = false
     limit = 0
