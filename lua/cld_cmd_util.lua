@@ -2,7 +2,11 @@ local cld_cmd_util = {}
 
 cld_cmd_util.table_sep = "  "
 
-function cld_cmd_util.display_table(hdrs, table_data, colwdths)
+function cld_cmd_util.display_table(o)
+    hdrs = o.hdrs
+    table_data = o.fmtout
+    colwdths = o.colwdths
+
     fmtspecs = {}
     if colwdths ~= nil then
         for k, v in pairs(colwdths) do

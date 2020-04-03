@@ -44,39 +44,43 @@ function cld_cmd_container.ls(d, options, args)
         -- print("Container #" .. k .. " is " .. v.Names[1])
     end
 
-    hdrs, fmt_output, colwdths = cld_cmd_container.ls_format(output)
+    o = cld_cmd_container.ls_format(output)
 
-    cld_cmd_util.display_table(hdrs, fmt_output, colwdths)
+    cld_cmd_util.display_table(o)
 
     return output
 end
 
 function cld_cmd_container.ls_format(output)
-    hdrs = {
-        "CONTAINER ID",
-        "IMAGE",
-        "COMMAND",
-        "CREATED",
-        "STATUS",
-        "PORTS",
-        "NAMES"
+    o = {
+        hdrs = {
+            "CONTAINER ID",
+            "IMAGE",
+            "COMMAND",
+            "CREATED",
+            "STATUS",
+            "PORTS",
+            "NAMES"
+        },
+        fmtout = {
+            ["CONTAINER ID"] = {},
+            ["IMAGE"] = {},
+            ["COMMAND"] = {},
+            ["CREATED"] = {},
+            ["STATUS"] = {},
+            ["PORTS"] = {},
+            ["NAMES"] = {}
+        },
+        colwdths = {
+            ["CONTAINER ID"] = 15,
+            ["IMAGE"] = 15,
+            ["COMMAND"] = 25,
+            ["CREATED"] = 25,
+            ["STATUS"] = 20,
+            ["PORTS"] = 25,
+            ["NAMES"] = 50        
+        }
     }
-    fmtout = {}
-    colwdths = {}
-    fmtout["CONTAINER ID"] = {}
-    fmtout["IMAGE"] = {}
-    fmtout["COMMAND"] = {}
-    fmtout["CREATED"] = {}
-    fmtout["STATUS"] = {}
-    fmtout["PORTS"] = {}
-    fmtout["NAMES"] = {}
-    colwdths["CONTAINER ID"] = 15
-    colwdths["IMAGE"] = 15
-    colwdths["COMMAND"] = 25
-    colwdths["CREATED"] = 25
-    colwdths["STATUS"] = 20
-    colwdths["PORTS"] = 25
-    colwdths["NAMES"] = 50
     for k, c in ipairs(output) do
         local ports_str = ""
         local count = 1
@@ -96,15 +100,15 @@ function cld_cmd_container.ls_format(output)
             end
         end
 
-        table.insert(fmtout["CONTAINER ID"], c["ID"])
-        table.insert(fmtout["IMAGE"], c["Image"])
-        table.insert(fmtout["COMMAND"], c["Command"])
-        table.insert(fmtout["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
-        table.insert(fmtout["STATUS"], c["Status"])
-        table.insert(fmtout["PORTS"], ports_str)
-        table.insert(fmtout["NAMES"], names_str)
+        table.insert(o.fmtout["CONTAINER ID"], c["ID"])
+        table.insert(o.fmtout["IMAGE"], c["Image"])
+        table.insert(o.fmtout["COMMAND"], c["Command"])
+        table.insert(o.fmtout["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
+        table.insert(o.fmtout["STATUS"], c["Status"])
+        table.insert(o.fmtout["PORTS"], ports_str)
+        table.insert(o.fmtout["NAMES"], names_str)
     end
-    return hdrs, fmtout, colwdths
+    return o
 end
 
 return cld_cmd_container
