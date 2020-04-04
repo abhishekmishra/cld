@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2020 Abhishek Mishra
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -441,155 +441,107 @@ cld_command* ctr_commands() {
 	if (make_command(&container_command, "container", "ctr",
 		"Docker Container Commands",
 		NULL) == CLD_COMMAND_SUCCESS) {
-		cld_command* ctrls_command, * ctrcreate_command, * ctrstart_command,
-			* ctrstop_command, * ctrrestart_command, * ctrkill_command,
-			* ctrren_command, * ctrpause_command, * ctrunpause_command,
-			* ctrwait_command, * ctrlogs_command, * ctrtop_command,
-			* ctrremove_command, * ctrstats_command;
-		if (make_command(&ctrls_command, "list", "ls", "Docker Container List",
-			&ctr_ls_cmd_handler) == CLD_COMMAND_SUCCESS) {
-			cld_option* ls_options[] = { 
-				create_option("all", "a", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Show all containers (by default shows only running ones)."),
-				NULL
-			};
-			cld_fill_options_in_list(ctrls_command->options, ls_options);
-			arraylist_add(container_command->sub_commands, ctrls_command);
-		}
-		if (make_command(&ctrcreate_command, "create", "create",
-			"Docker Container Create", &ctr_create_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* image_name_arg;
-			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
-				"Name of Docker Image to use.");
-			arraylist_add(ctrcreate_command->args, image_name_arg);
+		cld_command* ctr_command;
 
-			arraylist_add(container_command->sub_commands, ctrcreate_command);
-		}
-		if (make_command(&ctrstart_command, "start", "on",
-			"Docker Container Start", &ctr_start_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to start.");
-			arraylist_add(ctrstart_command->args, container_arg);
+		ctr_command = create_command("list", "ls", "Docker Container List",
+			&ctr_ls_cmd_handler);
+		arraylist_add(ctr_command->options,
+			create_option("all", "a", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Show all containers (by default shows only running ones)."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrstart_command);
-		}
-		if (make_command(&ctrstop_command, "stop", "off",
-			"Docker Container Stop", &ctr_stop_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to stop.");
-			arraylist_add(ctrstop_command->args, container_arg);
+		ctr_command = create_command("create", "create",
+			"Docker Container Create", &ctr_create_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Image Name", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), "Name of Docker Image to use."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrstop_command);
-		}
-		if (make_command(&ctrrestart_command, "restart", "restart",
-			"Docker Container Restart", &ctr_restart_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to restart.");
-			arraylist_add(ctrrestart_command->args, container_arg);
+		ctr_command = create_command("start", "on",
+			"Docker Container Start", &ctr_start_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to start."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrrestart_command);
-		}
-		if (make_command(&ctrkill_command, "kill", "kill",
-			"Docker Container Kill", &ctr_kill_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to kill.");
-			arraylist_add(ctrkill_command->args, container_arg);
+		ctr_command = create_command("stop", "off",
+			"Docker Container Stop", &ctr_stop_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to stop."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrkill_command);
-		}
-		if (make_command(&ctrren_command, "rename", "ren",
-			"Docker Container Rename", &ctr_ren_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to rename.");
-			arraylist_add(ctrren_command->args, container_arg);
+		ctr_command = create_command("restart", "restart",
+			"Docker Container Restart", &ctr_restart_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to restart."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			cld_argument* name_arg;
-			make_argument(&name_arg, "Name", CLD_TYPE_STRING,
-				"New name of container.");
-			arraylist_add(ctrren_command->args, name_arg);
+		ctr_command = create_command("kill", "kill",
+			"Docker Container Kill", &ctr_kill_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to kill."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrren_command);
-		}
-		if (make_command(&ctrpause_command, "pause", "pause",
-			"Docker Container Pause", &ctr_pause_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to pause.");
-			arraylist_add(ctrpause_command->args, container_arg);
+		ctr_command = create_command("rename", "ren",
+			"Docker Container Rename", &ctr_ren_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to rename."));
+		arraylist_add(ctr_command->args,
+			create_argument("Name", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"New name of container."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrpause_command);
-		}
-		if (make_command(&ctrunpause_command, "unpause", "unpause",
-			"Docker Container UnPause", &ctr_unpause_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to unpause.");
-			arraylist_add(ctrunpause_command->args, container_arg);
+		ctr_command = create_command("pause", "pause",
+			"Docker Container Pause", &ctr_pause_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to pause."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrunpause_command);
-		}
-		if (make_command(&ctrwait_command, "wait", "wait",
-			"Docker Container Wait", &ctr_wait_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container to wait.");
-			arraylist_add(ctrwait_command->args, container_arg);
+		ctr_command = create_command("unpause", "unpause",
+			"Docker Container UnPause", &ctr_unpause_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to unpause."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrwait_command);
-		}
-		if (make_command(&ctrlogs_command, "logs", "lg",
-			"Docker Container Logs", &ctr_logs_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container.");
-			arraylist_add(ctrlogs_command->args, container_arg);
+		ctr_command = create_command("wait", "wait",
+			"Docker Container Wait", &ctr_wait_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container to wait."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrlogs_command);
-		}
-		if (make_command(&ctrtop_command, "top", "ps",
-			"Docker Container Top/PS", &ctr_top_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container.");
-			arraylist_add(ctrtop_command->args, container_arg);
+		ctr_command = create_command("logs", "lg",
+			"Docker Container Logs", &ctr_logs_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrtop_command);
-		}
-		if (make_command(&ctrremove_command, "remove", "del",
-			"Docker Remove Container", &ctr_remove_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container.");
-			arraylist_add(ctrremove_command->args, container_arg);
+		ctr_command = create_command("top", "ps",
+			"Docker Container Top/PS", &ctr_top_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrremove_command);
-		}
-		if (make_command(&ctrstats_command, "stats", "stats",
-			"Docker Container Stats", &ctr_stats_cmd_handler)
-			== CLD_COMMAND_SUCCESS) {
-			cld_argument* container_arg;
-			make_argument(&container_arg, "Container", CLD_TYPE_STRING,
-				"Name of container.");
-			arraylist_add(ctrstats_command->args, container_arg);
+		ctr_command = create_command("remove", "del",
+			"Docker Remove Container", &ctr_remove_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container."));
+		arraylist_add(container_command->sub_commands, ctr_command);
 
-			arraylist_add(container_command->sub_commands, ctrstats_command);
-		}
+		ctr_command = create_command("stats", "stats",
+			"Docker Container Stats", &ctr_stats_cmd_handler);
+		arraylist_add(ctr_command->args,
+			create_argument("Container", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of container."));
+		arraylist_add(container_command->sub_commands, ctr_command);
+
 	}
 	return container_command;
 }

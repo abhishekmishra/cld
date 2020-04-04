@@ -341,10 +341,8 @@ cld_command* img_commands()
 			&img_pl_cmd_handler) == CLD_COMMAND_SUCCESS)
 		{
 			cld_argument* image_name_arg;
-			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
-				"Name of Docker Image to be pulled.");
-			arraylist_add(imgpl_command->args, image_name_arg);
-
+			arraylist_add(imgpl_command->args, create_argument("Image Name", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+				"Name of Docker Image to be pulled."));
 			arraylist_add(image_command->sub_commands, imgpl_command);
 		}
 		if (make_command(&imgls_command, "list", "ls", "Docker Image List",
@@ -356,11 +354,9 @@ cld_command* img_commands()
 			"Docker Image Build", &img_build_cmd_handler)
 			== CLD_COMMAND_SUCCESS)
 		{
-			cld_argument* folder_or_url_or_dash;
-			make_argument(&folder_or_url_or_dash, "Folder | URL | -",
-				CLD_TYPE_STRING,
-				"Docker resources to build (folder/url/stdin)");
-			arraylist_add(imgbuild_command->args, folder_or_url_or_dash);
+			arraylist_add(imgbuild_command->args,
+				create_argument("Folder | URL | -", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL),
+					"Docker resources to build (folder/url/stdin)"));
 
 			arraylist_add(image_command->sub_commands, imgbuild_command);
 		}

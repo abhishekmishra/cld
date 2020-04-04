@@ -312,8 +312,7 @@ void cld_fill_options_in_list(arraylist* optlist, cld_option* options[]) {
  * \param description
  * \return error code
  */
-cld_cmd_err make_argument(cld_argument **arg, char *name, cld_type type,
-						  char *description)
+cld_cmd_err make_argument(cld_argument **arg, char* name, cld_val* val, cld_val* default_val, char* description)
 {
 	(*arg) = (cld_argument *)calloc(1, sizeof(cld_argument));
 	if ((*arg) == NULL)
@@ -323,9 +322,15 @@ cld_cmd_err make_argument(cld_argument **arg, char *name, cld_type type,
 	(*arg)->name = name;
 	(*arg)->description = description;
 	(*arg)->optional = 0;
-	make_cld_val(&((*arg)->val), type);
-	make_cld_val(&((*arg)->default_val), type);
+	(*arg)->val = val;
+	(*arg)->default_val = default_val;
 	return CLD_COMMAND_SUCCESS;
+}
+
+cld_argument* create_argument(char* name, cld_val* val, cld_val* default_val, char* desc) {
+	cld_argument* arg;
+	make_argument(&arg, name, val, default_val, desc);
+	return arg;
 }
 
 /**
@@ -411,6 +416,15 @@ cld_cmd_err make_command(cld_command **command, char *name, char *short_name,
 	arraylist_new(&((*command)->args), (void (*)(void *)) & free_argument);
 	set_lua_convertor((*command)->args, &arraylist_cld_argument_to_lua);
 	return CLD_COMMAND_SUCCESS;
+}
+
+cld_command* create_command(char* name, char* short_name,
+	char* description, cld_command_handler handler) {
+	cld_command* cmd;
+	if (make_command(&cmd, name, short_name, description, handler) == CLD_COMMAND_SUCCESS) {
+		return cmd;
+	}
+	return NULL;
 }
 
 /**

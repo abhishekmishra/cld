@@ -154,7 +154,8 @@ cld_cmd_err parse_cld_val(cld_val* val, char* input);
  * \param option object to create
  * \param name
  * \param short_name
- * \param type
+ * \param value
+ * \param default value
  * \param description
  * \return error code
  */
@@ -179,8 +180,8 @@ cld_option* get_option_by_name(arraylist* options, char* name);
  * \param description
  * \return error code
  */
-cld_cmd_err make_argument(cld_argument** arg, char* name, cld_type type,
-	char* description);
+cld_cmd_err make_argument(cld_argument** arg, char* name, cld_val* val, cld_val* default_val, char* desc);
+cld_argument* create_argument(char* name, cld_val* val, cld_val* default_val, char* desc);
 
 /**
  * Free resources used by argument
@@ -202,6 +203,9 @@ void free_argument(cld_argument* arg);
  */
 cld_cmd_err make_command(cld_command** command, char* name, char* short_name,
 	char* description, cld_command_handler handler);
+
+cld_command* create_command(char* name, char* short_name,
+    char* description, cld_command_handler handler);
 
 /**
  * Free a command object
