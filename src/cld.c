@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2020 Abhishek Mishra
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -73,27 +73,27 @@
 #define CLD_OPTION_MAIN_VERSION_SHORT "v"
 #define CLD_OPTION_MAIN_VERSION_DESC "Show CLD version."
 
-static char *main_command_name;
-static docker_context *ctx;
+static char* main_command_name;
+static docker_context* ctx;
 static bool connected = false;
-static arraylist *CLD_COMMANDS;
+static arraylist* CLD_COMMANDS;
 
-void print_table_result(void *result)
+void print_table_result(void* result)
 {
-	cld_table *result_tbl = (cld_table *)result;
-	int *col_widths;
-	col_widths = (int *)calloc(result_tbl->num_cols, sizeof(int));
-	char **col_fmtspec;
-	col_fmtspec = (char **)calloc(result_tbl->num_cols, sizeof(char *));
-	char *header;
-	char *value;
+	cld_table* result_tbl = (cld_table*)result;
+	size_t* col_widths;
+	col_widths = (size_t*)calloc(result_tbl->num_cols, sizeof(size_t));
+	char** col_fmtspec;
+	col_fmtspec = (char**)calloc(result_tbl->num_cols, sizeof(char*));
+	char* header;
+	char* value;
 	int min_width = 4, max_width = 25;
 
 	//calculate column widths, and create format specifiers
 	for (int i = 0; i < result_tbl->num_cols; i++)
 	{
 		cld_table_get_header(&header, result_tbl, i);
-		int col_width = strlen(header);
+		size_t col_width = strlen(header);
 		for (int j = 0; j < result_tbl->num_rows; j++)
 		{
 			cld_table_get_row_val(&value, result_tbl, j, i);
@@ -113,7 +113,7 @@ void print_table_result(void *result)
 		{
 			col_width = max_width;
 		}
-		char *fmtspec = (char *)calloc(16, sizeof(char));
+		char* fmtspec = (char*)calloc(16, sizeof(char));
 		sprintf(fmtspec, "%%-%d.%ds", (col_width + 1), col_width);
 		col_widths[i] = col_width;
 		col_fmtspec[i] = fmtspec;
@@ -161,13 +161,13 @@ void print_table_result(void *result)
 }
 
 cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
-						  void *result)
+	void* result)
 {
 	if (res_type == CLD_RESULT_STRING)
 	{
 		if (result != NULL)
 		{
-			char *result_str = (char *)result;
+			char* result_str = (char*)result;
 			printf("%s", result_str);
 		}
 	}
@@ -177,7 +177,7 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	}
 	else if (res_type == CLD_RESULT_DICT)
 	{
-		cld_dict *result_dict = (cld_dict *)result;
+		cld_dict* result_dict = (cld_dict*)result;
 		cld_dict_foreach(result_dict, k, v)
 		{
 			printf("%-26.25s: %s\n", k, v);
@@ -186,20 +186,20 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	}
 	else if (res_type == CLD_RESULT_PROGRESS)
 	{
-		cld_multi_progress *result_progress = (cld_multi_progress *)result;
+		cld_multi_progress* result_progress = (cld_multi_progress*)result;
 		if (result_progress->old_count > 0)
 		{
 			printf("\033[%dA", result_progress->old_count);
 			fflush(stdout);
 		}
-		int new_len = arraylist_length(result_progress->progress_ls);
+		size_t new_len = arraylist_length(result_progress->progress_ls);
 		//		printf("To remove %d, to write %d\n", result_progress->old_count, new_len);
-		for (int i = 0; i < new_len; i++)
+		for (size_t i = 0; i < new_len; i++)
 		{
-			cld_progress *p = (cld_progress *)arraylist_get(
+			cld_progress* p = (cld_progress*)arraylist_get(
 				result_progress->progress_ls, i);
 			printf("\033[K%s: %s", p->name, p->message);
-			char *progress = p->extra;
+			char* progress = p->extra;
 			if (progress != NULL)
 			{
 				printf(" %s", progress);
@@ -214,22 +214,22 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	return CLD_COMMAND_SUCCESS;
 }
 
-void docker_result_handler(docker_context *ctx, docker_result *res)
+void docker_result_handler(docker_context* ctx, docker_result* res)
 {
 	handle_docker_error(res, (cld_command_output_handler)&print_handler, (cld_command_output_handler)&print_handler);
 }
 
-cld_cmd_err main_cmd_handler(void *handler_args,
-							 arraylist *options, arraylist *args,
-							 cld_command_output_handler success_handler,
-							 cld_command_output_handler error_handler)
+cld_cmd_err main_cmd_handler(void* handler_args,
+	arraylist* options, arraylist* args,
+	cld_command_output_handler success_handler,
+	cld_command_output_handler error_handler)
 {
 
-	cld_option *host_option = get_option_by_name(options, CLD_OPTION_MAIN_HOST_LONG);
+	cld_option* host_option = get_option_by_name(options, CLD_OPTION_MAIN_HOST_LONG);
 
 	if (!connected)
 	{
-		char *url;
+		char* url;
 
 		if (host_option->val->str_value == NULL)
 		{
@@ -262,7 +262,7 @@ cld_cmd_err main_cmd_handler(void *handler_args,
 
 		if (connected)
 		{
-			docker_context_result_handler_set(ctx, (docker_result_handler_fn *)&docker_result_handler);
+			docker_context_result_handler_set(ctx, (docker_result_handler_fn*)&docker_result_handler);
 			//if (docker_ping(ctx) != E_SUCCESS)
 			//{
 			//	docker_log_fatal("Could not ping the server %s", url);
@@ -280,7 +280,7 @@ cld_cmd_err main_cmd_handler(void *handler_args,
 		exit(-1);
 	}
 
-	cld_option *debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
+	cld_option* debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
 	if (debug_option->val->str_value != NULL)
 	{
 		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_DEBUG) == 0)
@@ -308,64 +308,41 @@ cld_cmd_err main_cmd_handler(void *handler_args,
 	return CLD_COMMAND_SUCCESS;
 }
 
-cld_command *create_main_command()
+cld_command* create_main_command()
 {
-	cld_command *main_command;
+	cld_command* main_command;
 	if (make_command(&main_command, main_command_name, "cld",
-					 "CLD Docker Client",
-					 &main_cmd_handler) == CLD_COMMAND_SUCCESS)
+		"CLD Docker Client",
+		&main_cmd_handler) == CLD_COMMAND_SUCCESS)
 	{
-		cld_option *config_option, *debug_option, *log_level_option, *tls_option,
-			*tlscacert_option, *tlscert_option, *tlskey_option, *tlsverify_option, *interactive_option,
-			*host_option, *version_option, *help_option;
-
-		make_option(&config_option, CLD_OPTION_MAIN_CONFIG_LONG,
-					CLD_OPTION_MAIN_CONFIG_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_CONFIG_DESC);
-		arraylist_add(main_command->options, config_option);
-
-		make_option(&debug_option, CLD_OPTION_MAIN_DEBUG_LONG,
-					CLD_OPTION_MAIN_DEBUG_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_DEBUG_DESC);
-		arraylist_add(main_command->options, debug_option);
-
-		make_option(&log_level_option, CLD_OPTION_MAIN_LOG_LEVEL_LONG,
-					CLD_OPTION_MAIN_LOG_LEVEL_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_LOG_LEVEL_DESC);
-		arraylist_add(main_command->options, log_level_option);
-
-		make_option(&tls_option, CLD_OPTION_MAIN_TLS_LONG,
-					CLD_OPTION_MAIN_TLS_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_TLS_DESC);
-		arraylist_add(main_command->options, tls_option);
-
-		make_option(&tlscacert_option, CLD_OPTION_MAIN_TLSCACERT_LONG,
-					CLD_OPTION_MAIN_TLSCACERT_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_TLSCACERT_DESC);
-		arraylist_add(main_command->options, tlscacert_option);
-
-		make_option(&tlscert_option, CLD_OPTION_MAIN_TLSCERT_LONG,
-					CLD_OPTION_MAIN_TLSCERT_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_TLSCERT_DESC);
-		arraylist_add(main_command->options, tlscert_option);
-
-		make_option(&tlskey_option, CLD_OPTION_MAIN_TLSKEY_LONG,
-					CLD_OPTION_MAIN_TLSKEY_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_TLSKEY_DESC);
-		arraylist_add(main_command->options, tlskey_option);
-
-		make_option(&tlsverify_option, CLD_OPTION_MAIN_TLSVERIFY_LONG,
-					CLD_OPTION_MAIN_TLSVERIFY_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_TLSVERIFY_DESC);
-		arraylist_add(main_command->options, tlsverify_option);
-
-		make_option(&interactive_option, CLD_OPTION_MAIN_INTERACTIVE_LONG,
-					CLD_OPTION_MAIN_INTERACTIVE_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_INTERACTIVE_DESC);
-		arraylist_add(main_command->options, interactive_option);
-
-		make_option(&host_option, CLD_OPTION_MAIN_HOST_LONG,
-					CLD_OPTION_MAIN_HOST_SHORT, CLD_TYPE_STRING, CLD_OPTION_MAIN_HOST_DESC);
-		arraylist_add(main_command->options, host_option);
-
-		make_option(&version_option, CLD_OPTION_MAIN_VERSION_LONG,
-					CLD_OPTION_MAIN_VERSION_SHORT, CLD_TYPE_FLAG, CLD_OPTION_MAIN_VERSION_DESC);
-		arraylist_add(main_command->options, version_option);
-
-		make_option(&help_option, CLD_OPTION_HELP_LONG,
-					CLD_OPTION_HELP_SHORT, CLD_TYPE_FLAG, CLD_OPTION_HELP_DESC);
-		arraylist_add(main_command->options, help_option);
+		cld_option* main_options[] = {
+		create_option(CLD_OPTION_MAIN_CONFIG_LONG,
+					CLD_OPTION_MAIN_CONFIG_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_CONFIG_DESC),
+		create_option(CLD_OPTION_MAIN_DEBUG_LONG,
+					CLD_OPTION_MAIN_DEBUG_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_DEBUG_DESC),
+		create_option(CLD_OPTION_MAIN_LOG_LEVEL_LONG,
+					CLD_OPTION_MAIN_LOG_LEVEL_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_LOG_LEVEL_DESC),
+		create_option(CLD_OPTION_MAIN_TLS_LONG,
+					CLD_OPTION_MAIN_TLS_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_TLS_DESC),
+		create_option(CLD_OPTION_MAIN_TLSCACERT_LONG,
+					CLD_OPTION_MAIN_TLSCACERT_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSCACERT_DESC),
+		create_option(CLD_OPTION_MAIN_TLSCERT_LONG,
+					CLD_OPTION_MAIN_TLSCERT_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSCERT_DESC),
+		create_option(CLD_OPTION_MAIN_TLSKEY_LONG,
+					CLD_OPTION_MAIN_TLSKEY_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSKEY_DESC),
+		create_option(CLD_OPTION_MAIN_TLSVERIFY_LONG,
+					CLD_OPTION_MAIN_TLSVERIFY_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_TLSVERIFY_DESC),
+		create_option(CLD_OPTION_MAIN_INTERACTIVE_LONG,
+					CLD_OPTION_MAIN_INTERACTIVE_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_INTERACTIVE_DESC),
+		create_option(CLD_OPTION_MAIN_HOST_LONG,
+					CLD_OPTION_MAIN_HOST_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_HOST_DESC),
+		create_option(CLD_OPTION_MAIN_VERSION_LONG,
+					CLD_OPTION_MAIN_VERSION_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_VERSION_DESC),
+		create_option(CLD_OPTION_HELP_LONG,
+					CLD_OPTION_HELP_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_HELP_DESC),
+		NULL
+		};
+		cld_fill_options_in_list(main_command->options, main_options);
 
 		arraylist_add(main_command->sub_commands, sys_commands());
 		arraylist_add(main_command->sub_commands, ctr_commands());
@@ -374,11 +351,12 @@ cld_command *create_main_command()
 		arraylist_add(main_command->sub_commands, net_commands());
 		return main_command;
 	}
+	return NULL;
 }
 
-arraylist *create_commands()
+arraylist* create_commands()
 {
-	int err = arraylist_new(&CLD_COMMANDS, (void (*)(void *)) & free_command);
+	int err = arraylist_new(&CLD_COMMANDS, (void (*)(void*)) & free_command);
 	if (err == 0)
 	{
 		arraylist_add(CLD_COMMANDS, create_main_command());
@@ -390,7 +368,7 @@ arraylist *create_commands()
 	return CLD_COMMANDS;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	docker_log_set_level(LOG_INFO);
 
@@ -404,8 +382,8 @@ int main(int argc, char *argv[])
 		create_commands();
 
 		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
-									   argv, (cld_command_output_handler)&print_handler,
-									   (cld_command_output_handler)&print_handler);
+			argv, (cld_command_output_handler)&print_handler,
+			(cld_command_output_handler)&print_handler);
 		if (err != CLD_COMMAND_SUCCESS)
 		{
 			docker_log_error("Error: invalid command.\n");
@@ -413,6 +391,6 @@ int main(int argc, char *argv[])
 	}
 
 	stop_lua_interpreter();
-	
+
 	return 0;
 }

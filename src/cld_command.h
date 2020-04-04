@@ -52,10 +52,17 @@ typedef struct cld_val_t
 	int int_value;
 	double dbl_value;
 	char* str_value;
-	char* description;
 } cld_val;
 
 int cld_val_to_lua(lua_State *L, cld_val* val);
+
+cld_val* create_cld_val(cld_type type, int bool_val, int int_val, double dbl_val, char* str);
+
+#define CLD_VAL_FLAG(v) create_cld_val(CLD_TYPE_FLAG, v, 0, 0, NULL)
+#define CLD_VAL_BOOLEAN(v) create_cld_val(CLD_TYPE_BOOLEAN, v, 0, 0, NULL)
+#define CLD_VAL_INT(v) create_cld_val(CLD_TYPE_INT, 0, v, 0, NULL)
+#define CLD_VAL_DOUBLE(v) create_cld_val(CLD_TYPE_DOUBLE, 0, 0, v, NULL)
+#define CLD_VAL_STRING(v) create_cld_val(CLD_TYPE_DOUBLE, 0, 0, 0, v)
 
 typedef struct cld_option_t
 {
@@ -80,6 +87,8 @@ typedef struct cld_argument_t
 
 int cld_argument_to_lua(lua_State *L, cld_argument* arg);
 void arraylist_cld_argument_to_lua(lua_State *L, int index, void *data);
+
+void cld_fill_options_in_list(arraylist* optlist, cld_option* options[]);
 
 typedef cld_cmd_err(*cld_command_output_handler)(cld_cmd_err result_flag,
 	cld_result_type result_type, void* result);
@@ -150,7 +159,9 @@ cld_cmd_err parse_cld_val(cld_val* val, char* input);
  * \return error code
  */
 cld_cmd_err make_option(cld_option** option, char* name, char* short_name,
-	cld_type type, char* description);
+    cld_val* val, cld_val* default_val, char* description);
+
+cld_option* create_option(char* name, char* short_name, cld_val* val, cld_val* default_val, char* desc);
 
 /**
  * Free resources used by option

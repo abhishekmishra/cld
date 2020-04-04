@@ -28,8 +28,8 @@ int cld_dict_keys(cld_dict* dict, char** keys);
 #define cld_dict_foreach(dict, key, value) \
 	char* key; \
 	char* value; \
-	int i; \
-	int len = arraylist_length(dict->keys); \
+	size_t i; \
+	size_t len = arraylist_length(dict->keys); \
 	for(i = 0, \
 			key = (char*)arraylist_get(dict->keys, i), \
 			value = (char*)arraylist_get(dict->vals, i); \

@@ -44,6 +44,18 @@ cld_cmd_err make_cld_val(cld_val **val, cld_type type)
 	return CLD_COMMAND_SUCCESS;
 }
 
+cld_val* create_cld_val(cld_type type, int bool_val, int int_val, double dbl_val, char* str) {
+	cld_val* v;
+	make_cld_val(&v, type);
+	if (v != NULL) {
+		v->bool_value = bool_val;
+		v->int_value = int_val;
+		v->dbl_value = dbl_val;
+		v->str_value = str;
+	}
+	return v;
+}
+
 /**
  * Free the created value
  */
@@ -180,7 +192,7 @@ int cld_val_to_lua(lua_State *L, cld_val *val)
  * \return error code
  */
 cld_cmd_err make_option(cld_option **option, char *name, char *short_name,
-						cld_type type, char *description)
+	cld_val* val, cld_val* default_val, char *description)
 {
 	(*option) = (cld_option *)calloc(1, sizeof(cld_option));
 	if ((*option) == NULL)
@@ -190,9 +202,15 @@ cld_cmd_err make_option(cld_option **option, char *name, char *short_name,
 	(*option)->name = name;
 	(*option)->short_name = short_name;
 	(*option)->description = description;
-	make_cld_val(&((*option)->val), type);
-	make_cld_val(&((*option)->default_val), type);
+	(*option)->val = val;
+	(*option)->default_val = default_val;
 	return CLD_COMMAND_SUCCESS;
+}
+
+cld_option* create_option(char* name, char* short_name, cld_val*val, cld_val* default_val, char* desc) {
+	cld_option* o;
+	make_option(&o, name, short_name, val, default_val, desc);
+	return o;
 }
 
 /**
@@ -272,6 +290,17 @@ int cld_option_to_lua(lua_State *L, cld_option *option)
 
 void arraylist_cld_option_to_lua(lua_State *L, int index, void *data) {
 	cld_option_to_lua(L, (cld_option*) data);
+}
+
+void cld_fill_options_in_list(arraylist* optlist, cld_option* options[]) {
+	if (options != NULL && optlist != NULL) {
+		int count = 0;
+		cld_option* val;
+		while ((val = options[count]) != NULL) {
+			arraylist_add(optlist, val);
+			count += 1;
+		}
+	}
 }
 
 /**
