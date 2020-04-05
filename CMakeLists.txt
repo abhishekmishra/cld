@@ -34,6 +34,8 @@ set( CLD_SOURCES
   src/cld.c
   src/tokenizer.c
   src/cld_lua.c
+  src/mustach.c
+  src/mustach-json-c.c
 
   src/cld_command.h
   src/cld_common.h
@@ -47,6 +49,8 @@ set( CLD_SOURCES
   src/cld_vol.h
   src/histedit.h
   src/cld_lua.h
+  src/mustach.h
+  src/mustach-json-c.h
 )
 
 include(FindLua)
@@ -60,6 +64,9 @@ endif (LUA_FOUND)
 
 add_executable( ${PROJECT_NAME} ${CLD_SOURCES} )
 target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
+
+# see mustach documentation for this
+add_definitions(-DNO_OPEN_MEMSTREAM)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
