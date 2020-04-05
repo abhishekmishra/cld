@@ -447,6 +447,20 @@ cld_command* ctr_commands() {
 			&ctr_ls_cmd_handler);
 		arraylist_add(ctr_command->options,
 			create_option("all", "a", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Show all containers (by default shows only running ones)."));
+		arraylist_add(ctr_command->options,
+			create_option("filter", "f", CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), "Filter output based on conditions provided"));
+		arraylist_add(ctr_command->options,
+			create_option("format", NULL, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), "Pretty-print containers using a Go template"));
+		arraylist_add(ctr_command->options,
+			create_option("last", "n", CLD_VAL_INT(-1), CLD_VAL_INT(10), "Show n last created containers (includes all states)"));
+		arraylist_add(ctr_command->options,
+			create_option("latest", "l", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Show the latest created container (includes all states)"));
+		arraylist_add(ctr_command->options,
+			create_option("no-trunc", NULL, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Don't truncate output"));
+		arraylist_add(ctr_command->options,
+			create_option("quiet", "q", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Only display numeric IDs"));
+		arraylist_add(ctr_command->options,
+			create_option("size", "s", CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), "Display total file sizes"));
 		arraylist_add(container_command->sub_commands, ctr_command);
 
 		ctr_command = create_command("create", "create",
