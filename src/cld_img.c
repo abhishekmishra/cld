@@ -16,6 +16,8 @@
 #include "cld_progress.h"
 #include "cld_command.h"
 
+#include "mustach-json-c.h"
+
 typedef struct
 {
 	cld_command_output_handler success_handler;
@@ -207,6 +209,20 @@ cld_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 			cld_table_set_header(img_tbl, col++, "IMAGE ID");
 			cld_table_set_header(img_tbl, col++, "CREATED");
 			cld_table_set_header(img_tbl, col++, "SIZE");
+
+			char* outstr;
+			size_t outstrlen;
+
+			printf("\n%s\n", get_json_string(images));
+
+			mustach_json_c(
+				"{{#.}}"
+				"  {{Created}}"
+				"{{/.}}", images, &outstr, &outstrlen);
+
+			if (outstr != NULL) {
+				printf("%s\n", outstr);
+			}
 
 			for (size_t i = 0; i < len_images; i++)
 			{
