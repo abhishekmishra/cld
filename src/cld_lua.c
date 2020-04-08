@@ -5,7 +5,7 @@
 
 #include "cld_lua.h"
 #include <docker_log.h>
-#include <lua_docker.h>
+#include "lua_docker.h"
 
 static lua_State *L;
 
