@@ -262,6 +262,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 
 		if (connected)
 		{
+			lua_set_docker_context(ctx);
 			docker_context_result_handler_set(ctx, (docker_result_handler_fn*)&docker_result_handler);
 			//if (docker_ping(ctx) != E_SUCCESS)
 			//{

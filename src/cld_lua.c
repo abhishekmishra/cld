@@ -5,6 +5,7 @@
 
 #include "cld_lua.h"
 #include <docker_log.h>
+#include <lua_docker.h>
 
 static lua_State *L;
 
@@ -22,11 +23,19 @@ cld_cmd_err start_lua_interpreter()
     luaL_dostring(L, "docker = require('luaclibdocker')");
 
     //create a docker client connection
-    luaL_dostring(L, "d=docker.connect()");
+    //luaL_dostring(L, "d=docker.connect()");
     
     //execute a dummy command to ensure all is well.
     //execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
 
+    return CLD_COMMAND_SUCCESS;
+}
+
+cld_cmd_err lua_set_docker_context(docker_context* ctx) {
+    docker_log_info("Setting docker context");
+    DockerClient_from_context(L, ctx);
+    lua_setglobal(L, "d");
+    docker_log_info("Setting docker context");
     return CLD_COMMAND_SUCCESS;
 }
 
