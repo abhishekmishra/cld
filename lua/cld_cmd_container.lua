@@ -21,7 +21,7 @@ function cld_cmd_container.ls(d, options, args)
 
     ctr_ls_str = d:container_ls(all, limit, size)
     ctr_ls = json.decode(ctr_ls_str)
-    -- print(ctr_ls_str)
+    print(ctr_ls_str)
 
     output = {}
     for k, v in ipairs(ctr_ls) do
@@ -48,7 +48,7 @@ function cld_cmd_container.ls(d, options, args)
 
     cld_cmd_util.display_table(o)
 
-    return output
+    return json.encode(o)
 end
 
 function cld_cmd_container.ls_format(output)

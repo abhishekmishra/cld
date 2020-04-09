@@ -6,6 +6,7 @@
 #include "cld_lua.h"
 #include <docker_log.h>
 #include "lua_docker.h"
+#include <json-c/json_object.h>
 
 static lua_State *L;
 
@@ -51,7 +52,7 @@ cld_cmd_err stop_lua_interpreter()
  * Execute a lua function representing a docker command.
  * The command is passed arguments identical to the C command handlers.
  */
-cld_cmd_err execute_lua_command(const char* module_name, const char *command_name, void *handler_args,
+cld_cmd_err execute_lua_command(json_object** res, const char* module_name, const char *command_name, void *handler_args,
                                 arraylist *options, arraylist *args, cld_command_output_handler success_handler,
                                 cld_command_output_handler error_handler)
 {
@@ -98,6 +99,9 @@ cld_cmd_err execute_lua_command(const char* module_name, const char *command_nam
               lua_tostring(L, -1));
         return CLD_COMMAND_ERR_UNKNOWN;
     }
+
+    char* result_str = lua_tostring(L, -1);
+    *res = json_tokener_parse(result_str);
 
     return CLD_COMMAND_SUCCESS;
 }
