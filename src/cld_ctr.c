@@ -19,9 +19,8 @@ cld_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
 
 	json_object* obj;
 	cld_cmd_err err = execute_lua_command(&obj, "ctr", "ls", handler_args, options, args, success_handler, error_handler);
-	printf("Received result\n");
 	if(obj != NULL) {
-		printf("Received json object -> %s\n", get_json_string(obj));
+		docker_log_debug("Received json object -> %s\n", get_json_string(obj));
 	}
 	return err;
 }

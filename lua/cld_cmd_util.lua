@@ -3,20 +3,18 @@ local cld_cmd_util = {}
 cld_cmd_util.table_sep = "  "
 
 function cld_cmd_util.display_table(o)
-    hdrs = o.hdrs
-    table_data = o.fmtout
-    colwdths = o.colwdths
+    headers = o.headers
+    table_data = o.data
+    column_widths = o.column_widths
 
     fmtspecs = {}
-    if colwdths ~= nil then
-        for k, v in pairs(colwdths) do
+    if column_widths ~= nil then
+        for k, v in pairs(column_widths) do
             fmtspecs[k] = "%-" .. (v+1) .. "." .. v .. "s"
-            -- print(fmtspecs[k])
         end
     end
     items = 0
-    -- io.write(cld_cmd_util.table_sep)
-    for _, k in ipairs(hdrs) do
+    for _, k in ipairs(headers) do
         if fmtspecs[k] ~= nil then
             io.write(string.format(fmtspecs[k], k) .. cld_cmd_util.table_sep)
         else
@@ -27,11 +25,8 @@ function cld_cmd_util.display_table(o)
         end
     end
     io.write("\n")
-    --print(#hdrs)
-    --print(items)
     for i = 1, items do
-        --io.write(cld_cmd_util.table_sep)
-        for _, k in ipairs(hdrs) do
+        for _, k in ipairs(headers) do
             if fmtspecs[k] ~= nil then
                 io.write(string.format(fmtspecs[k], table_data[k][i]) .. cld_cmd_util.table_sep)
             else

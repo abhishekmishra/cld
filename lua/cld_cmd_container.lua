@@ -21,7 +21,6 @@ function cld_cmd_container.ls(d, options, args)
 
     ctr_ls_str = d:container_ls(all, limit, size)
     ctr_ls = json.decode(ctr_ls_str)
-    print(ctr_ls_str)
 
     output = {}
     for k, v in ipairs(ctr_ls) do
@@ -53,7 +52,7 @@ end
 
 function cld_cmd_container.ls_format(output)
     o = {
-        hdrs = {
+        headers = {
             "CONTAINER ID",
             "IMAGE",
             "COMMAND",
@@ -62,7 +61,7 @@ function cld_cmd_container.ls_format(output)
             "PORTS",
             "NAMES"
         },
-        fmtout = {
+        data = {
             ["CONTAINER ID"] = {},
             ["IMAGE"] = {},
             ["COMMAND"] = {},
@@ -71,7 +70,7 @@ function cld_cmd_container.ls_format(output)
             ["PORTS"] = {},
             ["NAMES"] = {}
         },
-        colwdths = {
+        column_widths = {
             ["CONTAINER ID"] = 15,
             ["IMAGE"] = 15,
             ["COMMAND"] = 25,
@@ -100,13 +99,13 @@ function cld_cmd_container.ls_format(output)
             end
         end
 
-        table.insert(o.fmtout["CONTAINER ID"], c["ID"])
-        table.insert(o.fmtout["IMAGE"], c["Image"])
-        table.insert(o.fmtout["COMMAND"], c["Command"])
-        table.insert(o.fmtout["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
-        table.insert(o.fmtout["STATUS"], c["Status"])
-        table.insert(o.fmtout["PORTS"], ports_str)
-        table.insert(o.fmtout["NAMES"], names_str)
+        table.insert(o.data["CONTAINER ID"], c["ID"])
+        table.insert(o.data["IMAGE"], c["Image"])
+        table.insert(o.data["COMMAND"], c["Command"])
+        table.insert(o.data["CREATED"], os.date("%d-%m-%Y:%H:%M:%S", c["CreatedAt"]))
+        table.insert(o.data["STATUS"], c["Status"])
+        table.insert(o.data["PORTS"], ports_str)
+        table.insert(o.data["NAMES"], names_str)
     end
     return o
 end
