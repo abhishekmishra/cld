@@ -9,17 +9,17 @@ function cld_cmd_container.dummy(d)
 end
 
 function cld_cmd_container.ls(d, options, args)
-    all = false
-    limit = 0
-    size = true
+    -- cld_cmd_util.print_options(options)
 
-    if options ~= nil then
-        if options["all"] ~= nil then
-            all = options["all"].val
-        end
-    end
+    all = cld_cmd_util.option_val(options, "all")
+    limit = cld_cmd_util.option_val(options, "limit")
+    size = cld_cmd_util.option_val(options, "size")
+    last = cld_cmd_util.option_val(options, "last")
+    latest = cld_cmd_util.option_val(options, "latest")
+    no_trunc = cld_cmd_util.option_val(options, "no-trunc")
+    quiet = cld_cmd_util.option_val(options, "quiet")
 
-    ctr_ls_str = d:container_ls(all, limit, size)
+    ctr_ls_str = d:container_ls(all, last, size)
     ctr_ls = json.decode(ctr_ls_str)
 
     output = {}
