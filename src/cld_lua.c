@@ -33,10 +33,10 @@ cld_cmd_err start_lua_interpreter()
 }
 
 cld_cmd_err lua_set_docker_context(docker_context* ctx) {
-    docker_log_info("Setting docker context");
+    docker_log_debug("Setting docker context");
     DockerClient_from_context(L, ctx);
     lua_setglobal(L, "d");
-    docker_log_info("Setting docker context");
+    docker_log_debug("Setting docker context");
     return CLD_COMMAND_SUCCESS;
 }
 

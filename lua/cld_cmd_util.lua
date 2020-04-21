@@ -15,14 +15,18 @@ function cld_cmd_util.display_table(o)
     end
     items = 0
     for _, k in ipairs(headers) do
-        if fmtspecs[k] ~= nil then
-            io.write(string.format(fmtspecs[k], k) .. cld_cmd_util.table_sep)
-        else
-            io.write(k .. cld_cmd_util.table_sep)
+        if o.show_headers then
+            if fmtspecs[k] ~= nil then
+                io.write(string.format(fmtspecs[k], k) .. cld_cmd_util.table_sep)
+            else
+                io.write(k .. cld_cmd_util.table_sep)
+            end
         end
         if items == 0 then items = #table_data[k] end
     end
-    io.write("\n")
+    if o.show_headers then
+        io.write("\n")
+    end
     for i = 1, items do
         for _, k in ipairs(headers) do
             if fmtspecs[k] ~= nil then
@@ -40,10 +44,18 @@ function cld_cmd_util.print_options(options)
     for opt, opt_val in pairs(options) do
         io.write(opt .. " [")
         io.write("name=" .. opt_val["name"] .. " ")
-        if opt_val["short_name"] ~= nil then io.write("short_name=" .. tostring(opt_val["short_name"]) .. " ") end
-        if opt_val["val"] ~= nil then io.write("value=" .. tostring(opt_val["val"]) .. " ") end
-        if opt_val["default_val"] ~= nil then io.write("default=" .. tostring(opt_val["default_val"]) .. " ") end
-        if opt_val["description"] ~= nil then io.write("description=" .. tostring(opt_val["description"]) .. " ") end
+        if opt_val["short_name"] ~= nil then
+            io.write("short_name=" .. tostring(opt_val["short_name"]) .. " ")
+        end
+        if opt_val["val"] ~= nil then
+            io.write("value=" .. tostring(opt_val["val"]) .. " ")
+        end
+        if opt_val["default_val"] ~= nil then
+            io.write("default=" .. tostring(opt_val["default_val"]) .. " ")
+        end
+        if opt_val["description"] ~= nil then
+            io.write("description=" .. tostring(opt_val["description"]) .. " ")
+        end
         io.write(']\n')
     end
 end

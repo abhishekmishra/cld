@@ -9,8 +9,6 @@ function cld_cmd_container.dummy(d)
 end
 
 function cld_cmd_container.ls(d, options, args)
-    -- cld_cmd_util.print_options(options)
-
     all = cld_cmd_util.option_val(options, "all")
     limit = cld_cmd_util.option_val(options, "limit")
     size = cld_cmd_util.option_val(options, "size")
@@ -40,10 +38,13 @@ function cld_cmd_container.ls(d, options, args)
         c["Status"] = v.Status
 
         table.insert(output, c)
-        -- print("Container #" .. k .. " is " .. v.Names[1])
     end
 
-    o = cld_cmd_container.ls_format(output)
+    if quiet then
+        o = cld_cmd_container.ls_format_quiet(output)
+    else
+        o = cld_cmd_container.ls_format(output)
+    end
 
     cld_cmd_util.display_table(o)
 
@@ -78,7 +79,8 @@ function cld_cmd_container.ls_format(output)
             ["STATUS"] = 20,
             ["PORTS"] = 25,
             ["NAMES"] = 50        
-        }
+        },
+        show_headers = true
     }
     for k, c in ipairs(output) do
         local ports_str = ""
@@ -109,5 +111,25 @@ function cld_cmd_container.ls_format(output)
     end
     return o
 end
+
+function cld_cmd_container.ls_format_quiet(output)
+    o = {
+        headers = {
+            "CONTAINER ID"
+        },
+        data = {
+            ["CONTAINER ID"] = {}
+        },
+        column_widths = {
+            ["CONTAINER ID"] = 15 
+        },
+        show_headers = false
+    }
+    for k, c in ipairs(output) do
+        table.insert(o.data["CONTAINER ID"], c["ID"])
+    end
+    return o
+end
+
 
 return cld_cmd_container
