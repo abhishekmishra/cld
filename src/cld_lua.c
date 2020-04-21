@@ -15,7 +15,6 @@ cld_cmd_err start_lua_interpreter()
     docker_log_debug("Starting LUA interpreter...\n");
     L = luaL_newstate();
     luaL_openlibs(L);
-    //luaL_dostring(L, "print('Started LUA interpreter.')");
 
     //Load the cld_cmd library
     luaL_dostring(L, "cld_cmd = require('cld_cmd')");
@@ -23,9 +22,6 @@ cld_cmd_err start_lua_interpreter()
     //Load the luaclibdocker library
     luaL_dostring(L, "docker = require('luaclibdocker')");
 
-    //create a docker client connection
-    //luaL_dostring(L, "d=docker.connect()");
-    
     //execute a dummy command to ensure all is well.
     //execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
 
