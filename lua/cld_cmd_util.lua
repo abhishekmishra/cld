@@ -70,4 +70,7 @@ function cld_cmd_util.option_val(options, key)
     end
 end
 
+function cld_cmd_util.filters_to_list(filters)
+end
+
 return cld_cmd_util

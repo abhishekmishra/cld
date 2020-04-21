@@ -62,7 +62,7 @@ cld_val* create_cld_val(cld_type type, int bool_val, int int_val, double dbl_val
 #define CLD_VAL_BOOLEAN(v) create_cld_val(CLD_TYPE_BOOLEAN, v, 0, 0, NULL)
 #define CLD_VAL_INT(v) create_cld_val(CLD_TYPE_INT, 0, v, 0, NULL)
 #define CLD_VAL_DOUBLE(v) create_cld_val(CLD_TYPE_DOUBLE, 0, 0, v, NULL)
-#define CLD_VAL_STRING(v) create_cld_val(CLD_TYPE_DOUBLE, 0, 0, 0, v)
+#define CLD_VAL_STRING(v) create_cld_val(CLD_TYPE_STRING, 0, 0, 0, v)
 
 typedef struct cld_option_t
 {

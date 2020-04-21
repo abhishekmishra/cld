@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "cld_lua.h": "c"
+        "cld_lua.h": "c",
+        "docker_all.h": "c",
+        "docker_util.h": "c",
+        "docker_log.h": "c"
     }
 }

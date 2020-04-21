@@ -373,14 +373,14 @@ int main(int argc, char* argv[])
 {
 	docker_log_set_level(LOG_INFO);
 
-	start_lua_interpreter();
-
 	if (argc > 0)
 	{
 		docker_log_debug("command name is %s\n", argv[0]);
 		main_command_name = argv[0];
 
 		create_commands();
+
+		start_lua_interpreter();
 
 		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
 			argv, (cld_command_output_handler)&print_handler,
@@ -389,9 +389,9 @@ int main(int argc, char* argv[])
 		{
 			docker_log_error("Error: invalid command.\n");
 		}
-	}
 
-	stop_lua_interpreter();
+		stop_lua_interpreter();
+	}
 
 	return 0;
 }
