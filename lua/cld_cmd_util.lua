@@ -24,9 +24,7 @@ function cld_cmd_util.display_table(o)
         end
         if items == 0 then items = #table_data[k] end
     end
-    if o.show_headers then
-        io.write("\n")
-    end
+    if o.show_headers then io.write("\n") end
     for i = 1, items do
         for _, k in ipairs(headers) do
             if fmtspecs[k] ~= nil then
@@ -71,6 +69,25 @@ function cld_cmd_util.option_val(options, key)
 end
 
 function cld_cmd_util.filters_to_list(filters)
+    filters_ls = {}
+    for w in string.gmatch(filters, "[%w<>:-/@]+=[%w<>:-/@]+") do 
+        count = 0
+        key = nil
+        val = nil
+        for k in string.gmatch(w, "[%w<>:-/@]+") do
+            if count == 0 then 
+                key = k
+            else
+                val = k
+            end
+            count = count +1
+        end
+        if filters_ls[key] == nil then
+            filters_ls[key] = {}          
+        end
+        table.insert(filters_ls[key], val)
+    end
+    return filters_ls
 end
 
 return cld_cmd_util

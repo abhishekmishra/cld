@@ -16,8 +16,12 @@ function cld_cmd_container.ls(d, options, args)
     no_trunc = cld_cmd_util.option_val(options, "no-trunc")
     quiet = cld_cmd_util.option_val(options, "quiet")
 
-    ctr_ls_str = d:container_ls(all, cld_cmd_util.option_val(options, "last"),
-                                cld_cmd_util.option_val(options, "size"))
+    filters_ls = cld_cmd_util.filters_to_list(filter)
+
+    ctr_ls_str = d:container_ls_filter(all, cld_cmd_util.option_val(options,
+                                                                    "last"),
+                                       cld_cmd_util.option_val(options, "size"),
+                                       json.encode(filters_ls))
     ctr_ls = json.decode(ctr_ls_str)
 
     output = {}
