@@ -16,7 +16,7 @@ extern "C" {
 
 cld_cmd_err start_lua_interpreter();
 
-cld_cmd_err lua_set_docker_context(docker_context* ctx);
+cld_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel);
 
 cld_cmd_err stop_lua_interpreter();
 

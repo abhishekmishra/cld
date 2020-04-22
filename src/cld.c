@@ -77,6 +77,7 @@ static char* main_command_name;
 static docker_context* ctx;
 static bool connected = false;
 static arraylist* CLD_COMMANDS;
+static int loglevel = LOG_ERROR;
 
 void print_table_result(void* result)
 {
@@ -224,6 +225,35 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 	cld_command_output_handler success_handler,
 	cld_command_output_handler error_handler)
 {
+	cld_option* debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
+	if (debug_option->val->str_value != NULL)
+	{
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_DEBUG) == 0)
+		{
+			docker_log_set_level(LOG_DEBUG);
+			loglevel = LOG_DEBUG;
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_INFO) == 0)
+		{
+			docker_log_set_level(LOG_INFO);
+			loglevel = LOG_INFO;
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_WARN) == 0)
+		{
+			docker_log_set_level(LOG_WARN);
+			loglevel = LOG_WARN;
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_ERROR) == 0)
+		{
+			docker_log_set_level(LOG_ERROR);
+			loglevel = LOG_ERROR;
+		}
+		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_FATAL) == 0)
+		{
+			docker_log_set_level(LOG_FATAL);
+			loglevel = LOG_FATAL;
+		}
+	}
 
 	cld_option* host_option = get_option_by_name(options, CLD_OPTION_MAIN_HOST_LONG);
 
@@ -262,7 +292,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 
 		if (connected)
 		{
-			lua_set_docker_context(ctx);
+			lua_set_docker_context(ctx, loglevel);
 			docker_context_result_handler_set(ctx, (docker_result_handler_fn*)&docker_result_handler);
 			//if (docker_ping(ctx) != E_SUCCESS)
 			//{
@@ -279,31 +309,6 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 	if (!connected)
 	{
 		exit(-1);
-	}
-
-	cld_option* debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
-	if (debug_option->val->str_value != NULL)
-	{
-		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_DEBUG) == 0)
-		{
-			docker_log_set_level(LOG_DEBUG);
-		}
-		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_INFO) == 0)
-		{
-			docker_log_set_level(LOG_INFO);
-		}
-		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_WARN) == 0)
-		{
-			docker_log_set_level(LOG_WARN);
-		}
-		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_ERROR) == 0)
-		{
-			docker_log_set_level(LOG_ERROR);
-		}
-		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_FATAL) == 0)
-		{
-			docker_log_set_level(LOG_FATAL);
-		}
 	}
 
 	return CLD_COMMAND_SUCCESS;
@@ -378,9 +383,9 @@ int main(int argc, char* argv[])
 		docker_log_debug("command name is %s\n", argv[0]);
 		main_command_name = argv[0];
 
-		create_commands();
-
 		start_lua_interpreter();
+
+		create_commands();
 
 		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
 			argv, (cld_command_output_handler)&print_handler,

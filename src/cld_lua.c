@@ -28,11 +28,19 @@ cld_cmd_err start_lua_interpreter()
     return CLD_COMMAND_SUCCESS;
 }
 
-cld_cmd_err lua_set_docker_context(docker_context* ctx) {
+cld_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel) {
     docker_log_debug("Setting docker context");
     DockerClient_from_context(L, ctx);
     lua_setglobal(L, "d");
     docker_log_debug("Setting docker context");
+
+    char* cmdStr = (char*)calloc(1024, sizeof(char));
+    if(cmdStr != NULL) {
+        sprintf(cmdStr, "d:set_loglevel(%d)", loglevel);
+        luaL_dostring(L, cmdStr);
+        free(cmdStr);
+    }
+
     return CLD_COMMAND_SUCCESS;
 }
 
