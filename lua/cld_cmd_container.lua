@@ -16,7 +16,7 @@ function cld_cmd_container.ls(d, options, args)
     no_trunc = cld_cmd_util.option_val(options, "no-trunc")
     quiet = cld_cmd_util.option_val(options, "quiet")
 
-    filters_ls = {}
+    filters_ls = nil
     if filters ~= nil then
         filters_ls = cld_cmd_util.filters_to_list(filter)
     end
