@@ -16,7 +16,10 @@ function cld_cmd_container.ls(d, options, args)
     no_trunc = cld_cmd_util.option_val(options, "no-trunc")
     quiet = cld_cmd_util.option_val(options, "quiet")
 
-    filters_ls = cld_cmd_util.filters_to_list(filter)
+    filters_ls = {}
+    if filters ~= nil then
+        filters_ls = cld_cmd_util.filters_to_list(filter)
+    end
 
     ctr_ls_str = d:container_ls_filter(all, cld_cmd_util.option_val(options,
                                                                     "last"),
