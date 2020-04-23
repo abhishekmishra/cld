@@ -6,6 +6,7 @@
         "docker_log.h": "c",
         "cliutils.h": "c",
         "cli_progress.h": "c",
-        "cli_dict.h": "c"
+        "cli_dict.h": "c",
+        "getopt.h": "c"
     }
 }

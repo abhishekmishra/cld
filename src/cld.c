@@ -6,7 +6,6 @@
  */
 
 #include <string.h>
-#include <getopt.h>
 
 #include "docker_all.h"
 #include "cliutils.h"
