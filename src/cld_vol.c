@@ -5,7 +5,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-#include "cld_table.h"
+#include "cli_table.h"
 #include "docker_all.h"
 #include "cld_vol.h"
 
@@ -25,17 +25,17 @@ cli_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 
 		size_t col_num = 0;
 		size_t len_volumes = docker_volume_list_length(volumes);
-		cld_table* vol_tbl;
-		if (create_cld_table(&vol_tbl, len_volumes, 3) == 0) {
-			cld_table_set_header(vol_tbl, 0, "DRIVER");
-			cld_table_set_header(vol_tbl, 1, "VOLUME NAME");
-			cld_table_set_header(vol_tbl, 2, "MOUNT");
+		cli_table* vol_tbl;
+		if (create_cli_table(&vol_tbl, len_volumes, 3) == 0) {
+			cli_table_set_header(vol_tbl, 0, "DRIVER");
+			cli_table_set_header(vol_tbl, 1, "VOLUME NAME");
+			cli_table_set_header(vol_tbl, 2, "MOUNT");
 			for (size_t i = 0; i < len_volumes; i++) {
 				docker_volume* vol = (docker_volume*)docker_volume_list_get_idx(volumes,
 						i);
-				cld_table_set_row_val(vol_tbl, i, 0, docker_volume_driver_get(vol));
-				cld_table_set_row_val(vol_tbl, i, 1, docker_volume_name_get(vol));
-				cld_table_set_row_val(vol_tbl, i, 2, docker_volume_mountpoint_vol_get(vol));
+				cli_table_set_row_val(vol_tbl, i, 0, docker_volume_driver_get(vol));
+				cli_table_set_row_val(vol_tbl, i, 1, docker_volume_name_get(vol));
+				cli_table_set_row_val(vol_tbl, i, 2, docker_volume_mountpoint_vol_get(vol));
 			}
 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, vol_tbl);
 		}

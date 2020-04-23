@@ -5,7 +5,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-#include "cld_table.h"
+#include "cli_table.h"
 #include "docker_all.h"
 #include "cld_vol.h"
 
@@ -25,19 +25,19 @@ cli_cmd_err net_ls_cmd_handler(void *handler_args, arraylist *options,
 
 		size_t col_num = 0;
 		size_t len_networks = docker_network_list_length(networks);
-		cld_table* net_tbl;
-		if (create_cld_table(&net_tbl, len_networks, 4) == 0) {
-			cld_table_set_header(net_tbl, 0, "NETWORK ID");
-			cld_table_set_header(net_tbl, 1, "NAME");
-			cld_table_set_header(net_tbl, 2, "DRIVER");
-			cld_table_set_header(net_tbl, 3, "SCOPE");
+		cli_table* net_tbl;
+		if (create_cli_table(&net_tbl, len_networks, 4) == 0) {
+			cli_table_set_header(net_tbl, 0, "NETWORK ID");
+			cli_table_set_header(net_tbl, 1, "NAME");
+			cli_table_set_header(net_tbl, 2, "DRIVER");
+			cli_table_set_header(net_tbl, 3, "SCOPE");
 			for (size_t i = 0; i < len_networks; i++) {
 				docker_network* net = (docker_network*) docker_network_list_get_idx(
 						networks, i);
-				cld_table_set_row_val(net_tbl, i, 0, docker_network_id_get(net));
-				cld_table_set_row_val(net_tbl, i, 1, docker_network_name_get(net));
-				cld_table_set_row_val(net_tbl, i, 2, docker_network_driver_get(net));
-				cld_table_set_row_val(net_tbl, i, 3, docker_network_scope_get(net));
+				cli_table_set_row_val(net_tbl, i, 0, docker_network_id_get(net));
+				cli_table_set_row_val(net_tbl, i, 1, docker_network_name_get(net));
+				cli_table_set_row_val(net_tbl, i, 2, docker_network_driver_get(net));
+				cli_table_set_row_val(net_tbl, i, 3, docker_network_scope_get(net));
 			}
 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, net_tbl);
 		}

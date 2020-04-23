@@ -23,12 +23,9 @@ include_directories( src )
 set( CLD_SOURCES
   src/cld_common.c
   src/cld_ctr.c
-  src/cld_dict.c
   src/cld_img.c
   src/cld_net.c
-  src/cld_progress.c
   src/cld_sys.c
-  src/cld_table.c
   src/cld_vol.c
   src/cld.c
   src/tokenizer.c
@@ -38,12 +35,9 @@ set( CLD_SOURCES
 
   src/cld_common.h
   src/cld_ctr.h
-  src/cld_dict.h
   src/cld_img.h
   src/cld_net.h
-  src/cld_progress.h
   src/cld_sys.h
-  src/cld_table.h
   src/cld_vol.h
   src/histedit.h
   src/cld_lua.h

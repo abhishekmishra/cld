@@ -8,7 +8,7 @@
 #include "docker_all.h"
 #include <string.h>
 #include "cld_sys.h"
-#include "cld_dict.h"
+#include "cli_dict.h"
 
 cli_cmd_err sys_version_cmd_handler(void* handler_args,
 		arraylist* options, arraylist* args,
@@ -18,23 +18,23 @@ cli_cmd_err sys_version_cmd_handler(void* handler_args,
 	docker_context* ctx = get_docker_context(handler_args);
 	d_err_t err = docker_system_version(ctx, &version);
 	if (err == E_SUCCESS) {
-		cld_dict* ver_dict;
-		if (create_cld_dict(&ver_dict) == 0) {
-			cld_dict_put(ver_dict, "Docker Version", docker_version_version_get(version));
-			cld_dict_put(ver_dict, "OS", docker_version_os_get(version));
-			cld_dict_put(ver_dict, "Kernel", docker_version_kernel_version_get(version));
-			cld_dict_put(ver_dict, "Arch", docker_version_arch_get(version));
-			cld_dict_put(ver_dict, "API Version", docker_version_api_version_get(version));
-			cld_dict_put(ver_dict, "Min API Version", docker_version_min_api_version_get(version));
-			cld_dict_put(ver_dict, "Go Version", docker_version_go_version_get(version));
-			cld_dict_put(ver_dict, "Git Commit", docker_version_git_commit_get(version));
-			cld_dict_put(ver_dict, "Build Time", docker_version_build_time_get(version));
-			cld_dict_put(ver_dict, "Experimental",
+		cli_dict* ver_dict;
+		if (create_cli_dict(&ver_dict) == 0) {
+			cli_dict_put(ver_dict, "Docker Version", docker_version_version_get(version));
+			cli_dict_put(ver_dict, "OS", docker_version_os_get(version));
+			cli_dict_put(ver_dict, "Kernel", docker_version_kernel_version_get(version));
+			cli_dict_put(ver_dict, "Arch", docker_version_arch_get(version));
+			cli_dict_put(ver_dict, "API Version", docker_version_api_version_get(version));
+			cli_dict_put(ver_dict, "Min API Version", docker_version_min_api_version_get(version));
+			cli_dict_put(ver_dict, "Go Version", docker_version_go_version_get(version));
+			cli_dict_put(ver_dict, "Git Commit", docker_version_git_commit_get(version));
+			cli_dict_put(ver_dict, "Build Time", docker_version_build_time_get(version));
+			cli_dict_put(ver_dict, "Experimental",
 				docker_version_experimental_get(version) == 0 ? "False" : "True");
 
 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_DICT, ver_dict);
 
-			free_cld_dict(ver_dict);
+			free_cli_dict(ver_dict);
 		}
 
 		if (version != NULL) {

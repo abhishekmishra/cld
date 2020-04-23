@@ -12,8 +12,8 @@
 #include <time.h>
 #include <string.h>
 #include "cld_img.h"
-#include "cld_table.h"
-#include "cld_progress.h"
+#include "cli_table.h"
+#include "cli_progress.h"
 #include <cliutils.h>
 
 #include "mustach-json-c.h"
@@ -21,7 +21,7 @@
 typedef struct
 {
 	cli_command_output_handler success_handler;
-	cld_multi_progress* multi_progress;
+	cli_multi_progress* multi_progress;
 } docker_image_update_args;
 
 void log_pull_message(docker_image_create_status* status, void* client_cbargs)
@@ -37,7 +37,7 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 			size_t loc = -1;
 			for (size_t i = 0; i < len; i++)
 			{
-				cld_progress* p = (cld_progress*)arraylist_get(
+				cli_progress* p = (cli_progress*)arraylist_get(
 					upd_args->multi_progress->progress_ls, i);
 				if (strcmp(status->id, p->name) == 0)
 				{
@@ -47,8 +47,8 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 			}
 			if (found == 0)
 			{
-				cld_progress* p;
-				if (create_cld_progress(&p, status->id, 0, 0) == 0)
+				cli_progress* p;
+				if (create_cli_progress(&p, status->id, 0, 0) == 0)
 				{
 					arraylist_add(upd_args->multi_progress->progress_ls, p);
 					upd_args->multi_progress->old_count = (int)arraylist_length(
@@ -69,7 +69,7 @@ void log_pull_message(docker_image_create_status* status, void* client_cbargs)
 			}
 			else
 			{
-				cld_progress* p = (cld_progress*)arraylist_get(
+				cli_progress* p = (cli_progress*)arraylist_get(
 					upd_args->multi_progress->progress_ls, loc);
 				upd_args->multi_progress->old_count = (int)arraylist_length(
 					upd_args->multi_progress->progress_ls);
@@ -109,7 +109,7 @@ cli_cmd_err img_pl_cmd_handler(void* handler_args, arraylist* options,
 		return CLI_COMMAND_ERR_ALLOC_FAILED;
 	}
 	upd_args->success_handler = success_handler;
-	create_cld_multi_progress(&(upd_args->multi_progress));
+	create_cli_multi_progress(&(upd_args->multi_progress));
 
 	size_t len = arraylist_length(args);
 	if (len != 1)
@@ -141,7 +141,7 @@ cli_cmd_err img_pl_cmd_handler(void* handler_args, arraylist* options,
 			return CLI_COMMAND_ERR_UNKNOWN;
 		}
 	}
-	free_cld_multi_progress(upd_args->multi_progress);
+	free_cli_multi_progress(upd_args->multi_progress);
 }
 
 char* concat_tags(json_object* tags_ls)
@@ -200,15 +200,15 @@ cli_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 
 		int col_num = 0;
 		size_t len_images = docker_image_list_length(images);
-		cld_table* img_tbl;
-		if (create_cld_table(&img_tbl, len_images, 5) == 0)
+		cli_table* img_tbl;
+		if (create_cli_table(&img_tbl, len_images, 5) == 0)
 		{
 			int col = 0;
-			cld_table_set_header(img_tbl, col++, "REPOSITORY");
-			cld_table_set_header(img_tbl, col++, "TAG");
-			cld_table_set_header(img_tbl, col++, "IMAGE ID");
-			cld_table_set_header(img_tbl, col++, "CREATED");
-			cld_table_set_header(img_tbl, col++, "SIZE");
+			cli_table_set_header(img_tbl, col++, "REPOSITORY");
+			cli_table_set_header(img_tbl, col++, "TAG");
+			cli_table_set_header(img_tbl, col++, "IMAGE ID");
+			cli_table_set_header(img_tbl, col++, "CREATED");
+			cli_table_set_header(img_tbl, col++, "SIZE");
 
 			char* outstr;
 			size_t outstrlen;
@@ -245,8 +245,8 @@ cli_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 					char* repo_tag = docker_image_repo_tags_get_idx(img, 0);
 					char* tag = strrchr(repo_tag, ':');
 					if (tag == NULL) {
-						cld_table_set_row_val(img_tbl, i, col++, repo_tag);
-						cld_table_set_row_val(img_tbl, i, col++, "<none>");
+						cli_table_set_row_val(img_tbl, i, col++, repo_tag);
+						cli_table_set_row_val(img_tbl, i, col++, "<none>");
 					}
 					else {
 						char* repo_val = (char*)calloc(tag - repo_tag + 1, sizeof(char));
@@ -255,25 +255,25 @@ cli_cmd_err img_ls_cmd_handler(void* handler_args, arraylist* options,
 						}
 						strncpy(repo_val, repo_tag, tag - repo_tag);
 						repo_val[tag - repo_tag] = '\0';
-						cld_table_set_row_val(img_tbl, i, col++, repo_val);
-						cld_table_set_row_val(img_tbl, i, col++, tag + 1);
+						cli_table_set_row_val(img_tbl, i, col++, repo_val);
+						cli_table_set_row_val(img_tbl, i, col++, tag + 1);
 						free(repo_val);
 					}
 				}
 				else {
-					cld_table_set_row_val(img_tbl, i, col++, "<none>");
-					cld_table_set_row_val(img_tbl, i, col++, "<none>");
+					cli_table_set_row_val(img_tbl, i, col++, "<none>");
+					cli_table_set_row_val(img_tbl, i, col++, "<none>");
 				}
 				char* img_id = docker_image_id_get(img);
 				char* id_val = strrchr(img_id, ':');
 				if (id_val == NULL) {
-					cld_table_set_row_val(img_tbl, i, col++, img_id);
+					cli_table_set_row_val(img_tbl, i, col++, img_id);
 				}
 				else {
-					cld_table_set_row_val(img_tbl, i, col++, id_val + 1);
+					cli_table_set_row_val(img_tbl, i, col++, id_val + 1);
 				}
-				cld_table_set_row_val(img_tbl, i, col++, cstr);
-				cld_table_set_row_val(img_tbl, i, col++, sstr);
+				cli_table_set_row_val(img_tbl, i, col++, cstr);
+				cli_table_set_row_val(img_tbl, i, col++, sstr);
 			}
 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, img_tbl);
 		}
@@ -311,7 +311,7 @@ cli_cmd_err img_build_cmd_handler(void* handler_args,
 		return CLI_COMMAND_ERR_ALLOC_FAILED;
 	}
 	upd_args->success_handler = success_handler;
-	create_cld_multi_progress(&(upd_args->multi_progress));
+	create_cli_multi_progress(&(upd_args->multi_progress));
 
 	size_t len = arraylist_length(args);
 	if (len != 1)
@@ -343,7 +343,7 @@ cli_cmd_err img_build_cmd_handler(void* handler_args,
 			return CLI_COMMAND_ERR_UNKNOWN;
 		}
 	}
-	free_cld_multi_progress(upd_args->multi_progress);
+	free_cli_multi_progress(upd_args->multi_progress);
 }
 
 cli_command* img_commands()

@@ -3,6 +3,9 @@
         "cld_lua.h": "c",
         "docker_all.h": "c",
         "docker_util.h": "c",
-        "docker_log.h": "c"
+        "docker_log.h": "c",
+        "cliutils.h": "c",
+        "cli_progress.h": "c",
+        "cli_dict.h": "c"
     }
 }

@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cld_ctr.h"
-#include "cld_table.h"
+#include "cli_table.h"
 #include "cld_lua.h"
 
 cli_cmd_err ctr_ls_cmd_handler(void* handler_args, arraylist* options,
@@ -321,19 +321,19 @@ cli_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
 			sprintf(res_str, "Process list for container %s", container);
 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, res_str);
 
-			cld_table* ctr_tbl;
+			cli_table* ctr_tbl;
 			size_t num_labels = arraylist_length(ps->titles);
 			size_t num_processes = arraylist_length(ps->processes);
-			if (create_cld_table(&ctr_tbl, num_processes, num_labels) == 0) {
+			if (create_cli_table(&ctr_tbl, num_processes, num_labels) == 0) {
 				for (size_t i = 0; i < num_labels; i++) {
-					cld_table_set_header(ctr_tbl, i,
+					cli_table_set_header(ctr_tbl, i,
 						(char*)arraylist_get(ps->titles, i));
 				}
 				for (size_t i = 0; i < num_processes; i++) {
 					arraylist* psvals = (arraylist*)arraylist_get(
 						ps->processes, i);
 					for (size_t j = 0; j < num_labels; j++) {
-						cld_table_set_row_val(ctr_tbl, i, j,
+						cli_table_set_row_val(ctr_tbl, i, j,
 							(char*)arraylist_get(psvals, j));
 					}
 				}
@@ -378,32 +378,32 @@ typedef struct stats_args_t {
 
 void docker_container_stats_cb(docker_container_stats* stats, void* cbargs) {
 	stats_args* sarg = (stats_args*)cbargs;
-	cld_table* ctr_tbl;
-	if (create_cld_table(&ctr_tbl, 1, 8) == 0) {
-		cld_table_set_header(ctr_tbl, 0, "CONTAINER ID");
-		cld_table_set_header(ctr_tbl, 1, "NAME");
-		cld_table_set_header(ctr_tbl, 2, "CPU %");
-		cld_table_set_header(ctr_tbl, 3, "MEM USAGE / LIMIT");
-		cld_table_set_header(ctr_tbl, 4, "MEM %");
-		cld_table_set_header(ctr_tbl, 5, "NET I/O");
-		cld_table_set_header(ctr_tbl, 6, "BLOCK I/O");
-		cld_table_set_header(ctr_tbl, 7, "PIDS");
+	cli_table* ctr_tbl;
+	if (create_cli_table(&ctr_tbl, 1, 8) == 0) {
+		cli_table_set_header(ctr_tbl, 0, "CONTAINER ID");
+		cli_table_set_header(ctr_tbl, 1, "NAME");
+		cli_table_set_header(ctr_tbl, 2, "CPU %");
+		cli_table_set_header(ctr_tbl, 3, "MEM USAGE / LIMIT");
+		cli_table_set_header(ctr_tbl, 4, "MEM %");
+		cli_table_set_header(ctr_tbl, 5, "NET I/O");
+		cli_table_set_header(ctr_tbl, 6, "BLOCK I/O");
+		cli_table_set_header(ctr_tbl, 7, "PIDS");
 
-		cld_table_set_row_val(ctr_tbl, 0, 0, sarg->id);
-		cld_table_set_row_val(ctr_tbl, 0, 1, sarg->name);
+		cli_table_set_row_val(ctr_tbl, 0, 0, sarg->id);
+		cli_table_set_row_val(ctr_tbl, 0, 1, sarg->name);
 
 		char cpu_usg_str[128];
 		sprintf(cpu_usg_str, "%ld", docker_container_cpu_stats_cpu_usage_get(docker_container_stats_cpu_stats_get(stats)));
-		cld_table_set_row_val(ctr_tbl, 0, 2, cpu_usg_str);
+		cli_table_set_row_val(ctr_tbl, 0, 2, cpu_usg_str);
 
 		char mem_usg_str[128];
 		sprintf(mem_usg_str, "%ld", docker_container_mem_stats_usage_get(docker_container_stats_mem_stats_get(stats)));
-		cld_table_set_row_val(ctr_tbl, 0, 3, mem_usg_str);
+		cli_table_set_row_val(ctr_tbl, 0, 3, mem_usg_str);
 
-		cld_table_set_row_val(ctr_tbl, 0, 4, "");
-		cld_table_set_row_val(ctr_tbl, 0, 5, "");
-		cld_table_set_row_val(ctr_tbl, 0, 6, "");
-		cld_table_set_row_val(ctr_tbl, 0, 7, "");
+		cli_table_set_row_val(ctr_tbl, 0, 4, "");
+		cli_table_set_row_val(ctr_tbl, 0, 5, "");
+		cli_table_set_row_val(ctr_tbl, 0, 6, "");
+		cli_table_set_row_val(ctr_tbl, 0, 7, "");
 	}
 	sarg->success_handler(CLI_COMMAND_IS_RUNNING, CLI_RESULT_STRING,
 		"\033[0;0H\033[2J");
