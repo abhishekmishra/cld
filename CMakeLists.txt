@@ -1,7 +1,5 @@
 cmake_minimum_required ( VERSION 3.9 )
 
-include(CheckIncludeFile)
-
 project ( cld C )
 
 # Set the project source dir (just convention)
@@ -47,6 +45,7 @@ set( CLD_SOURCES
 
 include(FindLua)
 if (LUA_FOUND)
+  find_package(lua REQUIRED)
   message("-- lua found at ${LUA_LIBRARIES} ${LUA_INCLUDE_DIR}")
   message("-- lua version is ${LUA_VERSION_STRING}")
   add_compile_definitions(LUA_ENABLED)
@@ -55,12 +54,18 @@ else ()
 endif (LUA_FOUND)
 
 add_executable( ${PROJECT_NAME} ${CLD_SOURCES} )
-target_include_directories(${PROJECT_NAME} PRIVATE ${YOUR_DIRECTORY})
+target_include_directories(${PROJECT_NAME} PUBLIC src)
+
+if (LUA_FOUND)
+  target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+endif (LUA_FOUND)
 
 # see mustach documentation for this
-add_definitions(-DNO_OPEN_MEMSTREAM)
+#add_definitions(-DNO_OPEN_MEMSTREAM)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
+set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
 
 find_package(json-c CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC json-c::json-c)
@@ -77,8 +82,6 @@ find_library(LIBARCHIVE_LIBRARY archive)
 include_directories(${LIBARCHIVE_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} ZLIB::ZLIB)
 
-set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
-
 find_package(coll CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
 
@@ -88,6 +91,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
 find_package(cliutils CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC cliutils::cliutils)
 
+include(CheckIncludeFile)
 check_include_file("getopt.h" HAVE_GETOPT)
 
 if(NOT HAVE_GETOPT)
