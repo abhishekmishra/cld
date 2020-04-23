@@ -10,23 +10,24 @@ extern "C" {
 #endif
 
 #include <json-c/json_object.h>
+#include <docker_all.h>
 #include <lua.h>
 #include <lauxlib.h>
-#include "cld_common.h"
+#include <cliutils.h>
 
-cld_cmd_err start_lua_interpreter();
+cli_cmd_err start_lua_interpreter();
 
-cld_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel);
+cli_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel);
 
-cld_cmd_err stop_lua_interpreter();
+cli_cmd_err stop_lua_interpreter();
 
 /**
  * Execute a lua function representing a docker command.
  * The command is passed arguments identical to the C command handlers.
  */
- cld_cmd_err execute_lua_command(json_object** res, const char* module_name, const char* command_name, void* handler_args, 
-    arraylist* options,	arraylist* args, cld_command_output_handler success_handler,
-    cld_command_output_handler error_handler);
+ cli_cmd_err execute_lua_command(json_object** res, const char* module_name, const char* command_name, void* handler_args, 
+    arraylist* options,	arraylist* args, cli_command_output_handler success_handler,
+    cli_command_output_handler error_handler);
 
 #ifdef __cplusplus 
 }

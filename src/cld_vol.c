@@ -9,9 +9,9 @@
 #include "docker_all.h"
 #include "cld_vol.h"
 
-cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
-		arraylist *args, cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler) {
+cli_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
+		arraylist *args, cli_command_output_handler success_handler,
+		cli_command_output_handler error_handler) {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	docker_volume_list* volumes;
@@ -21,7 +21,7 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 	if (docker_error == E_SUCCESS) {
 		char res_str[1024];
 		sprintf(res_str, "Listing volumes");
-		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, res_str);
+		success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, res_str);
 
 		size_t col_num = 0;
 		size_t len_volumes = docker_volume_list_length(volumes);
@@ -37,22 +37,22 @@ cld_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 				cld_table_set_row_val(vol_tbl, i, 1, docker_volume_name_get(vol));
 				cld_table_set_row_val(vol_tbl, i, 2, docker_volume_mountpoint_vol_get(vol));
 			}
-			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_TABLE, vol_tbl);
+			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, vol_tbl);
 		}
 	} else {
-		return CLD_COMMAND_ERR_UNKNOWN;
+		return CLI_COMMAND_ERR_UNKNOWN;
 	}
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
 
-cld_command *vol_commands() {
-	cld_command *image_command;
+cli_command *vol_commands() {
+	cli_command *image_command;
 	if (make_command(&image_command, "volume", "vol", "Docker Volume Commands",
-	NULL) == CLD_COMMAND_SUCCESS) {
-		cld_command *volcreate_command, *volls_command;
+	NULL) == CLI_COMMAND_SUCCESS) {
+		cli_command *volcreate_command, *volls_command;
 //		if (make_command(&imgpl_command, "create", "create", "Docker Volume Create",
-//				&img_pl_cmd_handler) == CLD_COMMAND_SUCCESS) {
+//				&img_pl_cmd_handler) == CLI_COMMAND_SUCCESS) {
 //			cld_argument* image_name_arg;
 //			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
 //					"Name of Docker Image to be pulled.");
@@ -61,7 +61,7 @@ cld_command *vol_commands() {
 //			arraylist_add(image_command->sub_commands, imgpl_command);
 //		}
 		if (make_command(&volls_command, "list", "ls", "Docker Volumes List",
-				&vol_ls_cmd_handler) == CLD_COMMAND_SUCCESS) {
+				&vol_ls_cmd_handler) == CLI_COMMAND_SUCCESS) {
 			arraylist_add(image_command->sub_commands, volls_command);
 		}
 	}

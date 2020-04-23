@@ -21,7 +21,6 @@ include_directories( src )
 # Lists
 # Setup the list of source files
 set( CLD_SOURCES
-  src/cld_command.c
   src/cld_common.c
   src/cld_ctr.c
   src/cld_dict.c
@@ -37,7 +36,6 @@ set( CLD_SOURCES
   src/mustach.c
   src/mustach-json-c.c
 
-  src/cld_command.h
   src/cld_common.h
   src/cld_ctr.h
   src/cld_dict.h
@@ -92,6 +90,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
 
 find_package(clibdocker CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
+
+find_package(cliutils CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC cliutils::cliutils)
 
 check_include_file("getopt.h" HAVE_GETOPT)
 

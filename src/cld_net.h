@@ -7,8 +7,8 @@
 #define SRC_CLD_NET_H_
 
 #include "cld_common.h"
-#include "cld_command.h"
+#include <cliutils.h>
 
-cld_command* net_commands();
+cli_command* net_commands();
 
 #endif /* SRC_CLD_NET_H_ */

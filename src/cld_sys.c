@@ -10,10 +10,10 @@
 #include "cld_sys.h"
 #include "cld_dict.h"
 
-cld_cmd_err sys_version_cmd_handler(void* handler_args,
+cli_cmd_err sys_version_cmd_handler(void* handler_args,
 		arraylist* options, arraylist* args,
-		cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler) {
+		cli_command_output_handler success_handler,
+		cli_command_output_handler error_handler) {
 	docker_version* version = NULL;
 	docker_context* ctx = get_docker_context(handler_args);
 	d_err_t err = docker_system_version(ctx, &version);
@@ -32,7 +32,7 @@ cld_cmd_err sys_version_cmd_handler(void* handler_args,
 			cld_dict_put(ver_dict, "Experimental",
 				docker_version_experimental_get(version) == 0 ? "False" : "True");
 
-			success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_DICT, ver_dict);
+			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_DICT, ver_dict);
 
 			free_cld_dict(ver_dict);
 		}
@@ -41,22 +41,22 @@ cld_cmd_err sys_version_cmd_handler(void* handler_args,
 			free_docker_version(version);
 		}
 	}
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
-cld_cmd_err sys_connection_cmd_handler(void* handler_args,
+cli_cmd_err sys_connection_cmd_handler(void* handler_args,
 		arraylist* options, arraylist* args,
-		cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler) {
+		cli_command_output_handler success_handler,
+		cli_command_output_handler error_handler) {
 	docker_context* ctx = get_docker_context(handler_args);
 	if (ctx->url) {
 		printf("Connected to URL: %s\n", ctx->url);
 	}
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
 void docker_events_cb(docker_event* event, void* cbargs) {
-	cld_command_output_handler success_handler = (cld_command_output_handler)cbargs;
+	cli_command_output_handler success_handler = (cli_command_output_handler)cbargs;
 	char* content = (char*) calloc(2048, sizeof(char));
 	strcat(content, "");
 	time_t x = (time_t)(docker_event_time_get(event));
@@ -77,13 +77,13 @@ void docker_events_cb(docker_event* event, void* cbargs) {
 	//
 	//		strcat(content, json_object_get_string(event->actor_attributes));
 	strcat(content, "");
-	success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, content);
+	success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, content);
 }
 
-cld_cmd_err sys_events_cmd_handler(void *handler_args,
+cli_cmd_err sys_events_cmd_handler(void *handler_args,
 		arraylist *options, arraylist *args,
-		cld_command_output_handler success_handler,
-		cld_command_output_handler error_handler) {
+		cli_command_output_handler success_handler,
+		cli_command_output_handler error_handler) {
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 
@@ -91,29 +91,29 @@ cld_cmd_err sys_events_cmd_handler(void *handler_args,
 	time_t now = time(NULL);
 	d_err_t err = docker_system_events_cb(ctx, &docker_events_cb, success_handler, &events,  now - (3600 * 24), 0);
 	if (err == E_SUCCESS) {
-		success_handler(CLD_COMMAND_SUCCESS, CLD_RESULT_STRING, "done.");
+		success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, "done.");
 	}
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
-cld_command* sys_commands() {
-	cld_command* system_command;
+cli_command* sys_commands() {
+	cli_command* system_command;
 	if (make_command(&system_command, "system", "sys", "Docker System Commands",
-	NULL) == CLD_COMMAND_SUCCESS) {
-		cld_command *sysver_command, *syscon_command, *sysevt_command;
+	NULL) == CLI_COMMAND_SUCCESS) {
+		cli_command *sysver_command, *syscon_command, *sysevt_command;
 		if (make_command(&sysver_command, "version", "ver",
 				"Docker System Version", &sys_version_cmd_handler)
-				== CLD_COMMAND_SUCCESS) {
+				== CLI_COMMAND_SUCCESS) {
 			arraylist_add(system_command->sub_commands, sysver_command);
 		}
 		if (make_command(&syscon_command, "connection", "con",
 				"Docker System Connection", &sys_connection_cmd_handler)
-				== CLD_COMMAND_SUCCESS) {
+				== CLI_COMMAND_SUCCESS) {
 			arraylist_add(system_command->sub_commands, syscon_command);
 		}
 		if (make_command(&sysevt_command, "events", "evt",
 				"Docker System Connection", &sys_events_cmd_handler)
-				== CLD_COMMAND_SUCCESS) {
+				== CLI_COMMAND_SUCCESS) {
 			arraylist_add(system_command->sub_commands, sysevt_command);
 		}
 	}

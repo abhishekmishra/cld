@@ -9,7 +9,7 @@
 #include <getopt.h>
 
 #include "docker_all.h"
-#include "cld_command.h"
+#include "cliutils.h"
 #include "cld_sys.h"
 #include "cld_ctr.h"
 #include "cld_img.h"
@@ -23,17 +23,17 @@
 
 #define CMD_NOT_FOUND -1
 
-#define CLD_OPTION_MAIN_CONFIG_LONG "config"
-#define CLD_OPTION_MAIN_CONFIG_SHORT "c"
-#define CLD_OPTION_MAIN_CONFIG_DESC "Client Config"
+#define CLI_OPTION_MAIN_CONFIG_LONG "config"
+#define CLI_OPTION_MAIN_CONFIG_SHORT "c"
+#define CLI_OPTION_MAIN_CONFIG_DESC "Client Config"
 
-#define CLD_OPTION_MAIN_DEBUG_LONG "debug"
-#define CLD_OPTION_MAIN_DEBUG_SHORT "D"
-#define CLD_OPTION_MAIN_DEBUG_DESC "Debug Mode"
+#define CLI_OPTION_MAIN_DEBUG_LONG "debug"
+#define CLI_OPTION_MAIN_DEBUG_SHORT "D"
+#define CLI_OPTION_MAIN_DEBUG_DESC "Debug Mode"
 
-#define CLD_OPTION_MAIN_LOG_LEVEL_LONG "loglevel"
-#define CLD_OPTION_MAIN_LOG_LEVEL_SHORT "l"
-#define CLD_OPTION_MAIN_LOG_LEVEL_DESC "Set the Log Level (\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\") (default \"info\")"
+#define CLI_OPTION_MAIN_LOG_LEVEL_LONG "loglevel"
+#define CLI_OPTION_MAIN_LOG_LEVEL_SHORT "l"
+#define CLI_OPTION_MAIN_LOG_LEVEL_DESC "Set the Log Level (\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\") (default \"info\")"
 
 #define CLD_LOGLEVEL_DEBUG "debug"
 #define CLD_LOGLEVEL_INFO "info"
@@ -41,42 +41,42 @@
 #define CLD_LOGLEVEL_ERROR "error"
 #define CLD_LOGLEVEL_FATAL "fatal"
 
-#define CLD_OPTION_MAIN_TLS_LONG "tls"
-#define CLD_OPTION_MAIN_TLS_SHORT NULL
-#define CLD_OPTION_MAIN_TLS_DESC "Enable tls"
+#define CLI_OPTION_MAIN_TLS_LONG "tls"
+#define CLI_OPTION_MAIN_TLS_SHORT NULL
+#define CLI_OPTION_MAIN_TLS_DESC "Enable tls"
 
-#define CLD_OPTION_MAIN_TLSCACERT_LONG "tlscacert"
-#define CLD_OPTION_MAIN_TLSCACERT_SHORT NULL
-#define CLD_OPTION_MAIN_TLSCACERT_DESC "Set TLS CA Certificate"
+#define CLI_OPTION_MAIN_TLSCACERT_LONG "tlscacert"
+#define CLI_OPTION_MAIN_TLSCACERT_SHORT NULL
+#define CLI_OPTION_MAIN_TLSCACERT_DESC "Set TLS CA Certificate"
 
-#define CLD_OPTION_MAIN_TLSCERT_LONG "tlscert"
-#define CLD_OPTION_MAIN_TLSCERT_SHORT NULL
-#define CLD_OPTION_MAIN_TLSCERT_DESC "Set TLS Certificate"
+#define CLI_OPTION_MAIN_TLSCERT_LONG "tlscert"
+#define CLI_OPTION_MAIN_TLSCERT_SHORT NULL
+#define CLI_OPTION_MAIN_TLSCERT_DESC "Set TLS Certificate"
 
-#define CLD_OPTION_MAIN_TLSKEY_LONG "tlskey"
-#define CLD_OPTION_MAIN_TLSKEY_SHORT NULL
-#define CLD_OPTION_MAIN_TLSKEY_DESC "Set TLS Key"
+#define CLI_OPTION_MAIN_TLSKEY_LONG "tlskey"
+#define CLI_OPTION_MAIN_TLSKEY_SHORT NULL
+#define CLI_OPTION_MAIN_TLSKEY_DESC "Set TLS Key"
 
-#define CLD_OPTION_MAIN_TLSVERIFY_LONG "tlsverify"
-#define CLD_OPTION_MAIN_TLSVERIFY_SHORT NULL
-#define CLD_OPTION_MAIN_TLSVERIFY_DESC "Enable TLS Verify"
+#define CLI_OPTION_MAIN_TLSVERIFY_LONG "tlsverify"
+#define CLI_OPTION_MAIN_TLSVERIFY_SHORT NULL
+#define CLI_OPTION_MAIN_TLSVERIFY_DESC "Enable TLS Verify"
 
-#define CLD_OPTION_MAIN_INTERACTIVE_LONG "interactive"
-#define CLD_OPTION_MAIN_INTERACTIVE_SHORT "i"
-#define CLD_OPTION_MAIN_INTERACTIVE_DESC "Show REPL"
+#define CLI_OPTION_MAIN_INTERACTIVE_LONG "interactive"
+#define CLI_OPTION_MAIN_INTERACTIVE_SHORT "i"
+#define CLI_OPTION_MAIN_INTERACTIVE_DESC "Show REPL"
 
-#define CLD_OPTION_MAIN_HOST_LONG "host"
-#define CLD_OPTION_MAIN_HOST_SHORT "H"
-#define CLD_OPTION_MAIN_HOST_DESC "Set Docker Host"
+#define CLI_OPTION_MAIN_HOST_LONG "host"
+#define CLI_OPTION_MAIN_HOST_SHORT "H"
+#define CLI_OPTION_MAIN_HOST_DESC "Set Docker Host"
 
-#define CLD_OPTION_MAIN_VERSION_LONG "version"
-#define CLD_OPTION_MAIN_VERSION_SHORT "v"
-#define CLD_OPTION_MAIN_VERSION_DESC "Show CLD version."
+#define CLI_OPTION_MAIN_VERSION_LONG "version"
+#define CLI_OPTION_MAIN_VERSION_SHORT "v"
+#define CLI_OPTION_MAIN_VERSION_DESC "Show CLD version."
 
 static char* main_command_name;
 static docker_context* ctx;
 static bool connected = false;
-static arraylist* CLD_COMMANDS;
+static arraylist* CLI_COMMANDS;
 static int loglevel = LOG_ERROR;
 
 void print_table_result(void* result)
@@ -161,10 +161,10 @@ void print_table_result(void* result)
 	}
 }
 
-cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
+cli_cmd_err print_handler(cli_cmd_err result_flag, cli_result_type res_type,
 	void* result)
 {
-	if (res_type == CLD_RESULT_STRING)
+	if (res_type == CLI_RESULT_STRING)
 	{
 		if (result != NULL)
 		{
@@ -172,11 +172,11 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 			printf("%s", result_str);
 		}
 	}
-	else if (res_type == CLD_RESULT_TABLE)
+	else if (res_type == CLI_RESULT_TABLE)
 	{
 		print_table_result(result);
 	}
-	else if (res_type == CLD_RESULT_DICT)
+	else if (res_type == CLI_RESULT_DICT)
 	{
 		cld_dict* result_dict = (cld_dict*)result;
 		cld_dict_foreach(result_dict, k, v)
@@ -185,7 +185,7 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 		}
 		printf("\n");
 	}
-	else if (res_type == CLD_RESULT_PROGRESS)
+	else if (res_type == CLI_RESULT_PROGRESS)
 	{
 		cld_multi_progress* result_progress = (cld_multi_progress*)result;
 		if (result_progress->old_count > 0)
@@ -212,20 +212,20 @@ cld_cmd_err print_handler(cld_cmd_err result_flag, cld_result_type res_type,
 	{
 		printf("This result type is not handled %d\n", res_type);
 	}
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
 void docker_result_handler(docker_context* ctx, docker_result* res)
 {
-	handle_docker_error(res, (cld_command_output_handler)&print_handler, (cld_command_output_handler)&print_handler);
+	handle_docker_error(res, (cli_command_output_handler)&print_handler, (cli_command_output_handler)&print_handler);
 }
 
-cld_cmd_err main_cmd_handler(void* handler_args,
+cli_cmd_err main_cmd_handler(void* handler_args,
 	arraylist* options, arraylist* args,
-	cld_command_output_handler success_handler,
-	cld_command_output_handler error_handler)
+	cli_command_output_handler success_handler,
+	cli_command_output_handler error_handler)
 {
-	cld_option* debug_option = get_option_by_name(options, CLD_OPTION_MAIN_LOG_LEVEL_LONG);
+	cli_option* debug_option = get_option_by_name(options, CLI_OPTION_MAIN_LOG_LEVEL_LONG);
 	if (debug_option->val->str_value != NULL)
 	{
 		if (strcmp(debug_option->val->str_value, CLD_LOGLEVEL_DEBUG) == 0)
@@ -255,7 +255,7 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 		}
 	}
 
-	cld_option* host_option = get_option_by_name(options, CLD_OPTION_MAIN_HOST_LONG);
+	cli_option* host_option = get_option_by_name(options, CLI_OPTION_MAIN_HOST_LONG);
 
 	if (!connected)
 	{
@@ -311,44 +311,44 @@ cld_cmd_err main_cmd_handler(void* handler_args,
 		exit(-1);
 	}
 
-	return CLD_COMMAND_SUCCESS;
+	return CLI_COMMAND_SUCCESS;
 }
 
-cld_command* create_main_command()
+cli_command* create_main_command()
 {
-	cld_command* main_command;
+	cli_command* main_command;
 	if (make_command(&main_command, main_command_name, "cld",
 		"CLD Docker Client",
-		&main_cmd_handler) == CLD_COMMAND_SUCCESS)
+		&main_cmd_handler) == CLI_COMMAND_SUCCESS)
 	{
-		cld_option* main_options[] = {
-		create_option(CLD_OPTION_MAIN_CONFIG_LONG,
-					CLD_OPTION_MAIN_CONFIG_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_CONFIG_DESC),
-		create_option(CLD_OPTION_MAIN_DEBUG_LONG,
-					CLD_OPTION_MAIN_DEBUG_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_DEBUG_DESC),
-		create_option(CLD_OPTION_MAIN_LOG_LEVEL_LONG,
-					CLD_OPTION_MAIN_LOG_LEVEL_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_LOG_LEVEL_DESC),
-		create_option(CLD_OPTION_MAIN_TLS_LONG,
-					CLD_OPTION_MAIN_TLS_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_TLS_DESC),
-		create_option(CLD_OPTION_MAIN_TLSCACERT_LONG,
-					CLD_OPTION_MAIN_TLSCACERT_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSCACERT_DESC),
-		create_option(CLD_OPTION_MAIN_TLSCERT_LONG,
-					CLD_OPTION_MAIN_TLSCERT_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSCERT_DESC),
-		create_option(CLD_OPTION_MAIN_TLSKEY_LONG,
-					CLD_OPTION_MAIN_TLSKEY_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_TLSKEY_DESC),
-		create_option(CLD_OPTION_MAIN_TLSVERIFY_LONG,
-					CLD_OPTION_MAIN_TLSVERIFY_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_TLSVERIFY_DESC),
-		create_option(CLD_OPTION_MAIN_INTERACTIVE_LONG,
-					CLD_OPTION_MAIN_INTERACTIVE_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_INTERACTIVE_DESC),
-		create_option(CLD_OPTION_MAIN_HOST_LONG,
-					CLD_OPTION_MAIN_HOST_SHORT, CLD_VAL_STRING(NULL), CLD_VAL_STRING(NULL), CLD_OPTION_MAIN_HOST_DESC),
-		create_option(CLD_OPTION_MAIN_VERSION_LONG,
-					CLD_OPTION_MAIN_VERSION_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_MAIN_VERSION_DESC),
-		create_option(CLD_OPTION_HELP_LONG,
-					CLD_OPTION_HELP_SHORT, CLD_VAL_FLAG(0), CLD_VAL_FLAG(0), CLD_OPTION_HELP_DESC),
+		cli_option* main_options[] = {
+		create_option(CLI_OPTION_MAIN_CONFIG_LONG,
+					CLI_OPTION_MAIN_CONFIG_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_CONFIG_DESC),
+		create_option(CLI_OPTION_MAIN_DEBUG_LONG,
+					CLI_OPTION_MAIN_DEBUG_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_MAIN_DEBUG_DESC),
+		create_option(CLI_OPTION_MAIN_LOG_LEVEL_LONG,
+					CLI_OPTION_MAIN_LOG_LEVEL_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_LOG_LEVEL_DESC),
+		create_option(CLI_OPTION_MAIN_TLS_LONG,
+					CLI_OPTION_MAIN_TLS_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_MAIN_TLS_DESC),
+		create_option(CLI_OPTION_MAIN_TLSCACERT_LONG,
+					CLI_OPTION_MAIN_TLSCACERT_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_TLSCACERT_DESC),
+		create_option(CLI_OPTION_MAIN_TLSCERT_LONG,
+					CLI_OPTION_MAIN_TLSCERT_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_TLSCERT_DESC),
+		create_option(CLI_OPTION_MAIN_TLSKEY_LONG,
+					CLI_OPTION_MAIN_TLSKEY_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_TLSKEY_DESC),
+		create_option(CLI_OPTION_MAIN_TLSVERIFY_LONG,
+					CLI_OPTION_MAIN_TLSVERIFY_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_MAIN_TLSVERIFY_DESC),
+		create_option(CLI_OPTION_MAIN_INTERACTIVE_LONG,
+					CLI_OPTION_MAIN_INTERACTIVE_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_MAIN_INTERACTIVE_DESC),
+		create_option(CLI_OPTION_MAIN_HOST_LONG,
+					CLI_OPTION_MAIN_HOST_SHORT, CLI_VAL_STRING(NULL), CLI_VAL_STRING(NULL), CLI_OPTION_MAIN_HOST_DESC),
+		create_option(CLI_OPTION_MAIN_VERSION_LONG,
+					CLI_OPTION_MAIN_VERSION_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_MAIN_VERSION_DESC),
+		create_option(CLI_OPTION_HELP_LONG,
+					CLI_OPTION_HELP_SHORT, CLI_VAL_FLAG(0), CLI_VAL_FLAG(0), CLI_OPTION_HELP_DESC),
 		NULL
 		};
-		cld_fill_options_in_list(main_command->options, main_options);
+		cli_fill_options_in_list(main_command->options, main_options);
 
 		arraylist_add(main_command->sub_commands, sys_commands());
 		arraylist_add(main_command->sub_commands, ctr_commands());
@@ -362,16 +362,16 @@ cld_command* create_main_command()
 
 arraylist* create_commands()
 {
-	int err = arraylist_new(&CLD_COMMANDS, (void (*)(void*)) & free_command);
+	int err = arraylist_new(&CLI_COMMANDS, (void (*)(void*)) & free_command);
 	if (err == 0)
 	{
-		arraylist_add(CLD_COMMANDS, create_main_command());
+		arraylist_add(CLI_COMMANDS, create_main_command());
 	}
 	else
 	{
 		printf("Error creating commands list");
 	}
-	return CLD_COMMANDS;
+	return CLI_COMMANDS;
 }
 
 int main(int argc, char* argv[])
@@ -387,10 +387,10 @@ int main(int argc, char* argv[])
 
 		create_commands();
 
-		cld_cmd_err err = exec_command(CLD_COMMANDS, &ctx, argc,
-			argv, (cld_command_output_handler)&print_handler,
-			(cld_command_output_handler)&print_handler);
-		if (err != CLD_COMMAND_SUCCESS)
+		cli_cmd_err err = exec_command(CLI_COMMANDS, &ctx, argc,
+			argv, (cli_command_output_handler)&print_handler,
+			(cli_command_output_handler)&print_handler);
+		if (err != CLI_COMMAND_SUCCESS)
 		{
 			docker_log_error("Error: invalid command.\n");
 		}
