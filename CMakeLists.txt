@@ -62,7 +62,7 @@ if (LUA_FOUND)
 endif (LUA_FOUND)
 
 # see mustach documentation for this
-#add_definitions(-DNO_OPEN_MEMSTREAM)
+add_definitions(-DNO_OPEN_MEMSTREAM)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY ON)
