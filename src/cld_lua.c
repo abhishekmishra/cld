@@ -10,6 +10,19 @@
 
 static lua_State *L;
 
+// https://stackoverflow.com/questions/56230859/how-to-properly-print-error-messages-from-lual-dostring
+bool doString(const char *s) {
+    const int ret = luaL_dostring(L, s);
+
+    if (ret != LUA_OK) {
+      printf("Error: %s\n", lua_tostring(L, -1));
+      lua_pop(L, 1); // pop error message
+      return false;
+    }
+
+    return true;
+}
+
 cli_cmd_err start_lua_interpreter()
 {
     docker_log_debug("Starting LUA interpreter...\n");
@@ -17,10 +30,10 @@ cli_cmd_err start_lua_interpreter()
     luaL_openlibs(L);
 
     //Load the cld_cmd library
-    luaL_dostring(L, "cld_cmd = require('cld_cmd')");
+    doString("cld_cmd = require('cld_cmd')");
 
     //Load the luaclibdocker library
-    luaL_dostring(L, "docker = require('luaclibdocker')");
+    doString("docker = require('luaclibdocker')");
 
     //execute a dummy command to ensure all is well.
     //execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
