@@ -43,6 +43,11 @@ set( CLD_SOURCES
   src/mustach-json-c.h
 )
 
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" AND LUA_FROM_PKGCONFIG)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(lua REQUIRED IMPORTED_TARGET lua)
+endif()
+
 include(FindLua)
 if (LUA_FOUND)
   find_package(lua REQUIRED)
