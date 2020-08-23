@@ -50,7 +50,6 @@ endif()
 
 include(FindLua)
 if (LUA_FOUND)
-  find_package(lua REQUIRED)
   message("-- lua found at ${LUA_LIBRARIES} ${LUA_INCLUDE_DIR}")
   message("-- lua version is ${LUA_VERSION_STRING}")
   add_compile_definitions(LUA_ENABLED)
