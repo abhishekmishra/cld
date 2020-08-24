@@ -302,13 +302,13 @@ cli_cmd_err ctr_logs_cmd_handler(void* handler_args, arraylist* options,
 cli_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
 	arraylist* args, cli_command_output_handler success_handler,
 	cli_command_output_handler error_handler) {
-		json_object* obj;
-		cli_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args, options, args, success_handler, error_handler);
-		if(obj != NULL) {
-			docker_log_debug("Received json object -> %s\n", get_json_string(obj));
-		}
-		return err;
+	json_object* obj;
+	cli_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args, options, args, success_handler, error_handler);
+	if(obj != NULL) {
+		docker_log_debug("Received json object -> %s\n", get_json_string(obj));
 	}
+	return err;
+}
 
 // cli_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
 // 	arraylist* args, cli_command_output_handler success_handler,

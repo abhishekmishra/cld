@@ -59,7 +59,7 @@ function cld_cmd_container.ls(d, options, args)
 end
 
 function cld_cmd_container.ls_format(output, options)
-    o = {
+    local o = {
         headers = {
             "CONTAINER ID", "IMAGE", "COMMAND", "CREATED", "STATUS", "PORTS",
             "NAMES"
@@ -130,9 +130,32 @@ end
 function cld_cmd_container.top(d, options, args)
     local id = cld_cmd_util.option_val(args, "Container")
     local ctr_ps_str = d:container_top(id)
-    io.write(ctr_ps_str)
+    -- io.write(ctr_ps_str)
     local ctr_ps = json.decode(ctr_ps_str)
-    return ctr_ps
+    local o = {
+        headers = ctr_ps["Titles"],
+        data = {
+        },
+        column_widths = {
+        },
+        show_headers = true,
+        truncate = false
+    }
+
+    for k,v in ipairs(o.headers) do
+        o.data[v] = {}
+        for k1, v1 in ipairs(ctr_ps["Processes"]) do
+            o.data[v][k1] = v1[k]
+        end
+    end
+
+    for k,v in ipairs(o.headers) do
+        o.column_widths[k] = 10
+    end
+
+    cld_cmd_util.display_table(o)
+
+    return json.encode(o)
 end
 
 return cld_cmd_container
