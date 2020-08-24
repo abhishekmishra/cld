@@ -5,37 +5,37 @@ cld_cmd = require("cld_cmd")
 d = docker.connect()
 
 ls_options = {
-    ["--all"] = {
+    ["all"] = {
         ["val"] = false,
     },
-    ["--filter"] = {
+    ["filter"] = {
         ["val"] = nil,
     },
-    ["--format"] = {
+    ["format"] = {
         ["val"] = nil,
     },
-    ["--last"] = {
-        ["val"] = nil,
-    },
-    ["--latest"] = {
-        ["val"] = false,
-    },
-    ["--no-trunc"] = {
-        ["val"] = false,
-    },
-    ["--quiet"] = {
-        ["val"] = false,
-    },
-    ["--size"] = {
+    ["last"] = {
         ["val"] = 0,
+    },
+    ["latest"] = {
+        ["val"] = false,
+    },
+    ["no-trunc"] = {
+        ["val"] = false,
+    },
+    ["quiet"] = {
+        ["val"] = false,
+    },
+    ["size"] = {
+        ["val"] = false,
     },
 }
 output = cld_cmd.ctr.ls(d, ls_options)
--- for k, v in ipairs(output) do
---     print("Container #" .. k)
---     for kt, vt in pairs(v) do
---         print("\t" .. kt .. " = ")
---         print(vt)
---     end
---     print()
--- end
+ for k, v in ipairs(output) do
+     print("Container #" .. k)
+     for kt, vt in pairs(v) do
+         print("\t" .. kt .. " = ")
+         print(vt)
+     end
+     print()
+ end
