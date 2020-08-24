@@ -302,47 +302,58 @@ cli_cmd_err ctr_logs_cmd_handler(void* handler_args, arraylist* options,
 cli_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
 	arraylist* args, cli_command_output_handler success_handler,
 	cli_command_output_handler error_handler) {
-	int quiet = 0;
-	docker_context* ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
-	if (len != 1) {
-		error_handler(CLI_COMMAND_ERR_UNKNOWN, CLI_RESULT_STRING,
-			"Container not provided.");
-		return CLI_COMMAND_ERR_UNKNOWN;
-	}
-	else {
-		cli_argument* container_arg = (cli_argument*)arraylist_get(args,
-			0);
-		char* container = container_arg->val->str_value;
-		docker_container_ps* ps;
-		d_err_t e = docker_process_list_container(ctx, &ps, container, NULL);
-		if (e == E_SUCCESS) {
-			char res_str[1024];
-			sprintf(res_str, "Process list for container %s", container);
-			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, res_str);
-
-			cli_table* ctr_tbl;
-			size_t num_labels = arraylist_length(ps->titles);
-			size_t num_processes = arraylist_length(ps->processes);
-			if (create_cli_table(&ctr_tbl, num_processes, num_labels) == 0) {
-				for (size_t i = 0; i < num_labels; i++) {
-					cli_table_set_header(ctr_tbl, i,
-						(char*)arraylist_get(ps->titles, i));
-				}
-				for (size_t i = 0; i < num_processes; i++) {
-					arraylist* psvals = (arraylist*)arraylist_get(
-						ps->processes, i);
-					for (size_t j = 0; j < num_labels; j++) {
-						cli_table_set_row_val(ctr_tbl, i, j,
-							(char*)arraylist_get(psvals, j));
-					}
-				}
-				success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, ctr_tbl);
-			}
+		json_object* obj;
+		cli_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args, options, args, success_handler, error_handler);
+		if(obj != NULL) {
+			docker_log_debug("Received json object -> %s\n", get_json_string(obj));
 		}
+		return err;
 	}
-	return CLI_COMMAND_SUCCESS;
-}
+
+// cli_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
+// 	arraylist* args, cli_command_output_handler success_handler,
+// 	cli_command_output_handler error_handler) {
+// 	int quiet = 0;
+// 	docker_context* ctx = get_docker_context(handler_args);
+// 	size_t len = arraylist_length(args);
+// 	if (len != 1) {
+// 		error_handler(CLI_COMMAND_ERR_UNKNOWN, CLI_RESULT_STRING,
+// 			"Container not provided.");
+// 		return CLI_COMMAND_ERR_UNKNOWN;
+// 	}
+// 	else {
+// 		cli_argument* container_arg = (cli_argument*)arraylist_get(args,
+// 			0);
+// 		char* container = container_arg->val->str_value;
+// 		docker_container_ps* ps;
+// 		d_err_t e = docker_process_list_container(ctx, &ps, container, NULL);
+// 		if (e == E_SUCCESS) {
+// 			char res_str[1024];
+// 			sprintf(res_str, "Process list for container %s", container);
+// 			success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_STRING, res_str);
+
+// 			cli_table* ctr_tbl;
+// 			size_t num_labels = arraylist_length(ps->titles);
+// 			size_t num_processes = arraylist_length(ps->processes);
+// 			if (create_cli_table(&ctr_tbl, num_processes, num_labels) == 0) {
+// 				for (size_t i = 0; i < num_labels; i++) {
+// 					cli_table_set_header(ctr_tbl, i,
+// 						(char*)arraylist_get(ps->titles, i));
+// 				}
+// 				for (size_t i = 0; i < num_processes; i++) {
+// 					arraylist* psvals = (arraylist*)arraylist_get(
+// 						ps->processes, i);
+// 					for (size_t j = 0; j < num_labels; j++) {
+// 						cli_table_set_row_val(ctr_tbl, i, j,
+// 							(char*)arraylist_get(psvals, j));
+// 					}
+// 				}
+// 				success_handler(CLI_COMMAND_SUCCESS, CLI_RESULT_TABLE, ctr_tbl);
+// 			}
+// 		}
+// 	}
+// 	return CLI_COMMAND_SUCCESS;
+// }
 
 cli_cmd_err ctr_remove_cmd_handler(void* handler_args,
 	arraylist* options, arraylist* args,

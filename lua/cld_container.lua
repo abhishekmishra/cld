@@ -7,29 +7,28 @@ local cld_cmd_container = {}
 function cld_cmd_container.dummy(d) print("Running dummy fn") end
 
 function cld_cmd_container.ls(d, options, args)
-    all = cld_cmd_util.option_val(options, "all")
-    filter = cld_cmd_util.option_val(options, "filter")
-    format = cld_cmd_util.option_val(options, "format")
-    size = cld_cmd_util.option_val(options, "size")
-    last = cld_cmd_util.option_val(options, "last")
-    latest = cld_cmd_util.option_val(options, "latest")
-    no_trunc = cld_cmd_util.option_val(options, "no-trunc")
-    quiet = cld_cmd_util.option_val(options, "quiet")
+    local all = cld_cmd_util.option_val(options, "all")
+    local filter = cld_cmd_util.option_val(options, "filter")
+    local format = cld_cmd_util.option_val(options, "format")
+    local size = cld_cmd_util.option_val(options, "size")
+    local last = cld_cmd_util.option_val(options, "last")
+    local latest = cld_cmd_util.option_val(options, "latest")
+    local no_trunc = cld_cmd_util.option_val(options, "no-trunc")
+    local quiet = cld_cmd_util.option_val(options, "quiet")
 
-    filters_ls = nil
-    if filters ~= nil then
-        filters_ls = cld_cmd_util.filters_to_list(filter)
-    end
+    local filters_ls = nil
+    if filters ~= nil then filters_ls = cld_cmd_util.filters_to_list(filter) end
 
-    ctr_ls_str = d:container_ls_filter(all, cld_cmd_util.option_val(options,
-                                                                    "last"),
-                                       cld_cmd_util.option_val(options, "size"),
-                                       json.encode(filters_ls))
-    ctr_ls = json.decode(ctr_ls_str)
+    local ctr_ls_str = d:container_ls_filter(all, cld_cmd_util.option_val(
+                                                 options, "last"),
+                                             cld_cmd_util.option_val(options,
+                                                                     "size"),
+                                             json.encode(filters_ls))
+    local ctr_ls = json.decode(ctr_ls_str)
 
-    output = {}
+    local output = {}
     for k, v in ipairs(ctr_ls) do
-        c = {}
+        local c = {}
         c["Command"] = v.Command
         c["CreatedAt"] = v.Created
         c["ID"] = v.Id
@@ -47,6 +46,7 @@ function cld_cmd_container.ls(d, options, args)
         table.insert(output, c)
     end
 
+    local o = nil
     if cld_cmd_util.option_val(options, "quiet") then
         o = cld_cmd_container.ls_format_quiet(output)
     else
@@ -114,7 +114,7 @@ function cld_cmd_container.ls_format(output, options)
 end
 
 function cld_cmd_container.ls_format_quiet(output, options)
-    o = {
+    local o = {
         headers = {"CONTAINER ID"},
         data = {["CONTAINER ID"] = {}},
         column_widths = {["CONTAINER ID"] = 15},
@@ -125,6 +125,14 @@ function cld_cmd_container.ls_format_quiet(output, options)
         table.insert(o.data["CONTAINER ID"], c["ID"])
     end
     return o
+end
+
+function cld_cmd_container.top(d, options, args)
+    local id = cld_cmd_util.option_val(args, "Container")
+    local ctr_ps_str = d:container_top(id)
+    io.write(ctr_ps_str)
+    local ctr_ps = json.decode(ctr_ps_str)
+    return ctr_ps
 end
 
 return cld_cmd_container
