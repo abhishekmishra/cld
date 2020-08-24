@@ -8,6 +8,7 @@ function CLD:initialize(docker_conn)
 end
 
 CLD.static.container = require('cld_container')
+CLD.static.ctr = CLD.static.container
 
 function CLD:run(module, command, options, args)
     return CLD.static[module][command](self.d, options, args)

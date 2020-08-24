@@ -30,7 +30,7 @@ cli_cmd_err start_lua_interpreter()
     luaL_openlibs(L);
 
     //Load the cld_cmd library
-    doString("cld_cmd = require('cld_cmd')");
+    doString("CLD = require('cld')");
 
     //Load the luaclibdocker library
     doString("docker = require('luaclibdocker')");
@@ -45,7 +45,6 @@ cli_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel) {
     docker_log_debug("Setting docker context");
     DockerClient_from_context(L, ctx);
     lua_setglobal(L, "d");
-    docker_log_debug("Setting docker context");
 
     char* cmdStr = (char*)calloc(1024, sizeof(char));
     if(cmdStr != NULL) {
@@ -53,6 +52,9 @@ cli_cmd_err lua_set_docker_context(docker_context* ctx, int loglevel) {
         luaL_dostring(L, cmdStr);
         free(cmdStr);
     }
+
+    // create CLD instance
+    doString("cld = CLD:new(d)");
 
     return CLI_COMMAND_SUCCESS;
 }
@@ -73,13 +75,18 @@ cli_cmd_err execute_lua_command(json_object** res, const char* module_name, cons
                                 arraylist *options, arraylist *args, cli_command_output_handler success_handler,
                                 cli_command_output_handler error_handler)
 {
-    //function name is cld_cmd.`module_name`.`command_name`
-    lua_getglobal(L, "cld_cmd");
-    lua_getfield(L, -1, module_name);
-    lua_getfield(L, -1, command_name);
+    //function name is cld:run(module, command, options, args)
+    lua_getglobal(L, "cld");
+    lua_getfield(L, -1, "run");
+    // lua_getfield(L, -1, command_name);
 
-    //first arg is docker client
-    lua_getglobal(L, "d"); 
+    //first arg is class instance, to mimic the `:` call
+    lua_getglobal(L, "cld"); 
+
+    lua_pushstring(L, module_name);
+    lua_pushstring(L, command_name);
+    //lua_getfield(L, -1, module_name);
+    //lua_getfield(L, -1, command_name);
 
     //second arg is command options
     if (options == NULL) {
@@ -109,8 +116,8 @@ cli_cmd_err execute_lua_command(json_object** res, const char* module_name, cons
         }
     }
 
-    /* do the call (3 arguments, 1 result) */
-    if (lua_pcall(L, 3, 1, 0) != 0)
+    /* do the call (4 arguments, 1 result) */
+    if (lua_pcall(L, 5, 1, 0) != 0)
     {
         luaL_error(L, "error running function '%s': %s", command_name,
               lua_tostring(L, -1));
