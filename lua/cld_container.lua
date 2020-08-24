@@ -150,8 +150,9 @@ function cld_cmd_container.top(d, options, args)
     end
 
     for k,v in ipairs(o.headers) do
-        o.column_widths[k] = 10
+        o.column_widths[v] = 10
     end
+    o.column_widths['COMMAND'] = 25
 
     cld_cmd_util.display_table(o)
 
