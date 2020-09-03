@@ -12,6 +12,14 @@ set ( CLD_VERSION_MAJOR 0 )
 set ( CLD_VERSION_MINOR 1 )
 set ( CLD_VERSION_PATCH 0 )
 
+# https://stackoverflow.com/a/63037953
+include(CheckLibraryExists)
+CHECK_LIBRARY_EXISTS(m sin "" HAVE_LIB_M)
+
+if (HAVE_LIB_M)
+  set(EXTRA_LIBS ${EXTRA_LIBS} m)
+endif (HAVE_LIB_M)
+
 # Include Directories
 # In GCC, this will invoke the "-I" command
 include_directories( src )
@@ -84,10 +92,12 @@ find_package(ZLIB REQUIRED)
 find_package(lz4 REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(LibLZMA REQUIRED)
 find_path(LIBARCHIVE_INCLUDE_DIR archive.h)
 find_library(LIBARCHIVE_LIBRARY archive)
 include_directories(${LIBARCHIVE_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} lz4::lz4 BZip2::BZip2 LibXml2::LibXml2 m LibLZMA::LibLZMA ZLIB::ZLIB)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} lz4::lz4 BZip2::BZip2 LibXml2::LibXml2 LibLZMA::LibLZMA ZLIB::ZLIB)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${EXTRA_LIBS})
 
 find_package(coll CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
