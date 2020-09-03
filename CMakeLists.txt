@@ -81,10 +81,13 @@ target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
 # See https://github.com/microsoft/vcpkg/issues/8839#issuecomment-558066466
 # for additional lookup to ZLIB
 find_package(ZLIB REQUIRED)
+find_package(lz4 REQUIRED)
+find_package(BZip2 REQUIRED)
+find_package(LibXml2 REQUIRED)
 find_path(LIBARCHIVE_INCLUDE_DIR archive.h)
 find_library(LIBARCHIVE_LIBRARY archive)
 include_directories(${LIBARCHIVE_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} ZLIB::ZLIB)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} lz4::lz4 BZip2::BZip2 LibXml2::LibXml2 m LibLZMA::LibLZMA ZLIB::ZLIB)
 
 find_package(coll CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
