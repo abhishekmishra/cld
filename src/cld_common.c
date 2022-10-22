@@ -1,10 +1,11 @@
 /**
  * Copyright (c) 2020 Abhishek Mishra
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
 
+#include <string.h>
 #include "cliutils.h"
 #include "docker_all.h"
 
