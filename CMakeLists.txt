@@ -73,6 +73,18 @@ if (LUA_FOUND)
   target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
 endif (LUA_FOUND)
 
+# !!!!NOTE/WARNING!!!
+# The coll package is placed ahead of json-c such that arraylist.h from coll is used.
+# TODO: coll package should be fixed to use another header file name.
+find_package(coll CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
+
+find_package(clibdocker CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
+
+find_package(cliutils CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC cliutils::cliutils)
+
 # see mustach documentation for this
 add_definitions(-DNO_OPEN_MEMSTREAM)
 
@@ -98,15 +110,6 @@ find_library(LIBARCHIVE_LIBRARY archive)
 include_directories(${LIBARCHIVE_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} lz4::lz4 BZip2::BZip2 LibXml2::LibXml2 LibLZMA::LibLZMA ZLIB::ZLIB)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${EXTRA_LIBS})
-
-find_package(coll CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
-
-find_package(clibdocker CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
-
-find_package(cliutils CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC cliutils::cliutils)
 
 include(CheckIncludeFile)
 check_include_file("getopt.h" HAVE_GETOPT)
