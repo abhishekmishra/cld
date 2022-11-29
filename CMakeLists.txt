@@ -12,6 +12,9 @@ set ( CLD_VERSION_MAJOR 0 )
 set ( CLD_VERSION_MINOR 1 )
 set ( CLD_VERSION_PATCH 0 )
 
+# https://stackoverflow.com/a/47260387/9483968
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # https://stackoverflow.com/a/63037953
 include(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(m sin "" HAVE_LIB_M)
