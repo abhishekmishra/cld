@@ -253,25 +253,36 @@ int main(int argc, char *argv[])
 {
 	docker_log_set_level(LOG_INFO);
 
-	if (argc > 0)
+	d_err_t res = docker_api_init();
+
+	if(res == 0) 
 	{
-		docker_log_debug("command name is %s\n", argv[0]);
-		main_command_name = argv[0];
-
-		start_lua_interpreter();
-
-		create_commands();
-
-		cli_cmd_err err = exec_command(CLI_COMMANDS, &ctx, argc,
-									   argv, (cli_command_output_handler)&print_handler,
-									   (cli_command_output_handler)&print_handler);
-		if (err != CLI_COMMAND_SUCCESS)
+		if (argc > 0)
 		{
-			docker_log_error("Error: invalid command.\n");
-		}
+			docker_log_debug("command name is %s\n", argv[0]);
+			main_command_name = argv[0];
 
-		stop_lua_interpreter();
+			start_lua_interpreter();
+
+			create_commands();
+
+			cli_cmd_err err = exec_command(CLI_COMMANDS, &ctx, argc,
+										argv, (cli_command_output_handler)&print_handler,
+										(cli_command_output_handler)&print_handler);
+			if (err != CLI_COMMAND_SUCCESS)
+			{
+				docker_log_error("Error: invalid command.\n");
+			}
+
+			stop_lua_interpreter();
+		}
+	}
+	else
+	{
+		printf("Docker API initialization error!\n");
 	}
 
+	docker_api_cleanup();
+	
 	return 0;
 }
