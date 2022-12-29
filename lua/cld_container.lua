@@ -89,8 +89,16 @@ function cld_cmd_container.ls_format(output, options)
         local ports_str = ""
         local count = 1
         for _, p in ipairs(c["Ports"]) do
-            ports_str = ports_str .. p.IP .. ":" .. p.PublicPort .. "->" ..
-                            p.PrivatePort .. "/" .. p.Type
+            if p.IP then
+                ports_str = ports_str .. p.IP .. ":"
+            end
+            if p.PublicPort then
+                ports_str = ports_str .. p.PublicPort
+            end
+            if p.PrivatePort then
+                ports_str = ports_str .. "->" .. p.PrivatePort
+            end
+            ports_str = ports_str .. "/" .. p.Type
             if count < #c["Ports"] then ports_str = ports_str .. ", " end
         end
 
