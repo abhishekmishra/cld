@@ -26,10 +26,7 @@
 #include "cld_sys.h"
 #include "zclk_dict.h"
 
-zclk_cmd_err sys_version_cmd_handler(void *handler_args,
-									arraylist *options, arraylist *args,
-									zclk_command_output_handler success_handler,
-									zclk_command_output_handler error_handler)
+zclk_cmd_err sys_version_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_version *version = NULL;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -51,7 +48,7 @@ zclk_cmd_err sys_version_cmd_handler(void *handler_args,
 			zclk_dict_put(ver_dict, "Experimental",
 						 docker_version_experimental_get(version) == 0 ? "False" : "True");
 
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_DICT, ver_dict);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_DICT, ver_dict);
 
 			free_zclk_dict(ver_dict);
 		}
@@ -64,10 +61,7 @@ zclk_cmd_err sys_version_cmd_handler(void *handler_args,
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err sys_connection_cmd_handler(void *handler_args,
-									   arraylist *options, arraylist *args,
-									   zclk_command_output_handler success_handler,
-									   zclk_command_output_handler error_handler)
+zclk_cmd_err sys_connection_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_context *ctx = get_docker_context(handler_args);
 	if (ctx->url)
@@ -103,45 +97,46 @@ void docker_events_cb(docker_event *event, void *cbargs)
 	success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, content);
 }
 
-zclk_cmd_err sys_events_cmd_handler(void *handler_args,
-								   arraylist *options, arraylist *args,
-								   zclk_command_output_handler success_handler,
-								   zclk_command_output_handler error_handler)
+zclk_cmd_err sys_events_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
 
 	arraylist *events;
 	time_t now = time(NULL);
-	d_err_t err = docker_system_events_cb(ctx, &docker_events_cb, success_handler, &events, now - (3600 * 24), 0);
+	d_err_t err = docker_system_events_cb(ctx, &docker_events_cb, 
+		cmd->success_handler, &events, now - (3600 * 24), 0);
+	
 	if (err == E_SUCCESS)
 	{
-		success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, "done.");
+		cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, "done.");
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
 zclk_command *sys_commands()
 {
-	zclk_command *system_command;
-	if (make_command(&system_command, "system", "sys", "Docker System Commands",
-					 NULL) == ZCLK_COMMAND_SUCCESS)
+	zclk_command *system_command = new_zclk_command("system", "sys", 
+				"Docker System Commands", NULL);
+	if(system_command != NULL)
 	{
-		zclk_command *sysver_command, *syscon_command, *sysevt_command;
-		if (make_command(&sysver_command, "version", "ver",
-						 "Docker System Version", &sys_version_cmd_handler) == ZCLK_COMMAND_SUCCESS)
+		zclk_command *sysver_command = new_zclk_command("version", "ver",
+				"Docker System Version", &sys_version_cmd_handler);
+		if(sysver_command != NULL)
 		{
-			arraylist_add(system_command->sub_commands, sysver_command);
+			zclk_command_subcommand_add(system_command, sysver_command);
 		}
-		if (make_command(&syscon_command, "connection", "con",
-						 "Docker System Connection", &sys_connection_cmd_handler) == ZCLK_COMMAND_SUCCESS)
+		zclk_command *syscon_command = new_zclk_command("connection", "con",
+				"Docker System Connection", &sys_connection_cmd_handler);
+		if(syscon_command != NULL)
 		{
-			arraylist_add(system_command->sub_commands, syscon_command);
+			zclk_command_subcommand_add(system_command, syscon_command);
 		}
-		if (make_command(&sysevt_command, "events", "evt",
-						 "Docker System Connection", &sys_events_cmd_handler) == ZCLK_COMMAND_SUCCESS)
+		zclk_command *sysevt_command = new_zclk_command("events", "evt",
+				"Docker System Connection", &sys_events_cmd_handler);
+		if(sysevt_command != NULL)
 		{
-			arraylist_add(system_command->sub_commands, sysevt_command);
+			zclk_command_subcommand_add(system_command, sysevt_command);
 		}
 	}
 	return system_command;

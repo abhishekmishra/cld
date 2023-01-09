@@ -26,11 +26,11 @@
 #include "docker_all.h"
 #include "cld_common.h"
 #include <zclk.h>
-// #include "cld_sys.h"
-// #include "cld_ctr.h"
-// #include "cld_img.h"
+#include "cld_sys.h"
+#include "cld_ctr.h"
+#include "cld_img.h"
 #include "cld_vol.h"
-// #include "cld_net.h"
+#include "cld_net.h"
 #include "cld_lua.h"
 #include <coll_arraylist.h>
 
@@ -219,11 +219,11 @@ zclk_command *create_main_command()
 		zclk_command_string_option(main_command, ZCLK_OPTION_MAIN_VERSION_LONG,
 								   ZCLK_OPTION_MAIN_VERSION_SHORT, 0, 0, ZCLK_OPTION_MAIN_VERSION_DESC);
 
-		// arraylist_add(main_command->sub_commands, sys_commands());
-		// arraylist_add(main_command->sub_commands, ctr_commands());
-		// arraylist_add(main_command->sub_commands, img_commands());
+		arraylist_add(main_command->sub_commands, sys_commands());
+		arraylist_add(main_command->sub_commands, ctr_commands());
+		arraylist_add(main_command->sub_commands, img_commands());
 		arraylist_add(main_command->sub_commands, vol_commands());
-		// arraylist_add(main_command->sub_commands, net_commands());
+		arraylist_add(main_command->sub_commands, net_commands());
 		return main_command;
 	}
 	return NULL;

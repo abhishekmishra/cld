@@ -29,13 +29,12 @@
 #include "zclk_table.h"
 #include "cld_lua.h"
 
-zclk_cmd_err ctr_ls_cmd_handler(void *handler_args, arraylist *options,
-							   arraylist *args, zclk_command_output_handler success_handler,
-							   zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 
 	json_object *obj;
-	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "ls", handler_args, options, args, success_handler, error_handler);
+	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "ls", handler_args,
+		cmd->options, cmd->args, cmd->success_handler, cmd->error_handler);
 	if (obj != NULL)
 	{
 		docker_log_debug("Received json object -> %s\n", get_json_string(obj));
@@ -43,25 +42,22 @@ zclk_cmd_err ctr_ls_cmd_handler(void *handler_args, arraylist *options,
 	return err;
 }
 
-zclk_cmd_err ctr_create_cmd_handler(void *handler_args,
-								   arraylist *options, arraylist *args,
-								   zclk_command_output_handler success_handler,
-								   zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_create_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Image name not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *image_name_arg = (zclk_argument *)arraylist_get(args,
-																	 0);
-		char *image_name = image_name_arg->val->str_value;
+		zclk_argument *image_name_arg = 
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *image_name = zclk_argument_get_val_string(image_name_arg);
 		char *id = NULL;
 		docker_ctr_create_params *p = make_docker_ctr_create_params();
 		docker_ctr_create_params_image_set(p, image_name);
@@ -72,7 +68,7 @@ zclk_cmd_err ctr_create_cmd_handler(void *handler_args,
 			{
 				char res_str[1024];
 				sprintf(res_str, "Created container with id %s", id);
-				success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING,
+				cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING,
 								res_str);
 			}
 		}
@@ -80,239 +76,219 @@ zclk_cmd_err ctr_create_cmd_handler(void *handler_args,
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_start_cmd_handler(void *handler_args,
-								  arraylist *options, arraylist *args,
-								  zclk_command_output_handler success_handler,
-								  zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_start_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg = 
+			(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_start_container(ctx, container, NULL);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Started container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_stop_cmd_handler(void *handler_args, arraylist *options,
-								 arraylist *args, zclk_command_output_handler success_handler,
-								 zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_stop_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg = 
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_stop_container(ctx, container, 0);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Stopped container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_restart_cmd_handler(void *handler_args,
-									arraylist *options, arraylist *args,
-									zclk_command_output_handler success_handler,
-									zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_restart_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg = 
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_restart_container(ctx, container, 0);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Restarted container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_kill_cmd_handler(void *handler_args, arraylist *options,
-								 arraylist *args, zclk_command_output_handler success_handler,
-								 zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_kill_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg = 
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_kill_container(ctx, container, NULL);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Killed container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_ren_cmd_handler(void *handler_args, arraylist *options,
-								arraylist *args, zclk_command_output_handler success_handler,
-								zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_ren_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 2)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container name and new name not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
-		char *new_name =
-			((zclk_argument *)arraylist_get(args, 1))->val->str_value;
+		zclk_argument *container_arg = 
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
+		char *new_name = zclk_argument_get_val_string
+			((zclk_argument *)arraylist_get(cmd->args, 1));
 		d_err_t e = docker_rename_container(ctx, container, new_name);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Renamed container %s to %s", container, new_name);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_pause_cmd_handler(void *handler_args,
-								  arraylist *options, arraylist *args,
-								  zclk_command_output_handler success_handler,
-								  zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_pause_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_pause_container(ctx, container);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Paused container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_unpause_cmd_handler(void *handler_args,
-									arraylist *options, arraylist *args,
-									zclk_command_output_handler success_handler,
-									zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_unpause_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_unpause_container(ctx, container);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "UnPaused container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_wait_cmd_handler(void *handler_args, arraylist *options,
-								 arraylist *args, zclk_command_output_handler success_handler,
-								 zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_wait_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_wait_container(ctx, container, NULL);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Waiting for container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
@@ -325,24 +301,22 @@ void cld_log_line_handler(void *args, int stream_id, int line_num, char *line)
 	success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, line);
 }
 
-zclk_cmd_err ctr_logs_cmd_handler(void *handler_args, arraylist *options,
-								 arraylist *args, zclk_command_output_handler success_handler,
-								 zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_logs_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		char *log;
 		size_t log_len;
 		d_err_t e = docker_container_logs(ctx, &log, &log_len, container, 0, 1, 1, -1, -1, 1,
@@ -351,20 +325,20 @@ zclk_cmd_err ctr_logs_cmd_handler(void *handler_args, arraylist *options,
 		{
 			char res_str[1024];
 			sprintf(res_str, "Logs for container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 			// success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, log);
-			docker_container_logs_foreach(success_handler, log, log_len, &cld_log_line_handler);
+			docker_container_logs_foreach(cmd->success_handler, 
+					log, log_len, &cld_log_line_handler);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
 }
 
-zclk_cmd_err ctr_top_cmd_handler(void *handler_args, arraylist *options,
-								arraylist *args, zclk_command_output_handler success_handler,
-								zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	json_object *obj;
-	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args, options, args, success_handler, error_handler);
+	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args,
+			cmd->options, cmd->args, cmd->success_handler, cmd->error_handler);
 	if (obj != NULL)
 	{
 		docker_log_debug("Received json object -> %s\n", get_json_string(obj));
@@ -417,31 +391,28 @@ zclk_cmd_err ctr_top_cmd_handler(void *handler_args, arraylist *options,
 // 	return ZCLK_COMMAND_SUCCESS;
 // }
 
-zclk_cmd_err ctr_remove_cmd_handler(void *handler_args,
-								   arraylist *options, arraylist *args,
-								   zclk_command_output_handler success_handler,
-								   zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_remove_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		d_err_t e = docker_remove_container(ctx, container, 0, 0, 0);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Removed container %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
@@ -490,36 +461,33 @@ void docker_container_stats_cb(docker_container_stats *stats, void *cbargs)
 	sarg->success_handler(ZCLK_COMMAND_IS_RUNNING, ZCLK_RESULT_TABLE, ctr_tbl);
 }
 
-zclk_cmd_err ctr_stats_cmd_handler(void *handler_args,
-								  arraylist *options, arraylist *args,
-								  zclk_command_output_handler success_handler,
-								  zclk_command_output_handler error_handler)
+zclk_cmd_err ctr_stats_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
-	size_t len = arraylist_length(args);
+	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
 		return ZCLK_COMMAND_ERR_UNKNOWN;
 	}
 	else
 	{
-		zclk_argument *container_arg = (zclk_argument *)arraylist_get(args,
-																	0);
-		char *container = container_arg->val->str_value;
+		zclk_argument *container_arg =
+				(zclk_argument *)arraylist_get(cmd->args, 0);
+		char *container = zclk_argument_get_val_string(container_arg);
 		stats_args *sarg = (stats_args *)calloc(1, sizeof(stats_args));
 		sarg->id = container;
 		sarg->name = container;
-		sarg->success_handler = success_handler;
+		sarg->success_handler = cmd->success_handler;
 		d_err_t e = docker_container_get_stats_cb(ctx, &docker_container_stats_cb,
 												  sarg, container);
 		if (e == E_SUCCESS)
 		{
 			char res_str[1024];
 			sprintf(res_str, "done %s", container);
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
 	return ZCLK_COMMAND_SUCCESS;
@@ -527,125 +495,142 @@ zclk_cmd_err ctr_stats_cmd_handler(void *handler_args,
 
 zclk_command *ctr_commands()
 {
-	zclk_command *container_command;
-	if (make_command(&container_command, "container", "ctr",
-					 "Docker Container Commands",
-					 NULL) == ZCLK_COMMAND_SUCCESS)
+	zclk_command *container_command = new_zclk_command("container", "ctr",
+			"Docker Container Commands", NULL);
+	if(container_command != NULL)
 	{
-		zclk_command *ctr_command;
-
-		ctr_command = create_command("list", "ls", "Docker Container List",
+		zclk_command *ctr_command = new_zclk_command("list", "ls", "Docker Container List",
 									 &ctr_ls_cmd_handler);
-		arraylist_add(ctr_command->options,
-					  create_option("all", "a", ZCLK_VAL_FLAG(0), ZCLK_VAL_FLAG(0), "Show all containers (by default shows only running ones)."));
-		arraylist_add(ctr_command->options,
-					  create_option("filter", "f", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL), "Filter output based on conditions provided"));
-		arraylist_add(ctr_command->options,
-					  create_option("format", NULL, ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL), "Pretty-print containers using a Go template"));
-		arraylist_add(ctr_command->options,
-					  create_option("last", "n", ZCLK_VAL_INT(-1), ZCLK_VAL_INT(10), "Show n last created containers (includes all states)"));
-		arraylist_add(ctr_command->options,
-					  create_option("latest", "l", ZCLK_VAL_FLAG(0), ZCLK_VAL_FLAG(0), "Show the latest created container (includes all states)"));
-		arraylist_add(ctr_command->options,
-					  create_option("no-trunc", NULL, ZCLK_VAL_FLAG(0), ZCLK_VAL_FLAG(0), "Don't truncate output"));
-		arraylist_add(ctr_command->options,
-					  create_option("quiet", "q", ZCLK_VAL_FLAG(0), ZCLK_VAL_FLAG(0), "Only display numeric IDs"));
-		arraylist_add(ctr_command->options,
-					  create_option("size", "s", ZCLK_VAL_FLAG(0), ZCLK_VAL_FLAG(0), "Display total file sizes"));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_flag_option(ctr_command, "all", "a", 0, 0, "Show all containers (by default shows only running ones).");
+			zclk_command_string_option(ctr_command, "filter", "f", NULL, NULL, "Filter output based on conditions provided");
+			zclk_command_string_option(ctr_command, "format", NULL, NULL, NULL, "Pretty-print containers using a Go template");
+			zclk_command_int_option(ctr_command, "last", "n", -1, 10, "Show n last created containers (includes all states)");
+			zclk_command_flag_option(ctr_command, "latest", "l", 0, 0, "Show the latest created container (includes all states)");
+			zclk_command_flag_option(ctr_command, "no-trunc", NULL, 0, 0, "Don't truncate output");
+			zclk_command_flag_option(ctr_command, "quiet", "q", 0, 0, "Only display numeric IDs");
+			zclk_command_flag_option(ctr_command, "size", "s", 0, 0, "Display total file sizes");
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("create", "create",
+		ctr_command = new_zclk_command("create", "create",
 									 "Docker Container Create", &ctr_create_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Image Name", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL), "Name of Docker Image to use."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Image Name", NULL, NULL, "Name of Docker Image to use.", 1);
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("start", "on",
+		ctr_command = new_zclk_command("start", "on",
 									 "Docker Container Start", &ctr_start_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to start."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to start.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("stop", "off",
+		ctr_command = new_zclk_command("stop", "off",
 									 "Docker Container Stop", &ctr_stop_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to stop."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to stop.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("restart", "restart",
+		ctr_command = new_zclk_command("restart", "restart",
 									 "Docker Container Restart", &ctr_restart_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to restart."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to restart.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("kill", "kill",
+		ctr_command = new_zclk_command("kill", "kill",
 									 "Docker Container Kill", &ctr_kill_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to kill."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to kill.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("rename", "ren",
+		ctr_command = new_zclk_command("rename", "ren",
 									 "Docker Container Rename", &ctr_ren_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to rename."));
-		arraylist_add(ctr_command->args,
-					  create_argument("Name", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "New name of container."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to rename.", 1);;
+			zclk_command_string_argument(ctr_command, "Name", NULL, NULL,
+										"New name of container.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("pause", "pause",
+		ctr_command = new_zclk_command("pause", "pause",
 									 "Docker Container Pause", &ctr_pause_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to pause."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to pause.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("unpause", "unpause",
+		ctr_command = new_zclk_command("unpause", "unpause",
 									 "Docker Container UnPause", &ctr_unpause_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to unpause."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to unpause.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("wait", "wait",
+		ctr_command = new_zclk_command("wait", "wait",
 									 "Docker Container Wait", &ctr_wait_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container to wait."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container to wait.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("logs", "lg",
+		ctr_command = new_zclk_command("logs", "lg",
 									 "Docker Container Logs", &ctr_logs_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("top", "ps",
+		ctr_command = new_zclk_command("top", "ps",
 									 "Docker Container Top/PS", &ctr_top_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("remove", "del",
+		ctr_command = new_zclk_command("remove", "del",
 									 "Docker Remove Container", &ctr_remove_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 
-		ctr_command = create_command("stats", "stats",
+		ctr_command = new_zclk_command("stats", "stats",
 									 "Docker Container Stats", &ctr_stats_cmd_handler);
-		arraylist_add(ctr_command->args,
-					  create_argument("Container", ZCLK_VAL_STRING(NULL), ZCLK_VAL_STRING(NULL),
-									  "Name of container."));
-		arraylist_add(container_command->sub_commands, ctr_command);
+		if(ctr_command != NULL)
+		{
+			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+										"Name of container.", 1);;
+			zclk_command_subcommand_add(container_command, ctr_command);
+		}
 	}
 	return container_command;
 }
