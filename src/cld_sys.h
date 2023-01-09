@@ -26,6 +26,6 @@
 
 #include "cld_common.h"
 
-cli_command *sys_commands();
+zclk_command *sys_commands();
 
 #endif /* SRC_CLD_SYS_H_ */

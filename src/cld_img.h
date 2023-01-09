@@ -26,6 +26,6 @@
 
 #include "cld_common.h"
 
-cli_command *img_commands();
+zclk_command *img_commands();
 
 #endif

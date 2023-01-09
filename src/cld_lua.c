@@ -43,7 +43,7 @@ bool doString(const char *s)
     return true;
 }
 
-cli_cmd_err start_lua_interpreter()
+zclk_cmd_err start_lua_interpreter()
 {
     docker_log_debug("Starting LUA interpreter...\n");
     L = luaL_newstate();
@@ -58,10 +58,10 @@ cli_cmd_err start_lua_interpreter()
     // execute a dummy command to ensure all is well.
     // execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
 
-    return CLI_COMMAND_SUCCESS;
+    return ZCLK_COMMAND_SUCCESS;
 }
 
-cli_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel)
+zclk_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel)
 {
     docker_log_debug("Setting docker context");
     DockerClient_from_context(L, ctx);
@@ -78,24 +78,24 @@ cli_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel)
     // create CLD instance
     doString("cld = CLD:new(d)");
 
-    return CLI_COMMAND_SUCCESS;
+    return ZCLK_COMMAND_SUCCESS;
 }
 
-cli_cmd_err stop_lua_interpreter()
+zclk_cmd_err stop_lua_interpreter()
 {
     docker_log_debug("Stopping LUA interpreter...\n");
     lua_close(L);
 
-    return CLI_COMMAND_SUCCESS;
+    return ZCLK_COMMAND_SUCCESS;
 }
 
 /**
  * Execute a lua function representing a docker command.
  * The command is passed arguments identical to the C command handlers.
  */
-cli_cmd_err execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
-                                arraylist *options, arraylist *args, cli_command_output_handler success_handler,
-                                cli_command_output_handler error_handler)
+zclk_cmd_err execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
+                                arraylist *options, arraylist *args, zclk_command_output_handler success_handler,
+                                zclk_command_output_handler error_handler)
 {
     // function name is cld:run(module, command, options, args)
     lua_getglobal(L, "cld");
@@ -121,7 +121,7 @@ cli_cmd_err execute_lua_command(json_object **res, const char *module_name, cons
         lua_createtable(L, 0, len);
         for (size_t i = 0; i < len; i++)
         {
-            cli_option *o = (cli_option *)arraylist_get(options, i);
+            zclk_option *o = (zclk_option *)arraylist_get(options, i);
             options->convert_to_lua(L, i, o);
             lua_setfield(L, -2, o->name);
         }
@@ -138,7 +138,7 @@ cli_cmd_err execute_lua_command(json_object **res, const char *module_name, cons
         lua_createtable(L, 0, len);
         for (size_t i = 0; i < len; i++)
         {
-            cli_option *o = (cli_option *)arraylist_get(args, i);
+            zclk_option *o = (zclk_option *)arraylist_get(args, i);
             args->convert_to_lua(L, i, o);
             lua_setfield(L, -2, o->name);
         }
@@ -149,11 +149,11 @@ cli_cmd_err execute_lua_command(json_object **res, const char *module_name, cons
     {
         luaL_error(L, "error running function '%s': %s", command_name,
                    lua_tostring(L, -1));
-        return CLI_COMMAND_ERR_UNKNOWN;
+        return ZCLK_COMMAND_ERR_UNKNOWN;
     }
 
     char *result_str = lua_tostring(L, -1);
     *res = json_tokener_parse(result_str);
 
-    return CLI_COMMAND_SUCCESS;
+    return ZCLK_COMMAND_SUCCESS;
 }

@@ -31,11 +31,11 @@ include_directories( src )
 # Setup the list of source files
 set( CLD_SOURCES
   src/cld_common.c
-  src/cld_ctr.c
-  src/cld_img.c
-  src/cld_net.c
-  src/cld_sys.c
-  src/cld_vol.c
+#  src/cld_ctr.c
+#  src/cld_img.c
+#  src/cld_net.c
+#  src/cld_sys.c
+#  src/cld_vol.c
   src/cld.c
   src/tokenizer.c
   src/cld_lua.c
@@ -43,11 +43,11 @@ set( CLD_SOURCES
   src/mustach-json-c.c
 
   src/cld_common.h
-  src/cld_ctr.h
-  src/cld_img.h
-  src/cld_net.h
-  src/cld_sys.h
-  src/cld_vol.h
+#  src/cld_ctr.h
+#  src/cld_img.h
+#  src/cld_net.h
+#  src/cld_sys.h
+#  src/cld_vol.h
   src/histedit.h
   src/cld_lua.h
   src/mustach.h
@@ -85,8 +85,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC coll::coll)
 find_package(clibdocker CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC clibdocker::clibdocker)
 
-find_package(cliutils CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC cliutils::cliutils)
+find_package(zclk CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC zclk::zclk)
 
 # see mustach documentation for this
 add_definitions(-DNO_OPEN_MEMSTREAM)

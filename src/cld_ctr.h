@@ -29,6 +29,6 @@
 #define CLD_OPTION_LONG_LS_ALL "all"
 #define CLD_OPTION_SHORT_LS_ALL "a"
 
-cli_command *ctr_commands();
+zclk_command *ctr_commands();
 
 #endif

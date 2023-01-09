@@ -26,6 +26,6 @@
 
 #include "cld_common.h"
 
-cli_command *vol_commands();
+zclk_command *vol_commands();
 
 #endif /* SRC_CLD_VOL_H_ */

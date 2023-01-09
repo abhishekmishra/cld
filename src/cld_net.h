@@ -25,8 +25,8 @@
 #define SRC_CLD_NET_H_
 
 #include "cld_common.h"
-#include <cliutils.h>
+#include <zclk.h>
 
-cli_command *net_commands();
+zclk_command *net_commands();
 
 #endif /* SRC_CLD_NET_H_ */

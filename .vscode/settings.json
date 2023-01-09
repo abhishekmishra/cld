@@ -7,6 +7,8 @@
         "cliutils.h": "c",
         "cli_progress.h": "c",
         "cli_dict.h": "c",
-        "getopt.h": "c"
-    }
+        "getopt.h": "c",
+        "json_object.h": "c"
+    },
+    "editor.formatOnSave": false
 }
