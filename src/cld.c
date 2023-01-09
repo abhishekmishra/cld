@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 			start_lua_interpreter();
 
 
-			zclk_cmd_err err = zclk_command_exec(create_main_command(), NULL, argc, argv);
+			zclk_cmd_err err = zclk_command_exec(create_main_command(), &ctx, argc, argv);
 
 			if (err != ZCLK_COMMAND_SUCCESS)
 			{
