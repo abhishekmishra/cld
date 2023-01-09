@@ -29,7 +29,7 @@
 // #include "cld_sys.h"
 // #include "cld_ctr.h"
 // #include "cld_img.h"
-// #include "cld_vol.h"
+#include "cld_vol.h"
 // #include "cld_net.h"
 #include "cld_lua.h"
 #include <coll_arraylist.h>
@@ -222,7 +222,7 @@ zclk_command *create_main_command()
 		// arraylist_add(main_command->sub_commands, sys_commands());
 		// arraylist_add(main_command->sub_commands, ctr_commands());
 		// arraylist_add(main_command->sub_commands, img_commands());
-		// arraylist_add(main_command->sub_commands, vol_commands());
+		arraylist_add(main_command->sub_commands, vol_commands());
 		// arraylist_add(main_command->sub_commands, net_commands());
 		return main_command;
 	}

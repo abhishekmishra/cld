@@ -35,7 +35,7 @@ set( CLD_SOURCES
 #  src/cld_img.c
 #  src/cld_net.c
 #  src/cld_sys.c
-#  src/cld_vol.c
+  src/cld_vol.c
   src/cld.c
   src/tokenizer.c
   src/cld_lua.c
@@ -47,7 +47,7 @@ set( CLD_SOURCES
 #  src/cld_img.h
 #  src/cld_net.h
 #  src/cld_sys.h
-#  src/cld_vol.h
+  src/cld_vol.h
   src/histedit.h
   src/cld_lua.h
   src/mustach.h

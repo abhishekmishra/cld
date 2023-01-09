@@ -25,9 +25,7 @@
 #include "docker_all.h"
 #include "cld_vol.h"
 
-zclk_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
-							   arraylist *args, zclk_command_output_handler success_handler,
-							   zclk_command_output_handler error_handler)
+zclk_cmd_err vol_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -39,7 +37,7 @@ zclk_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 	{
 		char res_str[1024];
 		sprintf(res_str, "Listing volumes");
-		success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+		cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
 
 		size_t col_num = 0;
 		size_t len_volumes = docker_volume_list_length(volumes);
@@ -57,7 +55,7 @@ zclk_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 				zclk_table_set_row_val(vol_tbl, i, 1, docker_volume_name_get(vol));
 				zclk_table_set_row_val(vol_tbl, i, 2, docker_volume_mountpoint_vol_get(vol));
 			}
-			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_TABLE, vol_tbl);
+			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_TABLE, vol_tbl);
 		}
 	}
 	else
@@ -69,9 +67,8 @@ zclk_cmd_err vol_ls_cmd_handler(void *handler_args, arraylist *options,
 
 zclk_command *vol_commands()
 {
-	zclk_command *image_command;
-	if (make_command(&image_command, "volume", "vol", "Docker Volume Commands",
-					 NULL) == ZCLK_COMMAND_SUCCESS)
+	zclk_command *image_command = new_zclk_command("volume", "vol", "Docker Volume Commands", NULL);
+	if(image_command != NULL)
 	{
 		zclk_command *volcreate_command, *volls_command;
 		//		if (make_command(&imgpl_command, "create", "create", "Docker Volume Create",
@@ -83,10 +80,12 @@ zclk_command *vol_commands()
 		//
 		//			arraylist_add(image_command->sub_commands, imgpl_command);
 		//		}
-		if (make_command(&volls_command, "list", "ls", "Docker Volumes List",
-						 &vol_ls_cmd_handler) == ZCLK_COMMAND_SUCCESS)
+
+		volls_command = new_zclk_command("list", "ls", "Docker Volumes List",
+										 &vol_ls_cmd_handler);
+		if(volls_command != NULL)
 		{
-			arraylist_add(image_command->sub_commands, volls_command);
+			zclk_command_subcommand_add(image_command, volls_command);
 		}
 	}
 	return image_command;

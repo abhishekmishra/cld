@@ -8,7 +8,7 @@
                 "${vcpkgRoot}/x86-windows/include",
                 "C:\\cygwin64\\usr\\include",
                 "${workspaceFolder}/../coll/src",
-                "${workspaceFolder}/../cliutils/src",
+                "${workspaceFolder}/../zclk/src",
                 "${workspaceFolder}/../clibdocker/include"
             ],
             "defines": [
@@ -30,7 +30,7 @@
                 "${workspaceFolder}/**",
                 "${vcpkgRoot}/x64-osx/include",
                 "${workspaceFolder}/../coll/src",
-                "${workspaceFolder}/../cliutils/src",
+                "${workspaceFolder}/../zclk/src",
                 "${workspaceFolder}/../clibdocker/include"
             ],
             "defines": [
@@ -54,7 +54,7 @@
                 "${workspaceFolder}/**",
                 "${vcpkgRoot}/x64-linux/include",
                 "${workspaceFolder}/../coll/src",
-                "${workspaceFolder}/../cliutils/src",
+                "${workspaceFolder}/../zclk/src",
                 "${workspaceFolder}/../clibdocker/include"
             ],
             "defines": [

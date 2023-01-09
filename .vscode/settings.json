@@ -8,7 +8,8 @@
         "cli_progress.h": "c",
         "cli_dict.h": "c",
         "getopt.h": "c",
-        "json_object.h": "c"
+        "json_object.h": "c",
+        "cld_vol.h": "c"
     },
     "editor.formatOnSave": false
 }
