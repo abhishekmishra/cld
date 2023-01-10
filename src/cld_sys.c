@@ -26,7 +26,7 @@
 #include "cld_sys.h"
 #include "zclk_dict.h"
 
-zclk_cmd_err sys_version_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res sys_version_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_version *version = NULL;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -48,7 +48,7 @@ zclk_cmd_err sys_version_cmd_handler(zclk_command* cmd, void *handler_args)
 			zclk_dict_put(ver_dict, "Experimental",
 						 docker_version_experimental_get(version) == 0 ? "False" : "True");
 
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_DICT, ver_dict);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_DICT, ver_dict);
 
 			free_zclk_dict(ver_dict);
 		}
@@ -58,17 +58,17 @@ zclk_cmd_err sys_version_cmd_handler(zclk_command* cmd, void *handler_args)
 			free_docker_version(version);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err sys_connection_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res sys_connection_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_context *ctx = get_docker_context(handler_args);
 	if (ctx->url)
 	{
 		printf("Connected to URL: %s\n", ctx->url);
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 void docker_events_cb(docker_event *event, void *cbargs)
@@ -94,10 +94,10 @@ void docker_events_cb(docker_event *event, void *cbargs)
 	//
 	//		strcat(content, json_object_get_string(event->actor_attributes));
 	strcat(content, "");
-	success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, content);
+	success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, content);
 }
 
-zclk_cmd_err sys_events_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res sys_events_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	docker_result *res;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -109,9 +109,9 @@ zclk_cmd_err sys_events_cmd_handler(zclk_command* cmd, void *handler_args)
 	
 	if (err == E_SUCCESS)
 	{
-		cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, "done.");
+		cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, "done.");
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 zclk_command *sys_commands()

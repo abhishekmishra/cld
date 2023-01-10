@@ -29,11 +29,11 @@
 #include "zclk_table.h"
 #include "cld_lua.h"
 
-zclk_cmd_err ctr_ls_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 
 	json_object *obj;
-	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "ls", handler_args,
+	zclk_res err = execute_lua_command(&obj, "ctr", "ls", handler_args,
 		cmd->options, cmd->args, cmd->success_handler, cmd->error_handler);
 	if (obj != NULL)
 	{
@@ -42,16 +42,16 @@ zclk_cmd_err ctr_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 	return err;
 }
 
-zclk_cmd_err ctr_create_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_create_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Image name not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -68,24 +68,24 @@ zclk_cmd_err ctr_create_cmd_handler(zclk_command* cmd, void *handler_args)
 			{
 				char res_str[1024];
 				sprintf(res_str, "Created container with id %s", id);
-				cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING,
+				cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING,
 								res_str);
 			}
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_start_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_start_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -97,22 +97,22 @@ zclk_cmd_err ctr_start_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Started container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_stop_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_stop_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -124,22 +124,22 @@ zclk_cmd_err ctr_stop_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Stopped container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_restart_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_restart_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -151,22 +151,22 @@ zclk_cmd_err ctr_restart_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Restarted container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_kill_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_kill_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -178,22 +178,22 @@ zclk_cmd_err ctr_kill_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Killed container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_ren_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_ren_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 2)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container name and new name not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -207,22 +207,22 @@ zclk_cmd_err ctr_ren_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Renamed container %s to %s", container, new_name);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_pause_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_pause_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -234,22 +234,22 @@ zclk_cmd_err ctr_pause_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Paused container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_unpause_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_unpause_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -261,22 +261,22 @@ zclk_cmd_err ctr_unpause_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "UnPaused container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_wait_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_wait_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -288,29 +288,29 @@ zclk_cmd_err ctr_wait_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Waiting for container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 void cld_log_line_handler(void *args, int stream_id, int line_num, char *line)
 {
 	zclk_command_output_handler success_handler = (zclk_command_output_handler)args;
 	docker_log_info("Stream %d, line# %d :: %s", stream_id, line_num, line);
-	success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, line);
+	success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, line);
 }
 
-zclk_cmd_err ctr_logs_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_logs_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -325,19 +325,19 @@ zclk_cmd_err ctr_logs_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Logs for container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
-			// success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, log);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			// success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, log);
 			docker_container_logs_foreach(cmd->success_handler, 
 					log, log_len, &cld_log_line_handler);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	json_object *obj;
-	zclk_cmd_err err = execute_lua_command(&obj, "ctr", "top", handler_args,
+	zclk_res err = execute_lua_command(&obj, "ctr", "top", handler_args,
 			cmd->options, cmd->args, cmd->success_handler, cmd->error_handler);
 	if (obj != NULL)
 	{
@@ -346,16 +346,16 @@ zclk_cmd_err ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
 	return err;
 }
 
-// zclk_cmd_err ctr_top_cmd_handler(void* handler_args, arraylist* options,
+// zclk_res ctr_top_cmd_handler(void* handler_args, arraylist* options,
 // 	arraylist* args, zclk_command_output_handler success_handler,
 // 	zclk_command_output_handler error_handler) {
 // 	int quiet = 0;
 // 	docker_context* ctx = get_docker_context(handler_args);
 // 	size_t len = arraylist_length(args);
 // 	if (len != 1) {
-// 		error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+// 		error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 // 			"Container not provided.");
-// 		return ZCLK_COMMAND_ERR_UNKNOWN;
+// 		return ZCLK_RES_ERR_UNKNOWN;
 // 	}
 // 	else {
 // 		zclk_argument* container_arg = (zclk_argument*)arraylist_get(args,
@@ -366,7 +366,7 @@ zclk_cmd_err ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
 // 		if (e == E_SUCCESS) {
 // 			char res_str[1024];
 // 			sprintf(res_str, "Process list for container %s", container);
-// 			success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+// 			success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 
 // 			zclk_table* ctr_tbl;
 // 			size_t num_labels = arraylist_length(ps->titles);
@@ -384,23 +384,23 @@ zclk_cmd_err ctr_top_cmd_handler(zclk_command* cmd, void *handler_args)
 // 							(char*)arraylist_get(psvals, j));
 // 					}
 // 				}
-// 				success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_TABLE, ctr_tbl);
+// 				success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_TABLE, ctr_tbl);
 // 			}
 // 		}
 // 	}
-// 	return ZCLK_COMMAND_SUCCESS;
+// 	return ZCLK_RES_SUCCESS;
 // }
 
-zclk_cmd_err ctr_remove_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_remove_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -412,10 +412,10 @@ zclk_cmd_err ctr_remove_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "Removed container %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 typedef struct stats_args_t
@@ -456,21 +456,21 @@ void docker_container_stats_cb(docker_container_stats *stats, void *cbargs)
 		zclk_table_set_row_val(ctr_tbl, 0, 6, "");
 		zclk_table_set_row_val(ctr_tbl, 0, 7, "");
 	}
-	sarg->success_handler(ZCLK_COMMAND_IS_RUNNING, ZCLK_RESULT_STRING,
+	sarg->success_handler(ZCLK_RES_IS_RUNNING, ZCLK_RESULT_STRING,
 						  "\033[0;0H\033[2J");
-	sarg->success_handler(ZCLK_COMMAND_IS_RUNNING, ZCLK_RESULT_TABLE, ctr_tbl);
+	sarg->success_handler(ZCLK_RES_IS_RUNNING, ZCLK_RESULT_TABLE, ctr_tbl);
 }
 
-zclk_cmd_err ctr_stats_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res ctr_stats_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Container not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -487,10 +487,10 @@ zclk_cmd_err ctr_stats_cmd_handler(zclk_command* cmd, void *handler_args)
 		{
 			char res_str[1024];
 			sprintf(res_str, "done %s", container);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 		}
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 zclk_command *ctr_commands()

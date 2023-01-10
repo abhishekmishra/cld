@@ -25,7 +25,7 @@
 #include "docker_all.h"
 #include "cld_vol.h"
 
-zclk_cmd_err net_ls_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res net_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -37,7 +37,7 @@ zclk_cmd_err net_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 	{
 		char res_str[1024];
 		sprintf(res_str, "Listing networks");
-		cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+		cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 
 		size_t col_num = 0;
 		size_t len_networks = docker_network_list_length(networks);
@@ -57,14 +57,14 @@ zclk_cmd_err net_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 				zclk_table_set_row_val(net_tbl, i, 2, docker_network_driver_get(net));
 				zclk_table_set_row_val(net_tbl, i, 3, docker_network_scope_get(net));
 			}
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_TABLE, net_tbl);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_TABLE, net_tbl);
 		}
 	}
 	else
 	{
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 zclk_command *net_commands()
@@ -72,11 +72,11 @@ zclk_command *net_commands()
 	zclk_command *net_command;
 	if (make_command(&net_command, "network", "net",
 					 "Docker Network Commands",
-					 NULL) == ZCLK_COMMAND_SUCCESS)
+					 NULL) == ZCLK_RES_SUCCESS)
 	{
 		zclk_command *netcreate_command;
 		//		if (make_command(&imgpl_command, "create", "create", "Docker Volume Create",
-		//				&img_pl_cmd_handler) == ZCLK_COMMAND_SUCCESS) {
+		//				&img_pl_cmd_handler) == ZCLK_RES_SUCCESS) {
 		//			cld_argument* image_name_arg;
 		//			make_argument(&image_name_arg, "Image Name", CLD_TYPE_STRING,
 		//					"Name of Docker Image to be pulled.");

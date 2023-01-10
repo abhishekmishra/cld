@@ -34,17 +34,17 @@ extern "C"
 #include <lauxlib.h>
 #include <zclk.h>
 
-zclk_cmd_err start_lua_interpreter();
+zclk_res start_lua_interpreter();
 
-zclk_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel);
+zclk_res lua_set_docker_context(docker_context *ctx, int loglevel);
 
-zclk_cmd_err stop_lua_interpreter();
+zclk_res stop_lua_interpreter();
 
 /**
  * Execute a lua function representing a docker command.
  * The command is passed arguments identical to the C command handlers.
  */
-zclk_cmd_err execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
+zclk_res execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
                                 arraylist *options, arraylist *args, zclk_command_output_handler success_handler,
                                 zclk_command_output_handler error_handler);
 

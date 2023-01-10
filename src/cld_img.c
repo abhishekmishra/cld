@@ -102,18 +102,18 @@ void log_pull_message(docker_image_create_status *status, void *client_cbargs)
 					p->extra = NULL;
 				}
 			}
-			upd_args->success_handler(ZCLK_COMMAND_IS_RUNNING,
+			upd_args->success_handler(ZCLK_RES_IS_RUNNING,
 									  ZCLK_RESULT_PROGRESS, upd_args->multi_progress);
 		}
 		else
 		{
-			upd_args->success_handler(ZCLK_COMMAND_IS_RUNNING, ZCLK_RESULT_STRING,
+			upd_args->success_handler(ZCLK_RES_IS_RUNNING, ZCLK_RESULT_STRING,
 									  status->status);
 		}
 	}
 }
 
-zclk_cmd_err img_pl_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res img_pl_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -122,7 +122,7 @@ zclk_cmd_err img_pl_cmd_handler(zclk_command* cmd, void *handler_args)
 																			sizeof(docker_image_update_args));
 	if (upd_args == NULL)
 	{
-		return ZCLK_COMMAND_ERR_ALLOC_FAILED;
+		return ZCLK_RES_ERR_ALLOC_FAILED;
 	}
 	upd_args->success_handler = cmd->success_handler;
 	create_zclk_multi_progress(&(upd_args->multi_progress));
@@ -130,9 +130,9 @@ zclk_cmd_err img_pl_cmd_handler(zclk_command* cmd, void *handler_args)
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Image name not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -146,16 +146,16 @@ zclk_cmd_err img_pl_cmd_handler(zclk_command* cmd, void *handler_args)
 			char *res_str = (char *)calloc(strlen(image_name) + 100, sizeof(char));
 			if (res_str == NULL)
 			{
-				return ZCLK_COMMAND_ERR_ALLOC_FAILED;
+				return ZCLK_RES_ERR_ALLOC_FAILED;
 			}
 			sprintf(res_str, "Image pull successful -> %s", image_name);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 			free(res_str);
-			return ZCLK_COMMAND_SUCCESS;
+			return ZCLK_RES_SUCCESS;
 		}
 		else
 		{
-			return ZCLK_COMMAND_ERR_UNKNOWN;
+			return ZCLK_RES_ERR_UNKNOWN;
 		}
 	}
 	free_zclk_multi_progress(upd_args->multi_progress);
@@ -198,7 +198,7 @@ char *get_image_tags_concat(docker_image *img)
 	return tags;
 }
 
-zclk_cmd_err img_ls_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res img_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -211,7 +211,7 @@ zclk_cmd_err img_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 	{
 		char res_str[1024];
 		sprintf(res_str, "Listing images");
-		cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+		cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 
 		int col_num = 0;
 		size_t len_images = docker_image_list_length(images);
@@ -271,7 +271,7 @@ zclk_cmd_err img_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 						char *repo_val = (char *)calloc(tag - repo_tag + 1, sizeof(char));
 						if (repo_val == NULL)
 						{
-							return ZCLK_COMMAND_ERR_ALLOC_FAILED;
+							return ZCLK_RES_ERR_ALLOC_FAILED;
 						}
 						strncpy(repo_val, repo_tag, tag - repo_tag);
 						repo_val[tag - repo_tag] = '\0';
@@ -298,15 +298,15 @@ zclk_cmd_err img_ls_cmd_handler(zclk_command* cmd, void *handler_args)
 				zclk_table_set_row_val(img_tbl, i, col++, cstr);
 				zclk_table_set_row_val(img_tbl, i, col++, sstr);
 			}
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, 
+			cmd->success_handler(ZCLK_RES_SUCCESS, 
 				ZCLK_RESULT_TABLE, img_tbl);
 		}
 	}
 	else
 	{
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 void log_build_message(docker_build_status *status, void *client_cbargs)
@@ -316,13 +316,13 @@ void log_build_message(docker_build_status *status, void *client_cbargs)
 	{
 		if (status->stream)
 		{
-			upd_args->success_handler(ZCLK_COMMAND_IS_RUNNING,
+			upd_args->success_handler(ZCLK_RES_IS_RUNNING,
 									  ZCLK_RESULT_STRING, status->stream);
 		}
 	}
 }
 
-zclk_cmd_err img_build_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res img_build_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	int quiet = 0;
 	docker_context *ctx = get_docker_context(handler_args);
@@ -331,7 +331,7 @@ zclk_cmd_err img_build_cmd_handler(zclk_command* cmd, void *handler_args)
 																			sizeof(docker_image_update_args));
 	if (upd_args == NULL)
 	{
-		return ZCLK_COMMAND_ERR_ALLOC_FAILED;
+		return ZCLK_RES_ERR_ALLOC_FAILED;
 	}
 	upd_args->success_handler = cmd->success_handler;
 	create_zclk_multi_progress(&(upd_args->multi_progress));
@@ -339,9 +339,9 @@ zclk_cmd_err img_build_cmd_handler(zclk_command* cmd, void *handler_args)
 	size_t len = arraylist_length(cmd->args);
 	if (len != 1)
 	{
-		cmd->error_handler(ZCLK_COMMAND_ERR_UNKNOWN, ZCLK_RESULT_STRING,
+		cmd->error_handler(ZCLK_RES_ERR_UNKNOWN, ZCLK_RESULT_STRING,
 					  "Image name not provided.");
-		return ZCLK_COMMAND_ERR_UNKNOWN;
+		return ZCLK_RES_ERR_UNKNOWN;
 	}
 	else
 	{
@@ -355,16 +355,16 @@ zclk_cmd_err img_build_cmd_handler(zclk_command* cmd, void *handler_args)
 			char *res_str = (char *)calloc(strlen(folder_url_dash) + 100, sizeof(char));
 			if (res_str == NULL)
 			{
-				return ZCLK_COMMAND_ERR_ALLOC_FAILED;
+				return ZCLK_RES_ERR_ALLOC_FAILED;
 			}
 			sprintf(res_str, "Image pull successful -> %s\n", folder_url_dash);
-			cmd->success_handler(ZCLK_COMMAND_SUCCESS, ZCLK_RESULT_STRING, res_str);
+			cmd->success_handler(ZCLK_RES_SUCCESS, ZCLK_RESULT_STRING, res_str);
 			free(res_str);
-			return ZCLK_COMMAND_SUCCESS;
+			return ZCLK_RES_SUCCESS;
 		}
 		else
 		{
-			return ZCLK_COMMAND_ERR_UNKNOWN;
+			return ZCLK_RES_ERR_UNKNOWN;
 		}
 	}
 	free_zclk_multi_progress(upd_args->multi_progress);

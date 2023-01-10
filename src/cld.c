@@ -97,7 +97,7 @@ void docker_result_handler(docker_context *ctx, docker_result *res)
 	handle_docker_error(res, (zclk_command_output_handler)&print_handler, (zclk_command_output_handler)&print_handler);
 }
 
-zclk_cmd_err main_cmd_handler(zclk_command* cmd, void *handler_args)
+zclk_res main_cmd_handler(zclk_command* cmd, void *handler_args)
 {
 	zclk_option *debug_option = get_option_by_name(cmd->options, ZCLK_OPTION_MAIN_LOG_LEVEL_LONG);
 	if (zclk_option_get_val_string(debug_option) != NULL)
@@ -185,7 +185,7 @@ zclk_cmd_err main_cmd_handler(zclk_command* cmd, void *handler_args)
 		exit(-1);
 	}
 
-	return ZCLK_COMMAND_SUCCESS;
+	return ZCLK_RES_SUCCESS;
 }
 
 zclk_command *create_main_command()
@@ -259,9 +259,9 @@ int main(int argc, char *argv[])
 			start_lua_interpreter();
 
 
-			zclk_cmd_err err = zclk_command_exec(create_main_command(), &ctx, argc, argv);
+			zclk_res err = zclk_command_exec(create_main_command(), &ctx, argc, argv);
 
-			if (err != ZCLK_COMMAND_SUCCESS)
+			if (err != ZCLK_RES_SUCCESS)
 			{
 				docker_log_error("Error: invalid command.\n");
 			}

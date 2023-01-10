@@ -43,7 +43,7 @@ bool doString(const char *s)
     return true;
 }
 
-zclk_cmd_err start_lua_interpreter()
+zclk_res start_lua_interpreter()
 {
     docker_log_debug("Starting LUA interpreter...\n");
     L = luaL_newstate();
@@ -58,10 +58,10 @@ zclk_cmd_err start_lua_interpreter()
     // execute a dummy command to ensure all is well.
     // execute_lua_command("ctr", "dummy", NULL, NULL, NULL, NULL, NULL);
 
-    return ZCLK_COMMAND_SUCCESS;
+    return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel)
+zclk_res lua_set_docker_context(docker_context *ctx, int loglevel)
 {
     docker_log_debug("Setting docker context");
     DockerClient_from_context(L, ctx);
@@ -78,22 +78,22 @@ zclk_cmd_err lua_set_docker_context(docker_context *ctx, int loglevel)
     // create CLD instance
     doString("cld = CLD:new(d)");
 
-    return ZCLK_COMMAND_SUCCESS;
+    return ZCLK_RES_SUCCESS;
 }
 
-zclk_cmd_err stop_lua_interpreter()
+zclk_res stop_lua_interpreter()
 {
     docker_log_debug("Stopping LUA interpreter...\n");
     lua_close(L);
 
-    return ZCLK_COMMAND_SUCCESS;
+    return ZCLK_RES_SUCCESS;
 }
 
 /**
  * Execute a lua function representing a docker command.
  * The command is passed arguments identical to the C command handlers.
  */
-zclk_cmd_err execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
+zclk_res execute_lua_command(json_object **res, const char *module_name, const char *command_name, void *handler_args,
                                 arraylist *options, arraylist *args, zclk_command_output_handler success_handler,
                                 zclk_command_output_handler error_handler)
 {
@@ -149,11 +149,11 @@ zclk_cmd_err execute_lua_command(json_object **res, const char *module_name, con
     {
         luaL_error(L, "error running function '%s': %s", command_name,
                    lua_tostring(L, -1));
-        return ZCLK_COMMAND_ERR_UNKNOWN;
+        return ZCLK_RES_ERR_UNKNOWN;
     }
 
     char *result_str = lua_tostring(L, -1);
     *res = json_tokener_parse(result_str);
 
-    return ZCLK_COMMAND_SUCCESS;
+    return ZCLK_RES_SUCCESS;
 }
