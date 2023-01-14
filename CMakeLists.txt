@@ -6,11 +6,13 @@ project ( cld C )
 set( CLD_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 set( CLD_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 
-# It's useful to setup the current version of our code in the build system
-# using a `semver` style
-set ( CLD_VERSION_MAJOR 0 )
-set ( CLD_VERSION_MINOR 1 )
-set ( CLD_VERSION_PATCH 0 )
+# version numbers in semver style
+# matching the release tag version
+set ( CLD_VERSION_MAJOR "0" )
+set ( CLD_VERSION_MINOR "1" )
+set ( CLD_VERSION_PATCH "0" )
+set ( CLD_VERSION_PRERELEASE "-alpha.0" )
+set ( CLD_VERSION_STR ${CLD_VERSION_MAJOR}.${CLD_VERSION_MINOR}.${CLD_VERSION_PATCH}${CLD_VERSION_PRERELEASE})
 
 # https://stackoverflow.com/a/47260387/9483968
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
