@@ -503,14 +503,14 @@ zclk_command *ctr_commands()
 									 &ctr_ls_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_flag_option(ctr_command, "all", "a", 0, 0, "Show all containers (by default shows only running ones).");
-			zclk_command_string_option(ctr_command, "filter", "f", NULL, NULL, "Filter output based on conditions provided");
-			zclk_command_string_option(ctr_command, "format", NULL, NULL, NULL, "Pretty-print containers using a Go template");
-			zclk_command_int_option(ctr_command, "last", "n", -1, 10, "Show n last created containers (includes all states)");
-			zclk_command_flag_option(ctr_command, "latest", "l", 0, 0, "Show the latest created container (includes all states)");
-			zclk_command_flag_option(ctr_command, "no-trunc", NULL, 0, 0, "Don't truncate output");
-			zclk_command_flag_option(ctr_command, "quiet", "q", 0, 0, "Only display numeric IDs");
-			zclk_command_flag_option(ctr_command, "size", "s", 0, 0, "Display total file sizes");
+			zclk_command_flag_option(ctr_command, "all", "a", 0, "Show all containers (by default shows only running ones).");
+			zclk_command_string_option(ctr_command, "filter", "f", NULL, "Filter output based on conditions provided");
+			zclk_command_string_option(ctr_command, "format", NULL, NULL, "Pretty-print containers using a Go template");
+			zclk_command_int_option(ctr_command, "last", "n", 10, "Show n last created containers (includes all states)");
+			zclk_command_flag_option(ctr_command, "latest", "l", 0, "Show the latest created container (includes all states)");
+			zclk_command_flag_option(ctr_command, "no-trunc", NULL, 0, "Don't truncate output");
+			zclk_command_flag_option(ctr_command, "quiet", "q", 0, "Only display numeric IDs");
+			zclk_command_flag_option(ctr_command, "size", "s", 0, "Display total file sizes");
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
 
@@ -518,7 +518,8 @@ zclk_command *ctr_commands()
 									 "Docker Container Create", &ctr_create_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Image Name", NULL, NULL, "Name of Docker Image to use.", 1);
+			zclk_command_string_argument(ctr_command, "Image Name", 
+				NULL, "Name of Docker Image to use.", 1);
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
 
@@ -526,7 +527,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Start", &ctr_start_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to start.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -535,7 +536,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Stop", &ctr_stop_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to stop.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -544,7 +545,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Restart", &ctr_restart_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to restart.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -553,7 +554,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Kill", &ctr_kill_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to kill.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -562,9 +563,9 @@ zclk_command *ctr_commands()
 									 "Docker Container Rename", &ctr_ren_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to rename.", 1);;
-			zclk_command_string_argument(ctr_command, "Name", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Name", NULL,
 										"New name of container.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -573,7 +574,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Pause", &ctr_pause_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to pause.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -582,7 +583,7 @@ zclk_command *ctr_commands()
 									 "Docker Container UnPause", &ctr_unpause_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to unpause.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -591,7 +592,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Wait", &ctr_wait_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container to wait.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -600,7 +601,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Logs", &ctr_logs_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -609,7 +610,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Top/PS", &ctr_top_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -618,7 +619,7 @@ zclk_command *ctr_commands()
 									 "Docker Remove Container", &ctr_remove_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}
@@ -627,7 +628,7 @@ zclk_command *ctr_commands()
 									 "Docker Container Stats", &ctr_stats_cmd_handler);
 		if(ctr_command != NULL)
 		{
-			zclk_command_string_argument(ctr_command, "Container", NULL, NULL,
+			zclk_command_string_argument(ctr_command, "Container", NULL,
 										"Name of container.", 1);;
 			zclk_command_subcommand_add(container_command, ctr_command);
 		}

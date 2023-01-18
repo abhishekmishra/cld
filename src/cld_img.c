@@ -381,8 +381,7 @@ zclk_command *img_commands()
 		if(imgpl_command != NULL)
 		{
 			zclk_command_string_argument(imgpl_command, "Image Name", 
-					NULL, NULL,
-					"Name of Docker Image to be pulled.", 1);
+					NULL, "Name of Docker Image to be pulled.", 1);
 
 			zclk_command_subcommand_add(image_command, imgpl_command);
 		}
@@ -397,8 +396,7 @@ zclk_command *img_commands()
 		if(imgbuild_command != NULL)
 		{
 			zclk_command_string_argument(imgbuild_command, "Folder | URL | -", 
-					NULL, NULL,
-					"Docker resources to build (folder/url/stdin)", 1);
+					NULL, "Docker resources to build (folder/url/stdin)", 1);
 
 			zclk_command_subcommand_add(image_command, imgbuild_command);
 		}
