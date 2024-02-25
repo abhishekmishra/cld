@@ -116,16 +116,16 @@ include_directories(${LIBARCHIVE_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBARCHIVE_LIBRARY} lz4::lz4 BZip2::BZip2 LibXml2::LibXml2 LibLZMA::LibLZMA ZLIB::ZLIB)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${EXTRA_LIBS})
 
-include(CheckIncludeFile)
-check_include_file("getopt.h" HAVE_GETOPT)
-
-if(NOT HAVE_GETOPT)
+#include(CheckIncludeFile)
+#check_include_file("getopt.h" HAVE_GETOPT)
+#
+#if(NOT HAVE_GETOPT)
 	# To find and use linenoise, as the vcpkg build does not have cmake config
-	find_path(GETOPT_INCLUDE_DIR getopt.h)
-	find_library(GETOPT_LIBRARY getopt)
-	include_directories(${GETOPT_INCLUDE_DIR})
-	target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})
-endif (NOT HAVE_GETOPT)
+	#	find_path(GETOPT_INCLUDE_DIR getopt.h)
+	#find_library(GETOPT_LIBRARY getopt)
+	#include_directories(${GETOPT_INCLUDE_DIR})
+	#target_link_libraries(${PROJECT_NAME} PUBLIC ${GETOPT_LIBRARY})
+	#endif (NOT HAVE_GETOPT)
 
 # See https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Packaging-With-CPack
 INCLUDE(InstallRequiredSystemLibraries)
