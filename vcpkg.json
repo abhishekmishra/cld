@@ -1,0 +1,10 @@
+{
+  "dependencies": [
+    "bzip2",
+    "json-c",
+    "libarchive",
+    "lua",
+    "lz4",
+    "curl"
+  ]
+}
