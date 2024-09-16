@@ -31,15 +31,15 @@ delbuild:
 build:
 	cmake --build ./build
 
-run:
+run: build
 ifeq ($(OSFLAG),WIN32)
-	./build/bin/Debug/cld 
+	./build/bin/Debug/cld
 #uncomment the lines below to run macos bundles (if build produces one on macos)
 #else ifeq ($(OSFLAG),OSX)
-#	#open -n ./build/bin/cld.app --args 
-#	./build/bin/cld.app/Contents/MacOS/cld --args 
+#	#open -n ./build/bin/cld.app --args
+#	./build/bin/cld.app/Contents/MacOS/cld --args
 else
-	./build/bin/cld 
+	./build/bin/cld
 endif
 
 clean:
